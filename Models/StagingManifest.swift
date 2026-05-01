@@ -1,0 +1,1 @@
+// StagingManifest.swift
