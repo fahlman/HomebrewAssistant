@@ -1,0 +1,1 @@
+// PermissionsManager.swift
