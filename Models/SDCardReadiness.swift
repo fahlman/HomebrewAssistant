@@ -1,0 +1,1 @@
+// SDCardReadiness.swift
