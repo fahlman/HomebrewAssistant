@@ -1,0 +1,5 @@
+//
+//  ChecksumVerifierTests.swift
+//  Homebrew Assistant
+//
+

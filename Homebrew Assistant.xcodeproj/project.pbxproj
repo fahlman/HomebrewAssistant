@@ -35,16 +35,6 @@
 			path = "Homebrew Assistant";
 			sourceTree = "<group>";
 		};
-		94E96CA72FA449B2004218AD /* Homebrew AssistantTests */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			path = "Homebrew AssistantTests";
-			sourceTree = "<group>";
-		};
-		94E96CB12FA449B2004218AD /* Homebrew AssistantUITests */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			path = "Homebrew AssistantUITests";
-			sourceTree = "<group>";
-		};
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -76,8 +66,6 @@
 			isa = PBXGroup;
 			children = (
 				94E96C992FA449B1004218AD /* Homebrew Assistant */,
-				94E96CA72FA449B2004218AD /* Homebrew AssistantTests */,
-				94E96CB12FA449B2004218AD /* Homebrew AssistantUITests */,
 				94E96C982FA449B1004218AD /* Products */,
 			);
 			sourceTree = "<group>";
@@ -130,9 +118,6 @@
 			dependencies = (
 				94E96CA62FA449B2004218AD /* PBXTargetDependency */,
 			);
-			fileSystemSynchronizedGroups = (
-				94E96CA72FA449B2004218AD /* Homebrew AssistantTests */,
-			);
 			name = "Homebrew AssistantTests";
 			packageProductDependencies = (
 			);
@@ -152,9 +137,6 @@
 			);
 			dependencies = (
 				94E96CB02FA449B2004218AD /* PBXTargetDependency */,
-			);
-			fileSystemSynchronizedGroups = (
-				94E96CB12FA449B2004218AD /* Homebrew AssistantUITests */,
 			);
 			name = "Homebrew AssistantUITests";
 			packageProductDependencies = (
@@ -329,6 +311,7 @@
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = macosx;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 			};
 			name = Debug;
@@ -386,6 +369,7 @@
 				MTL_FAST_MATH = YES;
 				SDKROOT = macosx;
 				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_EMIT_LOC_STRINGS = YES;
 			};
 			name = Release;
 		};
