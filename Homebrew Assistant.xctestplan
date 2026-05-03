@@ -1,0 +1,39 @@
+{
+  "configurations" : [
+    {
+      "id" : "0A69FA32-D28F-4B35-84F3-8E40B65F3AB7",
+      "name" : "Test Scheme Action",
+      "options" : {
+
+      }
+    }
+  ],
+  "defaultOptions" : {
+    "performanceAntipatternCheckerEnabled" : true,
+    "targetForVariableExpansion" : {
+      "containerPath" : "container:Homebrew Assistant.xcodeproj",
+      "identifier" : "94E96C962FA449B1004218AD",
+      "name" : "Homebrew Assistant"
+    }
+  },
+  "testTargets" : [
+    {
+      "parallelizable" : true,
+      "target" : {
+        "containerPath" : "container:Homebrew Assistant.xcodeproj",
+        "identifier" : "94E96CA32FA449B2004218AD",
+        "name" : "Homebrew AssistantTests"
+      }
+    },
+    {
+      "enabled" : false,
+      "parallelizable" : true,
+      "target" : {
+        "containerPath" : "container:Homebrew Assistant.xcodeproj",
+        "identifier" : "94E96CAD2FA449B2004218AD",
+        "name" : "Homebrew AssistantUITests"
+      }
+    }
+  ],
+  "version" : 1
+}

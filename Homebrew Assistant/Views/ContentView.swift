@@ -25,7 +25,7 @@ struct ContentView: View {
                 BottomNavigationView(coordinator: coordinator)
             }
         }
-        .frame(minWidth: 760, minHeight: 520)
+        .frame(minWidth: 720, minHeight: 445)
     }
 }
 

@@ -13,7 +13,7 @@
 
 import Foundation
 
-struct PublicRecipeWorkflowMetadata: Identifiable, Hashable {
+struct PublicRecipeWorkflowMetadata: Identifiable, Hashable, Sendable {
     let id: String
     let titleKey: String
     let systemImageName: String

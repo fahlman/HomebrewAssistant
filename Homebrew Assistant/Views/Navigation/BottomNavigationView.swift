@@ -23,6 +23,7 @@ struct BottomNavigationView: View {
 
             rightActions
         }
+        .controlSize(.regular)
         .padding()
     }
 
