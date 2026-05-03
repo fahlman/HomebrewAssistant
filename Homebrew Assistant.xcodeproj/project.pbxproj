@@ -29,9 +29,68 @@
 		94E96CAE2FA449B2004218AD /* Homebrew AssistantUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "Homebrew AssistantUITests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		946C87AB2FA6D38100692D15 /* Exceptions for "Homebrew Assistant" folder in "Homebrew Assistant" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Tests/AppPreferencesTests.swift,
+				Tests/ArchiveExtractorTests.swift,
+				Tests/ChecksumVerifierTests.swift,
+				Tests/DiskManagerTests.swift,
+				Tests/DownloadServiceTests.swift,
+				Tests/HackMiiWorkflowTests.swift,
+				Tests/ItemPreparationServiceTests.swift,
+				Tests/LocalizationTests.swift,
+				Tests/PersistenceTests.swift,
+				Tests/RecipeCatalogLoaderTests.swift,
+				Tests/RecipeLoaderTests.swift,
+				Tests/ScopedAccessManagerTests.swift,
+				Tests/SDWriteServiceTests.swift,
+				Tests/SignedRecipeIndexVerifierTests.swift,
+				Tests/SourcePolicyTests.swift,
+				Tests/StagingManagerTests.swift,
+				Tests/StagingManifestTests.swift,
+				Tests/SuccessViewTests.swift,
+				Tests/WilbrandWorkflowTests.swift,
+				Tests/WorkflowCoordinatorTests.swift,
+			);
+			target = 94E96C962FA449B1004218AD /* Homebrew Assistant */;
+		};
+		946C87AC2FA6D38100692D15 /* Exceptions for "Homebrew Assistant" folder in "Homebrew AssistantTests" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Tests/AppPreferencesTests.swift,
+				Tests/ArchiveExtractorTests.swift,
+				Tests/ChecksumVerifierTests.swift,
+				Tests/DiskManagerTests.swift,
+				Tests/DownloadServiceTests.swift,
+				Tests/HackMiiWorkflowTests.swift,
+				Tests/ItemPreparationServiceTests.swift,
+				Tests/LocalizationTests.swift,
+				Tests/PersistenceTests.swift,
+				Tests/RecipeCatalogLoaderTests.swift,
+				Tests/RecipeLoaderTests.swift,
+				Tests/ScopedAccessManagerTests.swift,
+				Tests/SDWriteServiceTests.swift,
+				Tests/SignedRecipeIndexVerifierTests.swift,
+				Tests/SourcePolicyTests.swift,
+				Tests/StagingManagerTests.swift,
+				Tests/StagingManifestTests.swift,
+				Tests/SuccessViewTests.swift,
+				Tests/WilbrandWorkflowTests.swift,
+				Tests/WorkflowCoordinatorTests.swift,
+			);
+			target = 94E96CA32FA449B2004218AD /* Homebrew AssistantTests */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		94E96C992FA449B1004218AD /* Homebrew Assistant */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				946C87AB2FA6D38100692D15 /* Exceptions for "Homebrew Assistant" folder in "Homebrew Assistant" target */,
+				946C87AC2FA6D38100692D15 /* Exceptions for "Homebrew Assistant" folder in "Homebrew AssistantTests" target */,
+			);
 			path = "Homebrew Assistant";
 			sourceTree = "<group>";
 		};

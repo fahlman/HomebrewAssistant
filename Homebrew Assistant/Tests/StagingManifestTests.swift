@@ -1,1 +1,6 @@
-// StagingManifestTests.swift
+import Testing
+
+struct StagingManifestTests {
+    @Test func placeholder() {
+    }
+}

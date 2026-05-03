@@ -1,1 +1,6 @@
-// AppPreferencesTests.swift
+import Testing
+
+struct AppPreferencesTests {
+    @Test func placeholder() {
+    }
+}
