@@ -2,10 +2,9 @@
 
 Homebrew Assistant uses a focused SwiftUI architecture built around clear responsibility boundaries. Views present state and collect user intent. Coordinators, services, models, and utilities own workflow decisions, scoped SD card access, user-selected SD volume validation, signed recipe catalog loading, downloads, staging, archive extraction, writing, verification, diagnostics, sandbox-friendly filesystem access, and trust enforcement.
 
-This document defines file ownership expectations, dependency direction, and responsibility boundaries. Folder and file hierarchy lives in `ProjectStructure.md`.
+This document defines file ownership expectations, dependency direction, and responsibility boundaries. Folder and file hierarchy lives in `Structure.md`.
 
-
-Every production Swift file listed in `ProjectStructure.md` should either have its own section here or be covered by a clearly named grouped section. Test files are documented through testing priorities rather than one section per test file.
+Every production Swift file listed in `Structure.md` should either have its own section here or be covered by a clearly named grouped section. Test files are documented through testing priorities rather than one section per test file.
 
 This document should describe code ownership and dependency boundaries, not user-facing workflow details or recipe trust policy except where needed to explain file responsibilities.
 
@@ -138,11 +137,11 @@ Owns:
 - Type discriminator for fixed app step, app-owned internal workflow, or public recipe-driven step
 - Localization keys
 - Icon references
-- Availability and completion metadata
 
 Does not own:
 
 - Runtime workflow decisions
+- Availability and completion state
 - Scoped filesystem access
 - Disk operations
 - Downloads
@@ -160,12 +159,9 @@ Purpose: Defines fixed app-owned workflow steps that are not recipe or internal 
 
 Owns:
 
-- SD Card Selection step identity
-- Choose Items step identity
-- Review Setup step identity
-- Write and Verify Files step identity
-- Success step identity
-- Fixed-step ordering and basic metadata
+- Fixed step identities for SD Card Selection, Choose Items, Review Setup, Write and Verify Files, and Success
+- Fixed-step ordering
+- Basic metadata
 
 Does not own:
 
@@ -183,10 +179,12 @@ Delegates to:
 
 ### InternalWorkflowCatalog.swift
 
-Purpose: Provides app-owned internal workflow items that are selectable alongside public recipes.
+Purpose: Provides app-owned internal workflow item definitions that are selectable alongside public recipes.
 
 Owns:
 
+- Internal workflow kinds
+- Internal workflow definition protocol
 - Internal workflow list
 - Internal workflow ordering metadata
 - Internal workflow localization keys and icon references

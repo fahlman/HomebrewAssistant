@@ -14,9 +14,21 @@
 import SwiftUI
 
 struct ContentView: View {
+    @StateObject private var coordinator = WorkflowCoordinator()
+
     var body: some View {
-        Text("Homebrew Assistant")
-            .frame(minWidth: 800, minHeight: 520)
+        NavigationSplitView {
+            WorkflowSidebarView(coordinator: coordinator)
+        } detail: {
+            VStack(spacing: 0) {
+                WorkflowDetailView(coordinator: coordinator)
+
+                Divider()
+
+                BottomNavigationView(coordinator: coordinator)
+            }
+        }
+        .frame(minWidth: 900, minHeight: 600)
     }
 }
 
