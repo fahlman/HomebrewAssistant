@@ -5,7 +5,7 @@
 //  Purpose: Hosts the app's top-level sidebar/detail window layout.
 //  Owns: Main window layout composition and placement of sidebar, detail, and
 //  bottom navigation regions.
-//  Does not own: Workflow business logic, disk operations, permission checks,
+//  Does not own: Workflow business logic, disk operations, scoped filesystem access,
 //  downloads, staging, or file writes.
 //  Delegates to: WorkflowSidebarView, WorkflowDetailView, BottomNavigationView,
 //  and shared workflow state.

@@ -30,25 +30,31 @@ Recipes describe intended staged outputs. They do not directly add, remove, or m
 
 ## Version 1 Trust Model
 
-Version 1 uses bundled recipe definitions only.
+Version 1 uses the verified Homebrew Assistant Recipes signed catalog for public recipes.
 
-Allowed recipe sources in v1:
+Allowed public recipe sources in v1:
 
-- Bundled app resources shipped with Homebrew Assistant.
+- Recipe definitions listed in a verified Homebrew Assistant Recipes signed index.
+- Recipe definitions whose bytes match the SHA-256 checksum recorded in that verified index.
+- Recipe definitions whose schema version is supported by the app.
+- Recipe definitions whose source and payload metadata are approved by `SourcePolicy.swift`.
 
-Rejected recipe sources in v1:
+Rejected public recipe sources in v1:
 
-- User-selected local recipe files
-- Drag-and-drop recipe files
-- Manually entered recipe URLs
-- Alternative repositories
-- Forks
-- Mirrors
-- Rehosted recipes
-- Loose cached recipe files
-- Recipes from arbitrary websites
+- Bundled public recipe definitions in the app repository.
+- User-selected local recipe files.
+- Drag-and-drop recipe files.
+- Manually entered recipe URLs.
+- Alternative repositories.
+- Forks.
+- Mirrors.
+- Rehosted recipes.
+- Loose cached recipe files not listed in a verified signed index.
+- Recipes from arbitrary websites.
 
-Homebrew Assistant does not bundle third-party homebrew payloads. Payload files are downloaded from each trusted recipe’s declared approved upstream source and verified before extraction or staging.
+Homebrew Assistant does not bundle third-party homebrew payloads. Payload files are downloaded from each trusted public recipe’s declared approved upstream source and verified before extraction or staging.
+
+Wilbrand and HackMii are not public recipes. They are app-owned internal/bootstrap workflows controlled by the signed Homebrew Assistant app.
 
 ## Public Recipes
 
@@ -96,10 +102,10 @@ Homebrew Assistant Recipes recipes must not:
 
 It owns:
 
-- Recipe-source trust decisions
+- Public recipe-source trust decisions
 - Payload-source trust decisions
-- Approval of bundled recipe sources
-- Approval of future Homebrew Assistant Recipes repository sources through a verified signed index
+- Homebrew Assistant Recipes repository/source eligibility policy
+- Signed index trust policy after `SignedRecipeIndexVerifier.swift` verifies authenticity
 - Official upstream host/repository checks
 - Browser-only source handling
 - Internal-only capability restrictions
@@ -117,6 +123,7 @@ It does not own:
 - Navigating workflow steps
 - Presenting recipe UI
 - Signing recipe indexes
+- Verifying Ed25519 index signatures
 - Storing private signing keys
 
 Human review determines which upstream source is official when a recipe is authored or reviewed. The trusted recipe records that decision. `SourcePolicy.swift` enforces the recorded decision.
@@ -135,7 +142,6 @@ The app must reject payloads from:
 - Manually entered URLs
 - User-selected payload archives
 - Any source that cannot be confidently classified as approved
-
 
 A broad host check is not enough. For example, `github.com` is not automatically trusted. The URL must match the approved repository, release page, or direct download pattern declared by the trusted recipe metadata.
 
@@ -156,6 +162,7 @@ Archive extraction must reject entries that include or resolve to:
 - Malformed archive entries that cannot be safely classified
 
 Sandboxing is defense in depth, not the primary archive-safety control. Archive validation and path containment checks must happen before writing extracted files.
+
 ## SD Card Destination Trust
 
 The selected SD card volume is also a trust boundary.
@@ -168,15 +175,13 @@ The preferred sandbox-compatible model is user selection followed by app validat
 4. The workflow proceeds only when the selected volume is confirmed as Secure Digital and writable.
 5. `SDWriteService.swift` writes only to that approved volume during Write and Verify Files.
 
-The app must not trust a volume merely because the user selected it. Selection grants access; Disk Arbitration validation determines eligibility.
+The app must not trust a volume merely because the user selected it. Selection grants scoped filesystem access; Disk Arbitration validation determines eligibility.
 
-Recipes must never choose destinations directly. Recipe copy actions may describe intended relative paths within the approved SD card layout, but `SDWriteService.swift` owns final destination resolution, containment checks, copying, and verification.
+## Homebrew Assistant Recipes Updates
 
-## Future Dynamic Recipe Updates
+Homebrew Assistant Recipes support uses a signed recipe index rather than trusting loose local recipe files.
 
-Future Homebrew Assistant Recipes support should use a signed recipe index rather than trusting loose local recipe files.
-
-The future dynamic recipe flow is:
+The public recipe update flow is:
 
 ```text
 Contributor opens pull request in Homebrew Assistant Recipes
@@ -189,12 +194,12 @@ Release process signs the exact index bytes with Ed25519 private key
         ↓
 Homebrew Assistant.app downloads the index and signature
         ↓
-App verifies the index using compiled-in Ed25519 public key
+`SignedRecipeIndexVerifier.swift` verifies the index using the compiled-in Ed25519 public key
         ↓
-App loads only listed recipes whose SHA-256 checksums match the index
+App loads only listed recipes whose SHA-256 checksums match the verified index
 ```
 
-Ordinary eligible recipe additions or updates should not require a Homebrew Assistant app update when the signed index validates.
+Ordinary eligible public recipe additions or updates should not require a Homebrew Assistant app update when the signed index validates.
 
 App updates are required for:
 
@@ -206,7 +211,7 @@ App updates are required for:
 
 ## Signed Recipe Index
 
-The signed index protects the recipe catalog.
+The signed index protects the public recipe catalog.
 
 `recipes.index.json` should list:
 
@@ -222,9 +227,9 @@ The index is signed with an Ed25519 private key held outside the app.
 
 Homebrew Assistant.app ships with the matching public Ed25519 verification key compiled into the signed app.
 
-The app may load a dynamic recipe only when:
+The app may load a public recipe only when:
 
-1. The index signature verifies.
+1. `SignedRecipeIndexVerifier.swift` verifies the index signature.
 2. The recipe is listed in the verified index.
 3. The recipe file matches the SHA-256 checksum in the verified index.
 4. The recipe schema is supported.
@@ -294,7 +299,7 @@ If the private key is lost, recipe updates cannot be signed with that key. If th
 
 The app may cache downloaded recipe metadata for performance and offline resilience, but cached recipes are not trusted merely because they are present on disk.
 
-Before loading a cached dynamic recipe, the app must verify that:
+Before loading a cached public recipe, the app must verify that:
 
 - The signed index is valid.
 - The recipe is listed in the verified index.
@@ -316,4 +321,4 @@ When trust cannot be established, the app should:
 - Present an actionable user-facing error when the workflow is affected.
 - Log a diagnostic event without leaking secrets or unnecessary personal data.
 
-The app must not guess, fall back to loose local files, trust unvalidated selected volumes, or silently continue with unverified recipe metadata, unsafe archive contents, or unapproved destinations.
+The app must not guess, fall back to bundled public recipes or loose local files, trust unvalidated selected volumes, or silently continue with unverified recipe metadata, unsafe archive contents, or unapproved destinations.

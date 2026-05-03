@@ -1,33 +1,55 @@
 # Homebrew Assistant
 
-Homebrew Assistant is a native macOS SwiftUI app for safely preparing a removable SD card for selected Wii homebrew.
+Homebrew Assistant is a native macOS SwiftUI app for safely preparing a removable SD card for selected Wii homebrew workflows.
 
-The app guides users through a fixed workflow: verify required macOS permissions, select a real Secure Digital card, prepare selected items in temporary staging, review the planned SD card layout, then copy and verify files during the final write step.
+The app helps users choose an SD card, choose which internal workflows and public recipes to prepare, stage and verify files safely, review the planned SD card layout, then write and verify files during the final write step.
 
 ## Project Status
 
-Homebrew Assistant is in early development. The codebase is being built from project documentation and focused file-purpose contracts.
+Homebrew Assistant is in early development. The codebase is being built from project documentation, focused file-purpose contracts, and safety-first workflow rules.
+
+## What It Does
+
+At a high level, Homebrew Assistant guides users through:
+
+1. Selecting an SD card volume.
+2. Choosing app-owned internal workflows and verified public recipes.
+3. Preparing selected items in app-controlled staging.
+4. Reviewing the target SD card and write plan.
+5. Writing and verifying files.
+6. Showing success, next steps, and user-initiated eject guidance.
+
+There is no Full Disk Access gate in the preferred workflow. The app uses sandbox-friendly scoped filesystem access for the SD card volume the user chooses, then validates that selected volume as Secure Digital media before enabling writes.
 
 ## Key Principles
 
 - Native macOS app targeting macOS 14 Sonoma or newer.
-- SwiftUI-first interface with native macOS APIs preferred over shell commands.
+- SwiftUI-first interface with native macOS APIs preferred.
+- No broad Full Disk Access requirement for the preferred workflow.
+- No TCC database inspection.
+- No shell commands or command-line fallbacks unless a future implementation review explicitly proves that a required task cannot be done safely with native APIs.
 - No disk formatting, erasing, repartitioning, repairing, or destructive disk operations.
 - Real SD-card detection is based on Disk Arbitration reporting the protocol name `Secure Digital`.
-- Downloads, imports, extraction, validation, and prepared layouts happen in temporary staging.
-- Files are copied to the selected SD card only during **Write and Verify Files**.
-- Recipes are declarative instructions, not executable scripts.
-- Ambiguous disk, permission, recipe, or source state fails safe.
+- Downloads, imports, extraction, validation, and prepared layouts happen in app-controlled staging.
+- Files are copied to the selected, validated SD card only during **Write and Verify Files**.
+- Public recipes are declarative instructions, not executable scripts.
+- Public recipes are loaded through the verified Homebrew Assistant Recipes signed catalog.
+- Wilbrand and HackMii remain app-owned internal/bootstrap workflows.
+- Ambiguous disk, scoped-access, recipe, source, archive, signature, or verification state fails safe.
 
 ## Documentation
 
 Project documentation lives in `Docs/`:
 
-- `Docs/ProjectSpec.md` — readable project specification
-- `Docs/Architecture.md` — file responsibilities and dependency boundaries
-- `Docs/RecipeTrustModel.md` — recipe, payload, signed-index, and key-handling rules
-- `Docs/Workflow.md` — workflow steps, gating, button behavior, and session state
-- `Docs/ProjectStructure.md` — planned folder and file layout
+- `Docs/Specification.md` — product goals, non-goals, major design decisions, and documentation sources of truth
+- `Docs/Structure.md` — planned folder and file layout
+- `Docs/Architecture.md` — file responsibilities, dependency direction, and responsibility boundaries
+- `Docs/Workflow.md` — generated workflow behavior, step behavior, button behavior, retry behavior, and session state
+- `Docs/RecipeTrustModel.md` — recipe, payload, signed-index, archive-safety, internal workflow, source-policy, and key-handling rules
+
+Public security posture and vulnerability reporting are documented in `SECURITY.md`.
+
+Contributor expectations and pull request guidance are documented in `CONTRIBUTING.md`.
 
 ## Development Notes
 
