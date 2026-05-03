@@ -1,0 +1,773 @@
+{
+  "name": "HomebrewAssistant",
+  "children": [
+    {
+      "name": "Project Standards",
+      "children": [
+        {
+          "name": "Naming",
+          "note": "The app is Homebrew Assistant. All user-facing names, file names, type names, bundle display names, comments, documentation, schemes, project references, and identifiers should use Homebrew Assistant/HomebrewAssistant naming consistently unless a technical identifier has already shipped and cannot safely be changed."
+        },
+        {
+          "name": "Deployment Target",
+          "note": "Homebrew Assistant targets macOS 14 Sonoma or newer unless a specific compatibility requirement justifies changing the deployment target. The app should prefer modern SwiftUI, Swift concurrency, localization, accessibility, and native macOS APIs over supporting older macOS versions at the cost of safety, maintainability, or user experience."
+        },
+        {
+          "name": "Swift and SwiftUI",
+          "note": "Use Swift 6 and SwiftUI for the macOS app unless the Xcode project build settings explicitly require a newer Swift language mode. Prefer modern Swift concurrency for async work."
+        },
+        {
+          "name": "Native APIs First",
+          "note": "Prefer native Apple/macOS APIs whenever possible. Shell commands and command-line fallbacks are out of scope for the preferred architecture unless a future implementation review explicitly proves that a required task cannot be done safely with native APIs."
+        },
+        {
+          "name": "Secure Digital Detection",
+          "note": "The preferred SD card flow is user selection followed by app validation. The user selects the intended mounted SD card volume once through a sandbox-compatible system access flow, and Homebrew Assistant validates that exact selected mounted volume using native Disk Arbitration metadata before enabling progression or writes. A selected volume is accepted only when Disk Arbitration reports its protocol name exactly as \"Secure Digital\". Selection grants filesystem access; Disk Arbitration validation determines eligibility. Removable, ejectable, external, or writable status may be used for diagnostics and readiness details, but those traits are not sufficient to identify a valid SD card. Generic USB drives, external SSDs, internal disks, disk images, network volumes, and any selected volume whose Disk Arbitration protocol name is not Secure Digital must not be treated as valid SD-card targets. If Disk Arbitration metadata is unavailable or ambiguous, Homebrew Assistant must fail safe and require the user to resolve the issue rather than guessing."
+        },
+        {
+          "name": "Scoped Filesystem Access",
+          "note": "Homebrew Assistant should not require Full Disk Access for the primary workflow. The preferred access model is sandbox-friendly scoped filesystem access: the user selects the intended mounted SD card volume once through a system access flow, macOS grants access to that selected volume, and Homebrew Assistant validates that exact selected mounted volume using Disk Arbitration before enabling writes. This removes the need for broad Full Disk Access, TCC.db probing, sqlite3 shell calls, Open System Settings permission prompts, and quit/relaunch permission flows. If implementation testing proves a specific required operation cannot be performed through scoped access, that operation must be reviewed explicitly before reintroducing any broader permission requirement."
+        },
+        {
+          "name": "Xcode-Native Resources",
+          "note": "Use Xcode-native resource locations whenever possible. Store colors, accent colors, app icons, images, and visual assets in Assets.xcassets; store user-facing localized text in String Catalogs or equivalent localization resources. Swift helper files may provide typed access and reusable styling, but should not replace proper Xcode resource storage."
+        },
+        {
+          "name": "Graphics and Icons",
+          "note": "Use SF Symbols and asset-catalog images for graphics and icons. Do not use emoji as graphics, icons, status indicators, or decorative UI elements. Shared icon choices live in the UI Layout and Iconography section and should be exposed through DesignTokens.swift where useful."
+        },
+        {
+          "name": "Localization",
+          "note": "All user-facing text must be localizable. Avoid hardcoded display strings in views or services; route UI copy through Xcode-native localization resources such as Localizable.xcstrings. Localization coverage must include SD card selection and scoped-access explanations, button labels, unavailable-state messaging, SD card validation states, validation failures, Disk Utility warnings, Wilbrand instructions, file chooser guidance, validation results, recipe names/summaries/statuses, download/checksum/extraction errors, Review Setup confirmations and overwrite warnings, Write/Verify progress and failures, Success next steps, user-visible diagnostics, and accessibility labels for meaningful icons and controls. The architecture JSON defines required coverage and key conventions; the final user-facing copy belongs in Localizable.xcstrings."
+        },
+        {
+          "name": "Localization Key Namespaces",
+          "note": "Use stable localization key namespaces so views and services can reference copy without hardcoding strings. Preferred namespaces include app.*, button.*, sd.*, access.*, chooseItems.*, wilbrand.*, recipe.<id>.*, review.*, write.*, verify.*, success.*, error.*, accessibility.*, diagnostics.*, dialog.*, and status.*. Recipe plist files should reference localization keys such as recipe.usbloadergx.name rather than embedding display text."
+        },
+        {
+          "name": "Color and Visual Semantics",
+          "note": "Use semantic colors rather than hardcoded RGB/hex values wherever possible. Prefer SwiftUI system colors, named colors in Assets.xcassets, and colors that automatically adapt to Light Mode, Dark Mode, high contrast, and accessibility settings. Color must support meaning but never be the only way meaning is communicated. Important states such as success, warning, error, disabled, selected, blocked, or in progress must also be expressed through text, SF Symbols, layout, or accessibility labels. Use reusable semantic color roles such as success, warning, error, info, selected, disabled, background, cardBackground, border, and accent. Use the app accent color intentionally for primary actions, current selection, and key interactive affordances. Avoid decorative color noise; the app should feel calm, native, and utility-focused."
+        },
+        {
+          "name": "Accessibility",
+          "note": "All UI must be accessible with VoiceOver, keyboard navigation, Dynamic Type where applicable, sufficient contrast, meaningful labels, and clear focus order. Icons and SF Symbols that communicate meaning must have accessibility labels; decorative imagery should be hidden from assistive technologies."
+        },
+        {
+          "name": "Concurrency",
+          "note": "UI updates must happen on the main actor. Long-running work such as selected-volume validation, scoped-access checks, downloads, extraction, hashing, copying, and verification must run asynchronously without blocking the UI. Prefer structured Swift concurrency over manual thread management."
+        },
+        {
+          "name": "Error Handling",
+          "note": "Errors must be actionable, specific, and user-facing when they affect the workflow. Avoid vague messages such as 'Something went wrong.' Where possible, explain what failed, why it likely failed, and what the user can do next."
+        },
+        {
+          "name": "Separation of Concerns",
+          "note": "Views should present state and collect user intent. Business logic, selected-volume validation, scoped filesystem access, downloads, recipe parsing, file writes, validation, and workflow decisions should live in coordinators, services, models, or utilities rather than directly inside SwiftUI views."
+        },
+        {
+          "name": "Focused File Purpose",
+          "note": "Each Swift file should have a narrow, explicit purpose documented in its header and matching its project spec entry. Swift file spec notes should use the format 'Purpose: ... Owns: ... Does not own: ... Delegates to: ...' when those fields are applicable. File headers may use the same information in concise comment form. Avoid broad catch-all files, duplicated responsibility, and headers that justify unrelated behavior."
+        },
+        {
+          "name": "Dependency Direction",
+          "note": "Lower-level services and models should not depend on SwiftUI views. Services should expose testable APIs and plain data models. Views may depend on coordinators and observable state, but services should remain reusable and UI-independent."
+        },
+        {
+          "name": "Disk and Data Safety",
+          "note": "Homebrew Assistant must never format, erase, repartition, repair, or otherwise destructively modify disks. The app must never modify internal disks and must never install directly to a console. Disk Utility is the appropriate tool for formatting, erasing, repartitioning, or repairing disks, and Homebrew Assistant may offer a button that opens Disk Utility from the SD card selection screen. Before any file write, overwrite, delete, eject, or other risky removable-storage action, the app must clearly identify the user-approved, validated target volume, action, and consequence and require confirmation where risk exists. File writes must stay inside app-controlled staging directories or the user-approved, validated SD card volume."
+        },
+        {
+          "name": "App Sandbox and Filesystem Access",
+          "note": "Homebrew Assistant should be designed around sandbox-friendly scoped filesystem access. The app does not need broad Full Disk Access for the preferred workflow. The user selects the intended mounted SD card volume once through a system access flow; macOS grants scoped access to that selected volume; DiskManager.swift validates that exact selected mounted volume using Disk Arbitration metadata; the workflow proceeds only when the selected volume is confirmed as Secure Digital and writable; and SDWriteService.swift writes only to that approved volume during Write and Verify Files. The purpose of sandboxing is to limit filesystem access and help prevent accidental or malicious writes outside app-controlled directories and the user-approved, validated SD card volume. Sandboxing must not weaken required safety checks. If sandbox constraints interfere with Secure Digital validation, final writes, verification, or eject behavior, the app should redesign the access flow, use appropriate macOS security-scoped access where safe, or defer sandbox adoption rather than requesting broad access casually."
+        },
+        {
+          "name": "Recipe Trust and Sources",
+          "note": "Recipes are declarative app-defined instructions, not executable scripts. Homebrew Assistant must never execute arbitrary recipe scripts. Public recipe definitions come from the official Homebrew Assistant Recipes catalog through the signed recipe index model; third-party homebrew payloads are never bundled with the app. Payload downloads still come from each recipe's declared official upstream source and must be verified before extraction or staging. Recipes from arbitrary websites, alternative repositories, manually entered URLs, drag-and-drop, user-selected local files, loose cached files, mirrors, or rehosts are unsupported and must be rejected. Exploit/bootstrap workflows such as Wilbrand and HackMii are not public recipes; they are app-owned internal workflows controlled by bundled Homebrew Assistant code. They may be presented to the user alongside public recipe choices, but they must never be loaded from, added, replaced, overridden, or modified by Homebrew Assistant Recipes updates."
+        },
+        {
+          "name": "Signed Recipe Index",
+          "note": "Homebrew Assistant Recipes support uses a signed recipe index rather than trusting loose local recipe files. Homebrew Assistant.app should ship with a public Ed25519 verification key compiled into the signed app. The matching private key is held outside the app and must never be committed to Git. The Homebrew Assistant Recipes release process should generate an index listing approved recipe definitions, expected SHA-256 checksums, schema versions, source metadata, and any required revocation or deprecation metadata, then sign the exact bytes of that index with the private Ed25519 key. The app may load public recipes only when the index signature verifies, the recipe is listed in the verified index, the downloaded recipe content matches the expected checksum, the schema is supported, and SourcePolicy.swift approves the recipe and payload sources. Manually replaced local recipe files, unsigned indexes, mismatched checksums, stale or revoked recipes, alternate repositories, forks, mirrors, and user-selected recipe files must be rejected fail-safe. Eligible public recipe additions or updates should not require an app update when the signed index validates. App updates are required for trust-system changes, public key rotation, incompatible schema changes, new recipe capabilities, or app-owned internal/bootstrap workflow changes such as Wilbrand or HackMii."
+        },
+        {
+          "name": "Recipe Signing Tool",
+          "note": "The recipe signing tool should be a small Swift command-line utility used by the Homebrew Assistant Recipes release process, not part of the shipped Homebrew Assistant.app runtime. The tool may live under the Homebrew Assistant Recipes repository, for example Tools/RecipeSigner, so it stays close to the recipe publishing workflow. It should use CryptoKit Ed25519 signing through Curve25519.Signing to generate keys, sign recipes.index.json, and verify signatures for release checks. The signature file should use a simple documented format containing at least algorithm, keyID, and base64 signature. The tool must sign the exact index bytes that the app later verifies; it should not reserialize or pretty-print JSON during signing or verification. The public verification key and key identifier may be committed and compiled into the app; the private signing key must never be committed, bundled, logged, or stored in the app repository."
+        },
+        {
+          "name": "Source Policy Ownership",
+          "note": "Trust decisions for public recipe definitions, signed recipe index metadata, and payload sources should be centralized in SourcePolicy.swift rather than duplicated across RecipeCatalogLoader.swift, RecipeLoader.swift, DownloadService.swift, views, or individual recipes. Policy decisions must be deterministic, testable, fail-safe, and return actionable rejection reasons."
+        },
+        {
+          "name": "Recipe Schema and Trust Contract",
+          "note": "Recipe behavior is governed by the Recipe Schema Contract. Public recipes are declarative .plist files with safe app-defined operations only and are loaded only from the verified signed Homebrew Assistant Recipes catalog. Internal-only browser, file-selection, exploit, or bootstrap behavior is reserved for bundled app workflows and must not be accepted from Homebrew Assistant Recipes updates or any untrusted source. Wilbrand and HackMii are app-owned internal/bootstrap workflows whose approved URLs and behavior are controlled only by bundled Homebrew Assistant app code, though they may be presented to the user alongside public recipe choices."
+        },
+        {
+          "name": "No Drag-and-Drop Intake",
+          "note": "Do not accept user-supplied recipe files, archives, folders, or homebrew payloads by dragging them into the app window. Drag-and-drop file intake is out of scope because it creates unnecessary security, validation, and trust risks."
+        },
+        {
+          "name": "Security and Trust",
+          "note": "Downloaded or externally supplied content must be treated as untrusted. Validate signed recipe indexes, validate public recipes, verify checksums/signatures when available, restrict recipe actions to app-defined safe operations, and never execute arbitrary code from recipe files or downloaded content."
+        },
+        {
+          "name": "File Operations",
+          "note": "File operations must be explicit, validated, and recoverable where possible. Prefer atomic writes, temporary staging directories, verification after copy, and clear cleanup behavior for partial failures."
+        },
+        {
+          "name": "Archive Extraction and Zip Slip",
+          "note": "Homebrew Assistant downloads and extracts archive files, so ArchiveExtractor.swift must treat every archive as potentially hostile until validated. Archive extraction must prevent Zip Slip and related traversal attacks. Every extracted file’s final resolved destination must remain inside the intended session staging directory. Archive extraction must reject entries that include or resolve to path traversal such as '..', absolute paths, symlinks, hard links, paths that normalize outside the extraction destination, unsafe or ambiguous path components, and malformed archive entries that cannot be safely classified. Sandboxing is defense in depth, not the primary Zip Slip defense; archive validation and path containment checks must be enforced before writing extracted files."
+        },
+        {
+          "name": "Persistence and Session State",
+          "note": "Persist only low-risk preferences and app metadata. Workflow execution state, selected SD card identity, granted mounted volume paths or security-scoped access state, downloaded homebrew payloads, extracted archives, Wilbrand imports, prepared SD layouts, write manifests, and write session state are session-scoped and must be discarded when the workflow completes, resets, or the app quits. On launch, the app starts fresh by asking the user to choose an SD card volume and validating that selected volume before any preparation or write workflow can proceed."
+        },
+        {
+          "name": "Success and Eject Behavior",
+          "note": "Homebrew Assistant does not automatically eject the SD card after writing. After a successful write and verification, SuccessView presents a user-initiated Eject button and clear next-step instructions. Eject is never the default button because it changes device state. If eject succeeds, the UI confirms it is safe to remove the SD card and disables the Eject action. If eject fails, the UI presents an actionable error, explains that another app may be using the SD card, suggests closing Finder windows or other apps using the card, allows retry, and reminds the user they can eject manually in Finder. Starting a new workflow clears session-scoped state, scoped SD volume access state, and staging data, then returns to SD card selection."
+        },
+        {
+          "name": "AppKit Bridging",
+          "note": "Use SwiftUI-native APIs first. Use AppKit or NSViewRepresentable only when SwiftUI does not provide the required macOS behavior, such as system panels, opening Disk Utility, or low-level window/app integration."
+        },
+        {
+          "name": "No Hidden Side Effects",
+          "note": "User actions should have predictable results. Avoid surprising side effects such as scanning, downloading, writing, deleting, ejecting, or opening external tools without clear UI state and user intent."
+        },
+        {
+          "name": "Logging and Diagnostics",
+          "note": "Log important workflow events, validation failures, scoped-access status changes, user-selected SD volume validation results, download failures, write progress, and verification results. Logs must avoid private file contents, unnecessary personal data, or secrets and should support user-actionable troubleshooting."
+        },
+        {
+          "name": "Comments",
+          "note": "Comments should explain why code exists, not restate what the code obviously does. Complex macOS scoped-access, disk, recipe, download, archive-extraction, or file-write behavior should include comments explaining assumptions and edge cases."
+        },
+        {
+          "name": "Configuration and Constants",
+          "note": "Shared constants, identifiers, localization keys, recipe schema versions, supported file extensions, URL allowlists, UserDefaults keys, notification names, and other magic strings should be centralized rather than duplicated across views and services."
+        },
+        {
+          "name": "Build Quality",
+          "note": "The project should build cleanly without warnings where practical. Avoid temporary hacks, shell fallbacks, dead code, unused files, duplicated logic, and placeholder UI unless clearly marked as incomplete."
+        },
+        {
+          "name": "Testing",
+          "note": "Logic-heavy behavior should be testable. Prioritize tests for user-selected volume validation using injected or fixture disk metadata, scoped-access behavior, workflow availability, recipe validation, signed-index verification, download handling, checksum verification, archive extraction safety including Zip Slip prevention, staging and cleanup, persistence boundaries, file write planning, verification, and error mapping."
+        },
+        {
+          "name": "Upstream Source and Download Policy",
+          "note": "Homebrew Assistant does not bundle third-party homebrew payloads, installers, exploit files, archives, or tools. Verified public recipe definitions may point only to official upstream download sources or approved official project release pages. The app must not use unofficial mirrors, rehosted files, alternative repositories, manually entered URLs, or user-selected local recipe sources. If an upstream project requests that users visit a download page instead of direct-linking or automated downloading, the workflow must use an approved browser-based flow rather than automated download. Recipe and UI text must avoid implying ownership, authorship, endorsement, or affiliation with third-party homebrew projects."
+        }
+      ]
+    },
+    {
+      "name": "Initial Release Scope",
+      "children": [
+        {
+          "name": "Goal",
+          "note": "Build a macOS SwiftUI app that guides the user through safely preparing a user-approved, validated removable SD card for selected Wii homebrew workflows using app-owned internal workflow definitions, public recipes loaded from the verified Homebrew Assistant Recipes catalog, app-controlled staging, and safe file-copy operations."
+        },
+        {
+          "name": "Included in v1",
+          "note": "User-selected SD card volume access and validation; sandbox-friendly scoped filesystem access; Disk Utility launch button from SD selection; dynamic workflow sidebar and detail UI; selectable internal workflow items for Wilbrand and HackMii; public recipe catalog loading from the official Homebrew Assistant Recipes signed index; user selection of desired public recipes; direct Download buttons for supported downloadable items; Open Browser and controlled Choose File flow for Wilbrand; temporary staging for all downloads, extraction, imports, and prepared layout; Review Setup before writing; safe copy-to-SD workflow; post-copy verification; user-actionable errors; diagnostics log; success screen with next steps; user-initiated eject action; and safe start-new-workflow behavior."
+        },
+        {
+          "name": "Download Scope",
+          "note": "V1 loads public recipe definitions from the official Homebrew Assistant Recipes catalog only after verifying the signed Ed25519 recipe index and listed recipe checksums. Third-party payload files still come from each selected recipe's declared official upstream source and are never bundled with the app. Payload downloads are staged, verified, and extracted safely before any final SD card write."
+        },
+        {
+          "name": "Excluded Permanently",
+          "note": "Formatting, erasing, repartitioning, or repairing disks; modifying internal disks; installing directly to a console; executing arbitrary recipe scripts; installing recipes or payloads from arbitrary websites, alternative sources, drag-and-drop intake, or user-selected local files."
+        },
+        {
+          "name": "Future Features",
+          "note": "Future enhancements may include richer recipe catalog browsing, update notifications, revocation/deprecation handling, additional safe public recipe capabilities, public key rotation support, and improved recipe release tooling. Homebrew Assistant Recipes updates must not add, replace, override, or modify app-owned internal/bootstrap workflows such as Wilbrand or HackMii."
+        },
+        {
+          "name": "Persistence Policy",
+          "note": "Version 1 starts each launch as a fresh workflow. It may remember low-risk preferences and metadata, but it must not reuse a previous selected SD card, granted mount path or security-scoped access state, staged Wilbrand archive, downloaded payload, extracted archive, prepared SD layout, or write manifest across app launches. Completing a workflow or starting a new workflow clears session-scoped state and temporary staging data."
+        },
+        {
+          "name": "Upstream Source Policy",
+          "note": "Homebrew Assistant never bundles third-party homebrew payloads. Public recipe definitions come from the official Homebrew Assistant Recipes catalog through the signed recipe index model. Homebrew payloads are downloaded only from the official upstream URLs declared by trusted selected recipes and verified before extraction/staging. The app must not use mirrors, rehosts, arbitrary local files, manually entered URLs, or alternative repositories."
+        }
+      ]
+    },
+    {
+      "name": "Recipe Schema Contract",
+      "children": [
+        {
+          "name": "Purpose",
+          "note": "Defines the required and optional plist keys for public Homebrew Assistant Recipes entries, supported public recipe capabilities, internal-only capability exclusions, validation rules, source-trust rules, and staging expectations. This section describes the public recipe contract; app-owned internal workflows such as Wilbrand and HackMii are separate bundled code paths and are not public recipes."
+        },
+        {
+          "name": "Format and Required Keys",
+          "note": "Public recipes are property list (.plist) files. Each public recipe must declare schemaVersion, id, nameKey, summaryKey when user-facing summary text is needed, type, required, enabledByDefault, recipeVersion, contentVersion when tracking upstream payload/content version, recipeSource, allowedRoots, and the declarative operations needed to prepare the item. Recipe IDs are stable identifiers and must not be repurposed for different software. App-owned internal/bootstrap workflows such as Wilbrand and HackMii are not public recipes and are not governed by the public recipe update path."
+        },
+        {
+          "name": "Localization",
+          "note": "Recipes must use localization keys for user-facing names, summaries, warnings, instructions, status text, and post-install instructions. Recipe files should not hardcode display strings except stable technical identifiers, filenames, paths, URLs, and version values."
+        },
+        {
+          "name": "Recipe Sources",
+          "note": "Public recipe definitions may be loaded only from the official Homebrew Assistant Recipes repository through a signed recipe index. RecipeSource must be officialRecipesRepository for eligible repository recipes that are listed in a verified signed index and match the expected checksum. Local user-selected recipes, bundled public recipe shortcuts, drag-and-drop recipes, manually entered recipe URLs, loose cached recipe files, alternate repositories, forks, and third-party recipe sources are unsupported and must be rejected by RecipeLoader.swift through SourcePolicy.swift. Wilbrand and HackMii are app-owned internal/bootstrap workflows and must never be loaded from, updated by, or overridden by Homebrew Assistant Recipes."
+        },
+        {
+          "name": "Payload Sources",
+          "note": "Homebrew Assistant never bundles third-party homebrew payloads. Payload files are downloaded only from official upstream sources or approved official project release pages declared in verified public recipe metadata and approved by SourcePolicy.swift. Homebrew Assistant Recipes updates may update public recipe definitions through the signed index, but payload files still come from each recipe's declared upstream source. Mirrors, rehosts, alternative repositories, local file URLs, and manually entered payload URLs are rejected."
+        },
+        {
+          "name": "Supported Public Capabilities",
+          "note": "Public recipe capabilities are limited to safe declarative preparation actions such as download, extract, copy, verify checksum or metadata, create folder if supported by the app, and show localized instructions. Recipes must not contain arbitrary scripts, shell commands, executable hooks, custom code, or operations that format, erase, repartition, repair, or otherwise manage disks."
+        },
+        {
+          "name": "Internal-Only Capabilities",
+          "note": "Internal-only capabilities such as openBrowser, exploit/bootstrap download flow control, and controlled file selection are reserved for bundled Homebrew Assistant workflows such as Wilbrand and HackMii. Homebrew Assistant Recipes recipes must not declare openBrowser actions, request user-selected files, provide exploit/bootstrap URLs, or modify app-owned exploit/bootstrap workflow behavior. If a future public recipe needs a browser-only upstream flow, it requires an app-defined internal workflow update through a bundled Homebrew Assistant app release rather than a Homebrew Assistant Recipes recipe update."
+        },
+        {
+          "name": "Filesystem Scope",
+          "note": "Recipes do not decide whether the selected Secure Digital card is FAT32 or otherwise filesystem-ready. Filesystem readiness belongs to SDCardReadiness.swift and SDSelectionView.swift. Recipes may declare relative destination paths only; every destination must be normalized, relative, must not contain '..', must not start with '/', must not escape the selected SD card, and must resolve under an allowedRoot."
+        },
+        {
+          "name": "Downloads and Extraction",
+          "note": "Download entries should include an id, url, filename, kind, archiveFormat when applicable, checksum, and required flag. Archive extraction must occur only inside the current session's staging directory after Zip Slip protections are applied. Unsafe paths, symlinks, hard links, absolute paths, traversal attempts, paths that normalize outside the extraction destination, and malformed archive entries that cannot be safely classified must be rejected before writing extracted files."
+        },
+        {
+          "name": "Copy Operations",
+          "note": "Copy operations should identify staged source paths, intended relative destination paths within the user-approved, validated SD card volume, item kind such as file or directory, and explicit overwrite behavior. Existing destination conflicts are reported during Review Setup and handled only during the final Write and Verify Files step after user confirmation where required."
+        },
+        {
+          "name": "Staging Before Writing",
+          "note": "All recipe downloads, extraction, validation, and preparation are staged in app-controlled temporary session directories. Recipe steps never write to the SD card directly. The final prepared layout and manifest are copied only to the user-approved, validated SD card volume during the final Write and Verify Files step."
+        }
+      ]
+    },
+    {
+      "name": "Workflow Step Order",
+      "children": [
+        {
+          "name": "1. SD Card Selection",
+          "note": "First workflow step. The user selects the intended mounted SD card volume once through a sandbox-compatible system access flow, and Homebrew Assistant validates that exact selected mounted volume using native Disk Arbitration metadata before enabling preparation or writes. Selection grants filesystem access; validation determines eligibility. The selected volume is accepted only when Disk Arbitration reports its protocol name exactly as \"Secure Digital\" and the volume is writable. Provides Choose SD Card… as the primary non-default action, may provide Open Disk Utility, and keeps progression unavailable until the selected volume is validated as an eligible Secure Digital card."
+        },
+        {
+          "name": "2. Choose Items",
+          "note": "The user chooses which workflow items to prepare. The list combines app-owned internal workflows such as Wilbrand and HackMii with public recipes loaded from the verified Homebrew Assistant Recipes catalog. Wilbrand and HackMii may appear alongside public recipe choices, but they remain app-owned internal workflows and cannot be modified by public recipe updates. The sidebar/workflow is generated from the selected items in a safe app-defined order."
+        },
+        {
+          "name": "3. Prepare Selected Items",
+          "note": "The app presents preparation steps only for the items the user selected. Internal workflow items use bundled app-owned behavior. Public recipe items use validated recipe metadata and safe declarative operations. Downloads, browser flows, controlled file selection, checksum verification, archive extraction, and staging happen here, but no files are written to the SD card."
+        },
+        {
+          "name": "4. Review Setup",
+          "note": "Shows the user-approved, validated SD card volume, selected/prepared items, target paths, files to be copied, warnings, required space, and final confirmation before writing begins."
+        },
+        {
+          "name": "5. Write and Verify Files",
+          "note": "Copies prepared files to the user-approved, validated SD card volume and verifies the results. Verification is part of the write workflow for v1 rather than a separate sidebar step."
+        },
+        {
+          "name": "6. Success / Next Steps",
+          "note": "Confirms completion, summarizes prepared items, reports verification status, lists the user-approved, validated SD card and included items, provides clear next-step instructions, offers a user-initiated Eject button, reports eject success/failure, and provides a safe Start New Workflow action."
+        }
+      ]
+    },
+    {
+      "name": "UI Layout and Iconography",
+      "children": [
+        {
+          "name": "Main Layout",
+          "note": "Homebrew Assistant uses a native macOS sidebar/detail layout. The left sidebar lists the generated workflow steps in safe app-defined order and shows each step's state. The right detail pane shows the selected step content. A bottom navigation bar provides step-specific actions, with lower-left reserved for Quit or Back and lower-right reserved for the step's available actions."
+        },
+        {
+          "name": "Window Behavior",
+          "note": "The app uses a single main window that opens at a comfortable utility-app size, supports resizing, avoids horizontal scrolling, and remains usable at smaller sizes through SwiftUI adaptive layout. The primary design target is a desktop macOS utility window, not a compact mobile-style wizard."
+        },
+        {
+          "name": "Sidebar Behavior",
+          "note": "The sidebar is generated from the current workflow: SD Card Selection, Choose Items, the selected internal workflow and public recipe preparation steps in a safe app-defined order, Review Setup, Write and Verify Files, and Success. Unavailable steps are not presented as permission gates; progression is enabled only when required state exists, such as a validated SD card, at least one selected item, and a prepared/reviewed manifest. Step rows communicate state with text, SF Symbols, and accessibility labels, not color alone."
+        },
+        {
+          "name": "Detail Pane Behavior",
+          "note": "Each detail view uses a consistent structure: header area, concise explanation, status/readiness area, step-specific controls, and optional troubleshooting/help text. Views present state and send user intent to WorkflowCoordinator or services; they do not own workflow business logic."
+        },
+        {
+          "name": "Bottom Navigation Behavior",
+          "note": "BottomNavigationView owns the shared button layout. SD Card Selection starts the workflow and may offer Quit in the lower-left if appropriate. Later reachable screens use Back in the lower-left. Lower-right buttons are step-specific. Non-passive or risky actions such as Choose SD Card…, Open Browser, Choose File…, Download, Open Disk Utility, Write, Eject, and Continue from destructive-warning dialogs are never default buttons."
+        },
+        {
+          "name": "SF Symbol Map",
+          "children": [
+            {
+              "name": "App / General",
+              "note": "Use an SF Symbol such as externaldrive.badge.checkmark or memorychip, subject to macOS 14 availability and visual fit."
+            },
+            {
+              "name": "Scoped Access",
+              "note": "Use lock.shield only if a scoped-access explanation or error needs an icon. Do not present Full Disk Access as a normal workflow step."
+            },
+            {
+              "name": "Select SD Card",
+              "note": "Use sdcard."
+            },
+            {
+              "name": "Choose Items",
+              "note": "Use checklist or list.bullet.rectangle for the selectable item catalog."
+            },
+            {
+              "name": "Wilbrand",
+              "note": "Use ladybug to represent the exploit/bug concept. Do not use Safari/network as the step icon because browser opening is only one action within the step."
+            },
+            {
+              "name": "HackMii",
+              "note": "Use hammer as the native SF Symbol compromise for an axe/tool/hack metaphor."
+            },
+            {
+              "name": "Priiloader",
+              "note": "Use shield."
+            },
+            {
+              "name": "d2x cIOS",
+              "note": "Use gearshape.2."
+            },
+            {
+              "name": "USB Loader GX",
+              "note": "Use externaldrive."
+            },
+            {
+              "name": "Review Setup",
+              "note": "Use checklist."
+            },
+            {
+              "name": "Write Files",
+              "note": "Use square.and.arrow.down."
+            },
+            {
+              "name": "Verify Files",
+              "note": "Use checkmark.seal."
+            },
+            {
+              "name": "Success",
+              "note": "Use checkmark.circle."
+            },
+            {
+              "name": "Warning",
+              "note": "Use exclamationmark.triangle."
+            },
+            {
+              "name": "Error",
+              "note": "Use xmark.octagon."
+            },
+            {
+              "name": "Info / Help",
+              "note": "Use info.circle."
+            },
+            {
+              "name": "Download",
+              "note": "Use arrow.down.circle."
+            },
+            {
+              "name": "Open Browser",
+              "note": "Use safari for the button icon only, not for Wilbrand's step identity."
+            },
+            {
+              "name": "Open Disk Utility",
+              "note": "Use internaldrive or externaldrive.badge.gearshape if available on the deployment target."
+            },
+            {
+              "name": "Eject",
+              "note": "Use eject."
+            },
+            {
+              "name": "Back",
+              "note": "Use chevron.left."
+            },
+            {
+              "name": "Quit",
+              "note": "Use xmark.circle."
+            },
+            {
+              "name": "Skip",
+              "note": "Use forward."
+            },
+            {
+              "name": "Next",
+              "note": "Use arrow.right."
+            }
+          ]
+        },
+        {
+          "name": "Symbol Availability",
+          "note": "All SF Symbols must be verified against the macOS 14 Sonoma deployment target. If a preferred symbol is unavailable on macOS 14, use the closest available native SF Symbol instead of custom art or emoji."
+        }
+      ]
+    },
+    {
+      "name": "App",
+      "children": [
+        {
+          "name": "HomebrewAssistantApp.swift",
+          "type": "file",
+          "note": "Purpose: Defines the SwiftUI app entry point and creates the main window scene. Owns: App launch declaration and main scene creation. Does not own: Workflow business logic, disk operations, permission checks, downloads, staging, or file writes. Delegates to: ContentView and app-level dependencies injected through the SwiftUI scene."
+        }
+      ]
+    },
+    {
+      "name": "Core",
+      "children": [
+        {
+          "name": "WorkflowCoordinator.swift",
+          "type": "file",
+          "note": "Purpose: Coordinates the active workflow session and step transitions. Owns: Current workflow state, selected step, navigation rules, workflow availability decisions, skip/prepared/completed status, available actions, high-level workflow transitions, and cleanup requests when workflows complete, reset, or start over. Does not own: Disk scanning, recipe parsing, downloads, archive extraction, staging file management, SD card write execution, verification execution, eject operations, cleanup implementation, or persistent preferences. Delegates to: DiskManager, RecipeCatalogLoader, InternalWorkflowCatalog, RecipeLoader, DownloadService, StagingManager, SDWriteService, StepStateStore, and AppPreferences."
+        },
+        {
+          "name": "WorkflowItem.swift",
+          "type": "file",
+          "note": "Item model used in the workflow list: contains stable identifiers, localization keys for title/subtitle/help text, SF Symbol or asset references, type discriminator for fixed app step, app-owned internal workflow, or public recipe-driven step, ordering, availability, completion state, and optional payload linking to Recipe or internal workflow data."
+        },
+        {
+          "name": "FixedStep.swift",
+          "type": "file",
+          "note": "Enum and associated data for fixed app-owned workflow steps that are not recipe or internal workflow preparation items: SD card selection, Choose Items, Review Setup, Write and Verify Files, and Success. Defines step identifiers, ordering, availability rules, localization keys, default button configuration, and step-specific metadata."
+        },
+        {
+          "name": "InternalWorkflowCatalog.swift",
+          "type": "file",
+          "note": "Catalog of app-owned internal workflow items such as Wilbrand and HackMii. Presents internal workflows as selectable items alongside public recipes while keeping their approved URLs, validation rules, source trust, and behavior owned by bundled app code rather than Homebrew Assistant Recipes."
+        },
+        {
+          "name": "WilbrandWorkflow.swift",
+          "type": "file",
+          "note": "App-owned internal workflow definition for Wilbrand. Owns the approved Wilbrand URL, expected browser-to-file-selection flow, expected archive shape, validation requirements, and staging metadata that must not be provided by public recipes or Homebrew Assistant Recipes updates. User-facing text still belongs in localization resources."
+        },
+        {
+          "name": "HackMiiWorkflow.swift",
+          "type": "file",
+          "note": "App-owned internal/bootstrap workflow definition for HackMii. Owns the approved HackMii source metadata, expected files, checksum requirements when available, staging rules, and copy intent that must not be provided by public recipes or Homebrew Assistant Recipes updates. User-facing text still belongs in localization resources."
+        },
+        {
+          "name": "Recipe.swift",
+          "type": "file",
+          "note": "Declarative model for app-defined recipe steps. Defines recipe fields such as schemaVersion, id, localization keys, icon reference, required/enabled defaults, recipe/content versions, trusted source metadata, official upstream download URLs when applicable, expected files, checksums, target SD paths, allowed roots, copy actions, overwrite policy, and post-install instruction keys. Public recipes must describe only validated app-defined operations such as download, extract, verify checksum, copy file, create folder when supported, and show localized instructions; recipes must never contain or trigger arbitrary executable scripts. Internal-only capabilities such as openBrowser and controlled file selection are reserved for bundled workflows and are not accepted from future Homebrew Assistant Recipes updates. Recipe metadata should support project/source attribution without implying Homebrew Assistant owns, authors, maintains, endorses, or is affiliated with third-party homebrew projects."
+        },
+        {
+          "name": "StepStateStore.swift",
+          "type": "file",
+          "note": "Per-step session state store: tracks status such as hidden, blocked, not started, in progress, skipped, prepared, completed, or failed; stores progress percentage, timestamps, selected options, diagnostic messages, and recoverable error metadata for the active workflow session. Exposes methods to read/write state, merge state after refreshes, reset workflows, and sync with WorkflowCoordinator without owning UI presentation. Does not persist selected SD cards, mounted volume paths, downloaded payloads, extracted archives, Wilbrand imports, prepared SD layouts, or write manifests across app launches."
+        }
+      ]
+    },
+    {
+      "name": "Views",
+      "children": [
+        {
+          "name": "ContentView.swift",
+          "type": "file",
+          "note": "Purpose: Hosts the app's top-level sidebar/detail window layout. Owns: Main window layout composition and placement of sidebar, detail, and bottom navigation regions. Does not own: Workflow business logic, disk operations, permission checks, downloads, staging, or file writes. Delegates to: WorkflowSidebarView, WorkflowDetailView, BottomNavigationView, and shared workflow state."
+        },
+        {
+          "name": "Navigation",
+          "children": [
+            {
+              "name": "WorkflowSidebarView.swift",
+              "type": "file",
+              "note": "Left sidebar UI: renders the generated workflow steps with SF Symbols or asset icons, progress badges, state indicators, and accessibility labels. Shows SD Card Selection, Choose Items, selected internal workflow and public recipe preparation steps in safe app-defined order, Review Setup, Write and Verify Files, and Success. Highlights active, unavailable, in-progress, prepared, completed, and failed steps. Does not support drag-to-reorder because workflow order is app-defined for safety."
+            },
+            {
+              "name": "WorkflowDetailView.swift",
+              "type": "file",
+              "note": "Detail routing view: observes the selected WorkflowItem and conditionally displays the appropriate fixed step view, internal workflow view, or RecipeStepView. Handles routing, transitions, and contextual help while delegating workflow decisions to WorkflowCoordinator and service work to services."
+            },
+            {
+              "name": "BottomNavigationView.swift",
+              "type": "file",
+              "note": "Bottom toolbar: provides step-specific controls rather than assuming every step has the same buttons. SD Card Selection starts the workflow and may offer Quit in the lower-left if appropriate. Later reachable screens use Back in the lower-left. Lower-right buttons are step-specific, such as Choose SD Card…, Choose Items, Open Browser, Choose File…, Download, Next, Write, and Eject. Non-passive or risky actions are never default buttons. Disabled/default states come from WorkflowCoordinator."
+            }
+          ]
+        },
+        {
+          "name": "Steps",
+          "children": [
+            {
+              "name": "SDSelectionView.swift",
+              "type": "file",
+              "note": "SD card selection UI: lets the user choose the intended mounted SD card volume once through a sandbox-compatible system access flow, then presents validation results from DiskManager and SDCardReadiness. The selected volume is accepted only when native Disk Arbitration metadata for that exact selected mounted volume reports protocol name \"Secure Digital\" and the volume is writable. Provides Choose SD Card… as the primary non-default action, may include Open Disk Utility for formatting, erasing, partitioning, or repair outside Homebrew Assistant, and blocks progression until the selected volume is validated. This is the first normal workflow step. There is no Skip button, and progression remains unavailable until validation succeeds."
+            },
+            {
+              "name": "ChooseItemsView.swift",
+              "type": "file",
+              "note": "Selectable item catalog UI: shows app-owned internal workflow choices such as Wilbrand and HackMii alongside public recipes loaded from the verified Homebrew Assistant Recipes catalog. Allows the user to choose which items to prepare, communicates trust/source status, and sends selection intent to WorkflowCoordinator without owning recipe loading, source policy, or preparation behavior."
+            },
+            {
+              "name": "WilbrandView.swift",
+              "type": "file",
+              "note": "Wilbrand-specific optional app-owned internal workflow UI. Provides a non-default Open Browser button that opens the approved Wilbrand webpage so the user can generate a Wii-specific exploit using their MAC address and System Menu version. Appears only when the user selected Wilbrand in Choose Items. Next becomes available after a valid Wilbrand archive is selected, validated, and staged. After Open Browser has been clicked, enables a non-default Choose File… button that opens a controlled macOS file picker for the generated Wilbrand archive. Drag-and-drop file intake is not allowed. The selected archive is validated for expected Wilbrand output shape, unsafe paths are rejected, and the result is staged in the session temporary directory only; nothing is written to the SD card until the final Write and Verify Files step. This internal file-selection behavior is not a public recipe capability."
+            },
+            {
+              "name": "HackMiiView.swift",
+              "type": "file",
+              "note": "HackMii-specific optional app-owned internal workflow UI. Appears only when the user selected HackMii in Choose Items. Presents the approved HackMii source and preparation state, offers a non-default Download action when applicable, and enables Next only after the item is downloaded, verified, and staged. Uses bundled app-owned HackMiiWorkflow behavior rather than public recipe metadata. Nothing is written to the SD card until the final Write and Verify Files step."
+            },
+            {
+              "name": "ReviewSetupView.swift",
+              "type": "file",
+              "note": "Summary and confirmation screen: displays the user-approved, validated SD card volume, selected/prepared internal workflows and public recipes, staged files to be copied, destination paths, required space, warnings, and verification expectations based on the current session manifest. Clearly identifies the target volume name, granted path or display location, capacity, and any overwrite risk before writing begins, and never relies on stale manifests from previous app launches."
+            },
+            {
+              "name": "WriteFilesView.swift",
+              "type": "file",
+              "note": "Write-and-verify process UI: drives SDWriteService during the final write from the prepared staging layout to the user-approved, validated SD card volume, displays detailed per-file and overall progress, shows current operation, verifies copied files after writing, reports recoverable and fatal errors, supports cancellation when safe, and presents diagnostics for troubleshooting. Does not contain file operation business logic directly; SDWriteService owns write diagnostics and copy/verify execution."
+            },
+            {
+              "name": "SuccessView.swift",
+              "type": "file",
+              "note": "Final success screen: confirms completion, summarizes included recipes/prepared items, reports verification status, shows the user-approved, validated SD card name, provides next steps for using the SD card, and presents a user-initiated Eject button. Eject is never the default button. After successful eject, confirms it is safe to remove the SD card and disables the Eject action. If eject fails, shows an actionable error with retry guidance and manual Finder-eject guidance. Provides a safe Start New Workflow action that clears session state and staging."
+            }
+          ]
+        },
+        {
+          "name": "Recipe",
+          "children": [
+            {
+              "name": "RecipeStepView.swift",
+              "type": "file",
+              "note": "Generic recipe-driven UI template: renders validated public recipe metadata, localization keys, SF Symbol or asset icon, description, instructions, status, and action buttons. Recipe steps appear only when selected in Choose Items. Downloadable recipe steps show a Download button, and Next becomes available only after successful preparation. Download is never the default button. Views present state and user intent only; RecipeCatalogLoader, RecipeLoader, DownloadService, WorkflowCoordinator, and staging services perform the work."
+            }
+          ]
+        },
+        {
+          "name": "Components",
+          "children": [
+            {
+              "name": "StatusView.swift",
+              "type": "file",
+              "note": "Reusable status/progress component: displays localized status lines, progress bars, SF Symbol state indicators, optional subtext and timestamps, and standardized success/error/warning visuals. Must communicate state through text and accessibility labels, not color alone."
+            },
+            {
+              "name": "HeroCardView.swift",
+              "type": "file",
+              "note": "Prominent header/card layout component combining SF Symbol or asset icon, localized title, localized subtitle, and optional call-to-action. Uses semantic colors, native spacing, accessibility labels, and reusable theme styling."
+            },
+            {
+              "name": "AppTheme.swift",
+              "type": "file",
+              "note": "Reusable SwiftUI styling layer: defines view modifiers, button styles, card styles, progress/status styling, and layout helpers that reference semantic colors, design tokens, and approved SF Symbol usage. Must not define raw color values; color definitions belong in Assets.xcassets."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Services",
+      "children": [
+        {
+          "name": "ArchiveExtractor.swift",
+          "type": "file",
+          "note": "Purpose: Safely extracts approved archives into session staging directories while preventing Zip Slip and related path traversal attacks. Owns: Archive format handling, extraction progress, Zip Slip prevention, unsafe path rejection, symlink rejection, hard-link rejection, absolute-path rejection, traversal rejection, final resolved path containment inside the intended staging directory, malformed archive-entry rejection when safety cannot be determined, and extraction result reporting. Does not own: Network downloads, source trust decisions, recipe parsing, staging session lifecycle, workflow navigation, SD card writes, or user-facing recipe decisions. Delegates to: StagingManager for extraction destinations, FileManager/native or approved archive APIs, and DiagnosticsLog."
+        },
+        {
+          "name": "ChecksumVerifier.swift",
+          "type": "file",
+          "note": "Purpose: Verifies downloaded or staged files against trusted checksum metadata. Owns: Checksum algorithm selection from approved recipe metadata, streaming digest calculation, expected-versus-actual comparison, verification result reporting, and checksum-related diagnostics. Does not own: Network downloads, source trust decisions, recipe parsing, archive extraction, staging session lifecycle, workflow navigation, SD card writes, or user-facing recipe decisions. Delegates to: CryptoKit or approved native hashing APIs, Recipe checksum metadata, and DiagnosticsLog."
+        },
+        {
+          "name": "DiskManager.swift",
+          "type": "file",
+          "note": "Purpose: Validates the user-selected mounted volume as a valid Secure Digital card using native macOS Disk Arbitration metadata. Owns: Resolving the user-selected mounted volume to native disk metadata, reading disk and volume metadata from macOS, validating selected-volume metadata for SD-card eligibility, refreshing relevant disk state when hardware or mounted-volume state changes, user-initiated eject/unmount requests for the approved SD card volume, and SD volume validation diagnostics. Does not own: Filesystem access grants, security-scoped access lifecycle, SD card readiness policy beyond identity/metadata reporting, workflow navigation, file writes, formatting, erasing, repartitioning, repairing, recipe preparation, or downloads. Delegates to: Disk Arbitration/native macOS APIs, SDCard and SDCardReadiness models, and DiagnosticsLog. Runtime behavior must accept only the user-selected mounted volume whose Disk Arbitration protocol name is exactly \"Secure Digital\"; removable, ejectable, external, or writable status may inform diagnostics but is never sufficient by itself. Disk validation logic must be testable with injected or fixture disk metadata so tests can verify acceptance and rejection cases without requiring physical SD cards, USB drives, external SSDs, disk images, or network volumes."
+        },
+        {
+          "name": "RecipeCatalogLoader.swift",
+          "type": "file",
+          "note": "Loads the public recipe catalog from the official Homebrew Assistant Recipes repository through the signed Ed25519 recipe index. Owns index download/loading, signature verification handoff, recipe checksum verification handoff, catalog availability state, catalog error mapping, and exposing eligible public recipes for ChooseItemsView. Does not own internal workflow definitions, payload downloads, archive extraction, SD writes, or app-owned Wilbrand/HackMii behavior. Delegates to SourcePolicy, ChecksumVerifier or signature verification helpers, RecipeLoader, AppConstants, and DiagnosticsLog."
+        },
+        {
+          "name": "SDWriteService.swift",
+          "type": "file",
+          "note": "Purpose: Executes the final manifest-based copy to the user-approved, validated SD card volume and verifies copied files. Owns: Safe file-copy execution, limiting writes to the approved SD card volume destination, overwrite handling after user confirmation, per-file and overall progress reporting, post-copy verification, write-related cancellation where safe, and write diagnostics. Does not own: Workflow navigation, recipe preparation, downloads, archive extraction, staging layout creation, SD card discovery or selected-volume validation, SD card readiness validation, eject operations, formatting, erasing, repartitioning, repairing, or other destructive disk operations. Delegates to: StagingManifest, FileManager/native file APIs, and DiagnosticsLog."
+        },
+        {
+          "name": "SourcePolicy.swift",
+          "type": "file",
+          "note": "Purpose: Centralizes signed catalog, public recipe-source, and payload-source trust decisions. Owns: Validation of Homebrew Assistant Recipes repository sources through a verified signed Ed25519 index, approved payload source metadata, official upstream host/repository checks, browser-only source handling, internal-only capability restrictions, app-owned internal/bootstrap workflow restrictions for Wilbrand and HackMii, fail-safe source rejection, and actionable rejection reasons. Does not own: Network downloading, recipe parsing, checksum calculation, archive extraction, workflow navigation, user-facing recipe presentation, determining official upstream sources at runtime, signing recipe indexes, or storing private signing keys. Delegates to: AppConstants for official repository identifiers, allowlists, public verification key metadata, and signed-index endpoints; trusted recipe/index metadata; URL parsing; ChecksumVerifier or signature verification helpers; and DiagnosticsLog."
+        },
+        {
+          "name": "RecipeLoader.swift",
+          "type": "file",
+          "note": "Public recipe ingestion and validation service: loads public recipe plist content only after RecipeCatalogLoader has verified the signed Homebrew Assistant Recipes index and recipe checksum, validates schema and required fields, resolves asset/localization references, enforces version compatibility, rejects unsupported schema versions, validates safe declarative actions, rejects local/user-selected recipes, rejects loose cached recipes not listed in the verified index, rejects Homebrew Assistant Recipes attempts to add, replace, override, or modify app-owned internal/bootstrap workflows such as Wilbrand or HackMii, and delegates recipe-source, payload-source, mirror/rehost, manual-URL, internal-only capability, and signed-index decisions to SourcePolicy.swift. Maps validated public recipe data into Recipe model instances for WorkflowCoordinator and RecipeStepView without executing scripts or writing to the SD card."
+        },
+        {
+          "name": "DownloadService.swift",
+          "type": "file",
+          "note": "Purpose: Downloads approved payload files into the active session staging area. Owns: Network transfer, download progress, cancellation, retry behavior, downloaded-file placement, and download-related errors. Does not own: Source trust decisions, recipe parsing, archive extraction policy, checksum/signature verification policy, staging session lifecycle, SD card writes, workflow navigation, or user-facing recipe decisions. Delegates to: SourcePolicy, StagingManager, ChecksumVerifier, ArchiveExtractor, and DiagnosticsLog."
+        }
+      ]
+    },
+    {
+      "name": "Utilities",
+      "children": [
+        {
+          "name": "StagingManager.swift",
+          "type": "file",
+          "note": "Owns app-controlled temporary staging for each workflow session using a unique directory under FileManager.default.temporaryDirectory. Creates and manages downloads/, extracted/, wilbrand/, prepared/, and manifest files; prevents hardcoded temp paths; validates cleanup boundaries; keeps staged writes inside app-controlled session directories; keeps staged data available only long enough to support retry during the same app session when safe; and deletes staging data when the workflow completes, resets, the app quits, or the user starts a new workflow."
+        },
+        {
+          "name": "AppConstants.swift",
+          "type": "file",
+          "note": "Central location for non-user-facing constants such as recipe schema versions, supported file extensions, official Homebrew Assistant Recipes repository identifiers, signed recipe index endpoints, Ed25519 public verification key metadata, key identifiers, URL allowlists, UserDefaults keys, notification names, bundle identifiers, filesystem path fragments, and other magic strings that should not be duplicated. Private signing keys must never live in AppConstants.swift or anywhere in the app source tree."
+        },
+        {
+          "name": "DiagnosticsLog.swift",
+          "type": "file",
+          "note": "Collects user-actionable diagnostic events for troubleshooting, including scoped-access status, user-selected SD volume validation results, validation failures, recipe parsing errors, download failures, write progress, verification results, and eject outcomes. Avoids logging private file contents, unnecessary personal data, secrets, or full user paths unless required for troubleshooting and clearly appropriate."
+        },
+        {
+          "name": "DesignTokens.swift",
+          "type": "file",
+          "note": "Typed access to design constants such as semantic color names from Assets.xcassets, spacing values, corner radii, standard layout measurements, animation durations, and approved SF Symbol names from the UI Layout and Iconography map. Must not define raw color values; colors belong in the asset catalog."
+        },
+        {
+          "name": "AppPreferences.swift",
+          "type": "file",
+          "note": "Owns low-risk persisted app preferences such as optional recipe default selections, non-sensitive UI preferences, and last-known metadata. Must not persist selected SD cards, mounted paths, downloads, staged files, Wilbrand imports, write manifests, or workflow execution state."
+        }
+      ]
+    },
+    {
+      "name": "Models",
+      "children": [
+        {
+          "name": "SDCard.swift",
+          "type": "file",
+          "note": "SD card domain model: encapsulates a user-approved mounted volume after DiskManager has confirmed the selected volume's Disk Arbitration protocol name is \"Secure Digital\". Stores device identifier, BSD/whole-disk identifiers where available, volume name, granted mount/display path, capacity, free space, filesystem type, media/protocol metadata, removability, writability, internal/external traits, and helper methods for human-readable size strings and equality checks. The model may report whether the volume contains existing files, but must not classify those files as homebrew, photos, documents, or other content types."
+        },
+        {
+          "name": "SDCardReadiness.swift",
+          "type": "file",
+          "note": "Validation result model: represents readiness for the user-approved, selected SD card volume in the Homebrew Assistant workflow. A card is valid only when DiskManager has confidently identified the selected mounted volume as Secure Digital using Disk Arbitration protocol name \"Secure Digital\", it is mounted as a writable volume, not internal, not the system volume, has a usable granted path or access scope, and passes a temporary write/read/delete verification test. Non-FAT32 SD cards are not formatted by the app; SDSelectionView shows Open Disk Utility with a warning dialog. Existing files are reported only as present without classifying their contents. If the app cannot confidently identify the selected volume as Secure Digital media, readiness must fail safe."
+        },
+        {
+          "name": "PreparedTool.swift",
+          "type": "file",
+          "note": "Prepared item representation: tracks a selected internal workflow or public recipe item's prepared/downloaded state, trusted source metadata, staged location under the active session staging directory, expected files, intended relative destination paths, checksums, version, verification status, and errors. Represents only app-approved internal workflow outputs or verified public recipe catalog outputs, never arbitrary user-provided files, and is not persisted across app launches."
+        },
+        {
+          "name": "StagingManifest.swift",
+          "type": "file",
+          "note": "Prepared session write-plan model: represents selected workflow items, staged source paths, intended relative destination paths within the user-approved, validated SD card volume, expected checksums or metadata, overwrite warnings, verification expectations, source attribution, and user-visible summary data for Review Setup and Write/Verify Files. The manifest is session-scoped, stored only in the current temporary staging directory, and must not be reused across app launches."
+        }
+      ]
+    },
+    {
+      "name": "Resources",
+      "children": [
+        {
+          "name": "InternalWorkflows",
+          "note": "Optional resource support for app-owned internal/bootstrap workflows if non-executable metadata is needed. Internal workflow resources may contain localization keys, icon references, and static metadata, but approved URLs, source trust decisions, validation rules, and behavior for Wilbrand and HackMii should be owned by bundled app code. Internal workflow resources are not public recipes and must never be loaded from, updated by, or overridden by Homebrew Assistant Recipes.",
+          "children": []
+        },
+        {
+          "name": "Localization",
+          "children": [
+            {
+              "name": "Localizable.xcstrings",
+              "type": "file",
+              "note": "Xcode String Catalog containing all user-facing localized text for Homebrew Assistant, including app/window titles, button labels, SD card selection and scoped-access explanations, SD card validation states, Disk Utility warnings, Wilbrand instructions and validation messages, internal workflow labels, recipe names/summaries/post-install instructions, review confirmations, write/verify progress, success next steps, actionable errors, diagnostics shown to the user, and accessibility labels. Keys should follow the project localization namespace standard and must be referenced from Swift code and recipe plist files rather than hardcoded in views or services."
+            }
+          ]
+        },
+        {
+          "name": "Assets.xcassets",
+          "type": "file",
+          "note": "Asset catalog: source of truth for app icons, accent color, semantic color sets, template images, symbolic images, and other visual assets used by the app. Colors must adapt to Light Mode, Dark Mode, high contrast, and accessibility settings where appropriate. Do not store emoji-as-graphics assets."
+        }
+      ]
+    },
+    {
+      "name": "Tests",
+      "children": [
+        {
+          "name": "ArchiveExtractorTests.swift",
+          "type": "file",
+          "note": "Tests safe archive extraction, supported archive formats, extraction progress, Zip Slip prevention, unsafe path rejection, symlink rejection, hard-link rejection, absolute-path rejection, traversal rejection, final destination containment inside staging, malformed archives, extraction destination boundaries, and extraction diagnostics."
+        },
+        {
+          "name": "ChecksumVerifierTests.swift",
+          "type": "file",
+          "note": "Tests checksum algorithm handling, streaming digest calculation, expected-versus-actual comparison, missing or unsupported checksum metadata, mismatch errors, large-file behavior, cancellation where supported, and checksum diagnostics."
+        },
+        {
+          "name": "DiskManagerTests.swift",
+          "type": "file",
+          "note": "Tests user-selected volume validation using injected or fixture disk metadata rather than requiring physical hardware. Covers Disk Arbitration protocol name \"Secure Digital\", selected mounted-volume validation, rejection of generic USB drives, external SSDs, internal disks, disk images, network volumes, missing or ambiguous protocol metadata, selected-card validation, no-card state, multiple-card state, non-writable volumes, user-initiated eject success/failure mapping, and Disk Utility launch integration boundaries."
+        },
+        {
+          "name": "WorkflowCoordinatorTests.swift",
+          "type": "file",
+          "note": "Tests workflow ordering, workflow availability, SD selection and validation blocking, Choose Items selection behavior, dynamic sidebar generation from selected internal workflows and public recipes, Wilbrand Open Browser/Choose File behavior when selected, recipe preparation transitions, Back availability, eject request coordination, start-new-workflow cleanup/routing, reset behavior, and error state transitions."
+        },
+        {
+          "name": "RecipeCatalogLoaderTests.swift",
+          "type": "file",
+          "note": "Tests signed recipe index loading, Ed25519 signature verification handoff, recipe checksum verification handoff, catalog availability state, rejection of unsigned or invalid indexes, rejection of loose cached recipes, public recipe listing for Choose Items, and failure/error mapping."
+        },
+        {
+          "name": "RecipeLoaderTests.swift",
+          "type": "file",
+          "note": "Tests verified public recipe parsing, required fields, malformed recipe files, unsupported schema versions, missing assets, invalid install actions, unsafe target paths, unsupported action types, checksum mismatch rejection, loose cached recipe rejection, revoked/deprecated recipe handling, unofficial mirrors/rehosts, unapproved source URLs, arbitrary scripts, user-selected local recipe rejection, Homebrew Assistant Recipes recipe-source validation, and rejection of Homebrew Assistant Recipes attempts to add, replace, override, or modify app-owned Wilbrand or HackMii workflows."
+        },
+        {
+          "name": "WilbrandWorkflowTests.swift",
+          "type": "file",
+          "note": "Tests app-owned Wilbrand workflow metadata and behavior boundaries, including approved URL ownership, controlled browser-to-file-selection flow, archive validation expectations, staging-only behavior, and rejection of any public recipe or Homebrew Assistant Recipes attempt to modify Wilbrand behavior."
+        },
+        {
+          "name": "HackMiiWorkflowTests.swift",
+          "type": "file",
+          "note": "Tests app-owned HackMii workflow metadata and behavior boundaries, including approved source ownership, expected file/checksum requirements when available, staging-only behavior, copy intent, and rejection of any public recipe or Homebrew Assistant Recipes attempt to modify HackMii behavior."
+        },
+        {
+          "name": "SourcePolicyTests.swift",
+          "type": "file",
+          "note": "Tests source-trust decisions for verified public recipe catalog entries, future Homebrew Assistant Recipes recipe definitions through a verified signed Ed25519 index, official upstream payload URLs, approved project release pages, rejection of unsigned indexes, invalid signatures, mismatched recipe checksums, loose cached recipes, local/user-selected recipes, drag-and-drop inputs, alternate repositories, forks, unofficial mirrors, rehosted files, manually entered URLs, public-recipe openBrowser actions, rejection of Homebrew Assistant Recipes attempts to add, replace, override, or modify Wilbrand or HackMii, revocation/deprecation handling, and fail-safe behavior when a source cannot be confidently classified as approved."
+        },
+        {
+          "name": "DownloadServiceTests.swift",
+          "type": "file",
+          "note": "Tests trusted-source download planning, progress reporting, cancellation, retry behavior, downloaded-file placement, ChecksumVerifier handoff, ArchiveExtractor handoff, download error mapping, and rejection of unapproved URLs."
+        },
+        {
+          "name": "SDWriteServiceTests.swift",
+          "type": "file",
+          "note": "Tests file-copy planning, no-format/no-erase guarantees, limiting writes to the user-approved validated SD card volume, overwrite warnings, atomic/staged writes where practical, verification after copy, cancellation behavior, partial failure recovery, internal-disk rejection, and diagnostic logging."
+        },
+        {
+          "name": "LocalizationTests.swift",
+          "type": "file",
+          "note": "Tests localization coverage for required key namespaces, verifies that internal workflow and verified public recipe localization keys resolve, and helps prevent hardcoded user-facing strings from bypassing Localizable.xcstrings."
+        },
+        {
+          "name": "StagingManagerTests.swift",
+          "type": "file",
+          "note": "Tests creation of unique temporary staging sessions, expected downloads/extracted/wilbrand/prepared/manifest layout, cleanup on completion/reset/app quit/start-new-workflow, prevention of hardcoded temp paths, retry-safe retention during a single session, and rejection of cleanup outside the staging boundary."
+        },
+        {
+          "name": "PersistenceTests.swift",
+          "type": "file",
+          "note": "Tests that only low-risk preferences and metadata persist across launches and that selected SD cards, granted mount paths or security-scoped access state, downloaded payloads, extracted archives, Wilbrand imports, prepared layouts, write manifests, and workflow execution state are discarded when the app quits, completes, or resets."
+        },
+        {
+          "name": "SuccessViewTests.swift",
+          "type": "file",
+          "note": "Tests success summary presentation, verification status display, included recipe list, user-approved validated SD card display, Eject button availability, non-default eject behavior, eject success and failure states, manual eject guidance, and Start New Workflow behavior."
+        },
+        {
+          "name": "StagingManifestTests.swift",
+          "type": "file",
+          "note": "Tests manifest creation, staged-source to approved SD-volume relative-destination mapping, overwrite warning representation, verification expectation storage, source attribution, session-only behavior, and Review/Write handoff data."
+        },
+        {
+          "name": "AppPreferencesTests.swift",
+          "type": "file",
+          "note": "Tests that only low-risk preferences persist and that selected SD cards, granted mounted paths or security-scoped access state, downloads, staged files, Wilbrand imports, write manifests, and workflow execution state are not persisted."
+        }
+      ]
+    }
+  ]
+}
