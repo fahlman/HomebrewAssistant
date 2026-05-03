@@ -67,18 +67,6 @@
         }
       }
     },
-    "navigation.cancel" : {
-      "comment" : "Button title for cancelling a modal prompt or picker flow.",
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Cancel"
-          }
-        }
-      }
-    },
     "navigation.next" : {
       "comment" : "Button title for moving to the next workflow step.",
       "localizations" : {
@@ -130,18 +118,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Review UI will appear here."
-          }
-        }
-      }
-    },
-    "sdSelection.accessPrompt.chooseButton" : {
-      "comment" : "Button title in the SD access prompt that continues to the SD card picker.",
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Choose SD Card…"
           }
         }
       }
@@ -224,18 +200,6 @@
         }
       }
     },
-    "sdSelection.placeholder.description" : {
-      "comment" : "Placeholder description for the SD card selection screen.",
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "SD card selection UI will appear here."
-          }
-        }
-      }
-    },
     "sdSelection.readiness.invalidDrive%@" : {
       "comment" : "Readiness message shown when a selected drive is not a valid SD card. The placeholder is the user-facing drive name.",
       "localizations" : {
@@ -287,18 +251,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "No valid SD card selected."
-          }
-        }
-      }
-    },
-    "sdSelection.readiness.ready" : {
-      "comment" : "Readiness message shown when the selected SD card is valid and writable.",
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "SD card is ready."
           }
         }
       }
@@ -455,18 +407,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Wilbrand"
-          }
-        }
-      }
-    },
-    "workflow.sidebar.title" : {
-      "comment" : "Title for the workflow sidebar.",
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Workflow"
           }
         }
       }

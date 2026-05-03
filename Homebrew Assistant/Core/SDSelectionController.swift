@@ -53,7 +53,6 @@ final class SDSelectionController: ObservableObject {
         case .success(let urls):
             guard let selectedURL = urls.first else {
                 clearSelection()
-                selectedDrive = nil
                 selectionErrorMessage = String(localized: "sdSelection.error.noVolumeSelected")
                 return
             }
@@ -61,7 +60,6 @@ final class SDSelectionController: ObservableObject {
             validateSelectedVolume(selectedURL)
         case .failure:
             clearSelection()
-            selectedDrive = nil
             selectionErrorMessage = String(localized: "sdSelection.error.selectionFailed")
         }
     }
