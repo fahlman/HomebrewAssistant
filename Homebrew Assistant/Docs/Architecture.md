@@ -317,6 +317,63 @@ Delegates to:
 - `WorkflowCoordinator` for state transitions
 - `DiagnosticsLog` for diagnostic event recording
 
+### WorkflowStepAction.swift
+
+Purpose: Describes an optional contextual action for the selected workflow step.
+
+Owns:
+
+- User-facing action localization key
+- Optional action icon reference
+- Enabled/disabled action state
+- Action execution closure
+- A generic model for step-specific actions that can be presented outside the step view
+
+Does not own:
+
+- Button placement
+- Workflow navigation
+- Step UI layout
+- File picker presentation
+- Downloads
+- SD card writes
+- Risky operation policy
+- Action availability decisions beyond the supplied enabled state
+
+Delegates to:
+
+- `BottomNavigationView` for presentation
+- `WorkflowCoordinator` or step-specific controllers for action availability and behavior
+
+### SDSelectionController.swift
+
+Purpose: Coordinates SD card selection state for the active workflow session.
+
+Owns:
+
+- SD card picker presentation state
+- Selected-volume scoped access state
+- Selected-volume readiness result
+- SD card selection error state
+- SD card selection reset behavior
+- Shared SD-selection actions that can be triggered outside `SDSelectionView`
+
+Does not own:
+
+- SD card selection UI layout
+- Bottom button placement
+- Disk Arbitration metadata policy
+- File writes
+- Staging
+- Recipe preparation
+- Workflow navigation
+
+Delegates to:
+
+- `ScopedAccessManager` for scoped filesystem access
+- `DiskManager` for SD card readiness classification
+- `WorkflowStepAction` consumers for contextual action presentation
+
 ## Views Layer
 
 ### ContentView.swift
@@ -327,6 +384,7 @@ Owns:
 
 - Main window layout composition
 - Placement of sidebar, detail, and bottom navigation regions
+- Creation and injection of shared view/session controllers needed by multiple app regions
 
 Does not own:
 
@@ -343,6 +401,7 @@ Delegates to:
 - `WorkflowDetailView`
 - `BottomNavigationView`
 - Shared workflow state
+- `SDSelectionController` for shared SD selection state
 
 ### Components
 
@@ -436,6 +495,7 @@ Owns:
 
 - Lower-left Quit/Back placement
 - Lower-right action placement
+- Optional contextual step-action placement before the default Next action
 - Default button presentation rules
 - Rule that non-passive or risky actions are never default buttons
 - Disabled/enabled button presentation
@@ -448,7 +508,8 @@ Does not own:
 
 Delegates to:
 
-- `WorkflowCoordinator` for available actions and user intent handling
+- `WorkflowCoordinator` for navigation availability and user intent handling
+- `WorkflowStepAction` for optional contextual step-action metadata
 
 ### Step Views
 
@@ -505,6 +566,7 @@ Owns:
 Does not own:
 
 - Scoped access lifecycle
+- SD card picker presentation state
 - Disk Arbitration metadata resolution
 - SD card readiness policy
 - File writes
@@ -513,8 +575,7 @@ Does not own:
 Delegates to:
 
 - `WorkflowCoordinator`
-- `ScopedAccessManager`
-- `DiskManager`
+- `SDSelectionController`
 - `SDCardReadiness`
 
 ### ChooseItemsView.swift

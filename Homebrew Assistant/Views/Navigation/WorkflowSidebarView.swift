@@ -27,7 +27,6 @@ struct WorkflowSidebarView: View {
                 .tag(item.id)
             }
         }
-        .navigationTitle(String(localized: "workflow.sidebar.title"))
     }
 }
 

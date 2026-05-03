@@ -24,7 +24,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		94CC8BFD2FA70A3900F1B7D6 /* Homebrew Assistant.xctestplan */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Homebrew Assistant.xctestplan"; sourceTree = "<group>"; };
+		94CC8BFD2FA70A3900F1B7D6 /* Homebrew Assistant.xctestplan */ = {isa = PBXFileReference; lastKnownFileType = text; path = "Homebrew Assistant.xctestplan"; sourceTree = "<group>"; };
 		94E96C972FA449B1004218AD /* Homebrew Assistant.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Homebrew Assistant.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		94E96CA42FA449B2004218AD /* Homebrew AssistantTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "Homebrew AssistantTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		94E96CAE2FA449B2004218AD /* Homebrew AssistantUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "Homebrew AssistantUITests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };

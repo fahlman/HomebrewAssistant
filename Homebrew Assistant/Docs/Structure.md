@@ -11,10 +11,12 @@ HomebrewAssistant/
 │   ├── HackMiiWorkflow.swift
 │   ├── InternalWorkflowCatalog.swift
 │   ├── Recipe.swift
+│   ├── SDSelectionController.swift
 │   ├── StepStateStore.swift
 │   ├── WilbrandWorkflow.swift
 │   ├── WorkflowCoordinator.swift
-│   └── WorkflowItem.swift
+│   ├── WorkflowItem.swift
+│   └── WorkflowStepAction.swift
 ├── Docs/
 │   ├── Architecture.md
 │   ├── Specification.md

@@ -17,25 +17,47 @@ struct ChooseItemsView: View {
     @ObservedObject var coordinator: WorkflowCoordinator
 
     var body: some View {
-        Form {
-            Section(String(localized: "chooseItems.internalWorkflows.sectionTitle")) {
+        VStack(alignment: .leading, spacing: 28) {
+            internalWorkflowsSection
+            publicRecipesSection
+        }
+    }
+
+    private var internalWorkflowsSection: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text(String(localized: "chooseItems.internalWorkflows.sectionTitle"))
+                .font(.headline)
+
+            VStack(spacing: 0) {
                 ForEach(InternalWorkflowKind.allCases) { kind in
                     Toggle(isOn: binding(for: kind)) {
                         Label(String(localized: String.LocalizationValue(kind.titleKey)), systemImage: kind.systemImageName)
                     }
+                    .padding(.vertical, 10)
+                    .padding(.horizontal, 12)
+
+                    if kind != InternalWorkflowKind.allCases.last {
+                        Divider()
+                    }
                 }
             }
-
-            Section(String(localized: "chooseItems.publicRecipes.sectionTitle")) {
-                ContentUnavailableView(
-                    String(localized: "chooseItems.publicRecipes.unavailable.title"),
-                    systemImage: "network.slash",
-                    description: Text(String(localized: "chooseItems.publicRecipes.unavailable.description"))
-                )
-            }
+            .background(.quaternary, in: RoundedRectangle(cornerRadius: 12))
         }
-        .formStyle(.grouped)
-        .padding()
+    }
+
+    private var publicRecipesSection: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text(String(localized: "chooseItems.publicRecipes.sectionTitle"))
+                .font(.headline)
+
+            ContentUnavailableView(
+                String(localized: "chooseItems.publicRecipes.unavailable.title"),
+                systemImage: "network.slash",
+                description: Text(String(localized: "chooseItems.publicRecipes.unavailable.description"))
+            )
+            .frame(maxWidth: .infinity, minHeight: 160)
+            .background(.quaternary, in: RoundedRectangle(cornerRadius: 12))
+        }
     }
 
     private func binding(for kind: InternalWorkflowKind) -> Binding<Bool> {

@@ -67,6 +67,18 @@
         }
       }
     },
+    "navigation.cancel" : {
+      "comment" : "Button title for cancelling a modal prompt or picker flow.",
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cancel"
+          }
+        }
+      }
+    },
     "navigation.next" : {
       "comment" : "Button title for moving to the next workflow step.",
       "localizations" : {
@@ -122,13 +134,193 @@
         }
       }
     },
+    "sdSelection.accessPrompt.chooseButton" : {
+      "comment" : "Button title in the SD access prompt that continues to the SD card picker.",
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Choose SD Card…"
+          }
+        }
+      }
+    },
+    "sdSelection.accessPrompt.message" : {
+      "comment" : "Message in the SD access prompt explaining why the app needs scoped access to the selected SD card.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Homebrew Assistant requires access to your SD card. Click Choose SD Card…, select your SD card, then click Open."
+          }
+        }
+      }
+    },
+    "sdSelection.accessPrompt.title" : {
+      "comment" : "Title in the SD access prompt shown before opening the SD card picker.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Disk Access Required"
+          }
+        }
+      }
+    },
+    "sdSelection.chooseSDCard.button" : {
+      "comment" : "Button title for choosing the SD card volume.",
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Choose SD Card…"
+          }
+        }
+      }
+    },
+    "sdSelection.error.noVolumeSelected" : {
+      "comment" : "Error shown when the picker returns no selected volume.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No volume was selected."
+          }
+        }
+      }
+    },
+    "sdSelection.error.scopedAccessFailed" : {
+      "comment" : "Error shown when macOS does not grant scoped filesystem access to the selected volume.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Homebrew Assistant could not access the selected volume."
+          }
+        }
+      }
+    },
+    "sdSelection.error.selectionFailed" : {
+      "comment" : "Error shown when SD card selection fails.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The SD card selection could not be completed."
+          }
+        }
+      }
+    },
+    "sdSelection.noValidSDCard.label" : {
+      "comment" : "Drive-card label shown when no valid SD card has been selected.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No valid SD card"
+          }
+        }
+      }
+    },
     "sdSelection.placeholder.description" : {
       "comment" : "Placeholder description for the SD card selection screen.",
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "SD card selection UI will appear here."
+          }
+        }
+      }
+    },
+    "sdSelection.readiness.invalidDrive%@" : {
+      "comment" : "Readiness message shown when a selected drive is not a valid SD card. The placeholder is the user-facing drive name.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ is not a valid SD card."
+          }
+        }
+      }
+    },
+    "sdSelection.readiness.metadataUnavailable" : {
+      "comment" : "Readiness message shown when Disk Arbitration metadata is unavailable for the selected volume.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Homebrew Assistant could not read disk metadata for the selected volume."
+          }
+        }
+      }
+    },
+    "sdSelection.readiness.notSecureDigital" : {
+      "comment" : "Readiness message shown when the selected volume is not reported as Secure Digital media.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The selected volume is not reported as Secure Digital media."
+          }
+        }
+      }
+    },
+    "sdSelection.readiness.notWritable" : {
+      "comment" : "Readiness message shown when the selected Secure Digital volume is not writable.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The selected SD card is not writable."
+          }
+        }
+      }
+    },
+    "sdSelection.readiness.noValidSDCard" : {
+      "comment" : "Drive-card status shown when no valid SD card has been selected.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No valid SD card selected."
+          }
+        }
+      }
+    },
+    "sdSelection.readiness.ready" : {
+      "comment" : "Readiness message shown when the selected SD card is valid and writable.",
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "SD card is ready."
+          }
+        }
+      }
+    },
+    "sdSelection.readiness.readyDrive%@" : {
+      "comment" : "Readiness message shown when a selected SD card is valid. The placeholder is the user-facing drive name.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ is a valid SD card."
+          }
+        }
+      }
+    },
+    "sdSelection.selectedVolume.label" : {
+      "comment" : "Label shown above the selected SD card volume path.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Selected Volume"
           }
         }
       }
@@ -213,6 +405,7 @@
     },
     "workflow.fixedStep.sdCardSelection.title" : {
       "comment" : "Workflow step title for selecting the SD card.",
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -268,6 +461,7 @@
     },
     "workflow.sidebar.title" : {
       "comment" : "Title for the workflow sidebar.",
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {

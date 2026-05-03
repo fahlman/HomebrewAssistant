@@ -27,11 +27,11 @@ struct DiskManager {
         }
 
         guard metadata.protocolName == "Secure Digital" else {
-            return .unavailable(reason: .notSecureDigital)
+            return .unavailable(reason: .notSecureDigital, metadata: metadata)
         }
 
         guard metadata.isWritable else {
-            return .unavailable(reason: .notWritable)
+            return .unavailable(reason: .notWritable, metadata: metadata)
         }
 
         return .ready(metadata)
@@ -45,6 +45,7 @@ protocol DiskMetadataProvider {
 struct DiskVolumeMetadata: Equatable, Sendable {
     let volumeURL: URL
     let localizedName: String?
+    let displayName: String
     let protocolName: String?
     let isWritable: Bool
     let isRemovable: Bool?
@@ -54,6 +55,7 @@ struct DiskVolumeMetadata: Equatable, Sendable {
     init(
         volumeURL: URL,
         localizedName: String? = nil,
+        displayName: String? = nil,
         protocolName: String? = nil,
         isWritable: Bool,
         isRemovable: Bool? = nil,
@@ -62,6 +64,7 @@ struct DiskVolumeMetadata: Equatable, Sendable {
     ) {
         self.volumeURL = volumeURL
         self.localizedName = localizedName
+        self.displayName = displayName ?? localizedName ?? volumeURL.lastPathComponent
         self.protocolName = protocolName
         self.isWritable = isWritable
         self.isRemovable = isRemovable
@@ -72,7 +75,7 @@ struct DiskVolumeMetadata: Equatable, Sendable {
 
 enum SDCardReadiness: Equatable {
     case ready(DiskVolumeMetadata)
-    case unavailable(reason: SDCardReadinessFailureReason)
+    case unavailable(reason: SDCardReadinessFailureReason, metadata: DiskVolumeMetadata? = nil)
 }
 
 enum SDCardReadinessFailureReason: Equatable {
@@ -96,6 +99,7 @@ struct DiskArbitrationMetadataProvider: DiskMetadataProvider {
         }
 
         let localizedName = description[kDADiskDescriptionVolumeNameKey as String] as? String
+        let displayName = localizedName ?? volumeURL.lastPathComponent
         let protocolName = description[kDADiskDescriptionDeviceProtocolKey as String] as? String
         let isWritable = (description[kDADiskDescriptionMediaWritableKey as String] as? Bool) ?? false
         let isRemovable = description[kDADiskDescriptionMediaRemovableKey as String] as? Bool
@@ -105,6 +109,7 @@ struct DiskArbitrationMetadataProvider: DiskMetadataProvider {
         return DiskVolumeMetadata(
             volumeURL: volumeURL,
             localizedName: localizedName,
+            displayName: displayName,
             protocolName: protocolName,
             isWritable: isWritable,
             isRemovable: isRemovable,

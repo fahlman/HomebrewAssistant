@@ -3,17 +3,28 @@
 //  Homebrew Assistant
 //
 //  Purpose: Presents shared bottom navigation and step-specific actions.
-//  Owns: Lower-left Quit/Back placement, lower-right action placement, default
-//  button presentation rules, and disabled/enabled button presentation.
+//  Owns: Lower-left Quit/Back placement, lower-right action placement,
+//  optional contextual step-action placement before the default Next action,
+//  default button presentation rules, and disabled/enabled button presentation.
 //  Does not own: Action availability decisions, workflow transitions, or risky
 //  operation execution.
-//  Delegates to: WorkflowCoordinator for available actions and user intent handling.
+//  Delegates to: WorkflowCoordinator for navigation availability and user intent handling,
+//  and WorkflowStepAction for optional contextual step-action metadata.
 //
 
 import SwiftUI
 
 struct BottomNavigationView: View {
     @ObservedObject var coordinator: WorkflowCoordinator
+    let configuration: WorkflowBottomBarConfiguration
+
+    init(
+        coordinator: WorkflowCoordinator,
+        configuration: WorkflowBottomBarConfiguration = .automatic
+    ) {
+        self.coordinator = coordinator
+        self.configuration = configuration
+    }
 
     var body: some View {
         HStack {
@@ -50,10 +61,51 @@ struct BottomNavigationView: View {
                 }
             }
 
-            Button(String(localized: "navigation.next")) {
-                coordinator.goForward()
+            if let contextualAction = configuration.contextualAction {
+                contextualActionButton(contextualAction)
             }
-            .disabled(!coordinator.canGoForward)
+
+            nextButton
+        }
+    }
+
+    private var nextButton: some View {
+        Button(String(localized: "navigation.next")) {
+            coordinator.goForward()
+        }
+        .disabled(!canGoForward)
+        .keyboardShortcut(isNextDefault ? .defaultAction : nil)
+    }
+
+    private func contextualActionButton(_ action: WorkflowStepAction) -> some View {
+        Button(String(localized: String.LocalizationValue(action.titleKey))) {
+            action.perform()
+        }
+        .disabled(!action.isEnabled)
+        .keyboardShortcut(isContextualActionDefault && action.isEnabled ? .defaultAction : nil)
+    }
+
+    private var canGoForward: Bool {
+        configuration.canGoForwardOverride ?? coordinator.canGoForward
+    }
+
+    private var isContextualActionDefault: Bool {
+        switch configuration.defaultAction {
+        case .contextualAction:
+            true
+        case .next, nil:
+            false
+        }
+    }
+
+    private var isNextDefault: Bool {
+        switch configuration.defaultAction {
+        case .next:
+            canGoForward
+        case .contextualAction:
+            false
+        case nil:
+            canGoForward
         }
     }
 

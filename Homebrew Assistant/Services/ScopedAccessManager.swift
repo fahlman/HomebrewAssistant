@@ -23,7 +23,11 @@ final class ScopedAccessManager: ObservableObject {
     private let accessSessionFactory: any SecurityScopedAccessSessionFactory
     private var accessSession: (any SecurityScopedAccessSession)?
 
-    init(accessSessionFactory: any SecurityScopedAccessSessionFactory = ProductionSecurityScopedAccessSessionFactory()) {
+    init() {
+        self.accessSessionFactory = ProductionSecurityScopedAccessSessionFactory()
+    }
+
+    init(accessSessionFactory: any SecurityScopedAccessSessionFactory) {
         self.accessSessionFactory = accessSessionFactory
     }
 

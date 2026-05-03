@@ -21,7 +21,14 @@ struct DiskManagerTests {
             isInternal: false
         )))
 
-        #expect(manager.readiness(for: volumeURL) == .unavailable(reason: .notSecureDigital))
+        let readiness = manager.readiness(for: volumeURL)
+        guard case .unavailable(reason: .notSecureDigital, metadata: let metadata) = readiness else {
+            Issue.record("Expected notSecureDigital readiness, got \(readiness)")
+            return
+        }
+
+        #expect(metadata?.volumeURL == volumeURL)
+        #expect(metadata?.displayName == "TestSD")
     }
 
     @Test func nonSecureDigitalProtocolReturnsNotSecureDigital() {
@@ -35,7 +42,15 @@ struct DiskManagerTests {
             isInternal: false
         )))
 
-        #expect(manager.readiness(for: volumeURL) == .unavailable(reason: .notSecureDigital))
+        let readiness = manager.readiness(for: volumeURL)
+        guard case .unavailable(reason: .notSecureDigital, metadata: let metadata) = readiness else {
+            Issue.record("Expected notSecureDigital readiness, got \(readiness)")
+            return
+        }
+
+        #expect(metadata?.volumeURL == volumeURL)
+        #expect(metadata?.displayName == "USBDrive")
+        #expect(metadata?.protocolName == "USB")
     }
 
     @Test func secureDigitalButReadOnlyReturnsNotWritable() {
@@ -49,7 +64,16 @@ struct DiskManagerTests {
             isInternal: false
         )))
 
-        #expect(manager.readiness(for: volumeURL) == .unavailable(reason: .notWritable))
+        let readiness = manager.readiness(for: volumeURL)
+        guard case .unavailable(reason: .notWritable, metadata: let metadata) = readiness else {
+            Issue.record("Expected notWritable readiness, got \(readiness)")
+            return
+        }
+
+        #expect(metadata?.volumeURL == volumeURL)
+        #expect(metadata?.displayName == "TestSD")
+        #expect(metadata?.protocolName == "Secure Digital")
+        #expect(metadata?.isWritable == false)
     }
 
     @Test func secureDigitalAndWritableReturnsReady() {
@@ -79,7 +103,18 @@ struct DiskManagerTests {
             isInternal: false
         )))
 
-        #expect(manager.readiness(for: volumeURL) == .unavailable(reason: .notSecureDigital))
+        let readiness = manager.readiness(for: volumeURL)
+        guard case .unavailable(reason: .notSecureDigital, metadata: let metadata) = readiness else {
+            Issue.record("Expected notSecureDigital readiness, got \(readiness)")
+            return
+        }
+
+        #expect(metadata?.volumeURL == volumeURL)
+        #expect(metadata?.displayName == "ExternalDrive")
+        #expect(metadata?.protocolName == "USB")
+        #expect(metadata?.isRemovable == true)
+        #expect(metadata?.isEjectable == true)
+        #expect(metadata?.isInternal == false)
     }
 }
 
