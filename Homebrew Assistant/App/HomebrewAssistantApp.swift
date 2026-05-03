@@ -19,6 +19,6 @@ struct HomebrewAssistantApp: App {
         WindowGroup {
             ContentView()
         }
-        .windowStyle(.titleBar)
+        .windowStyle(.hiddenTitleBar)
     }
 }

@@ -22,13 +22,10 @@ struct ContentView: View {
         } detail: {
             VStack(spacing: 0) {
                 WorkflowDetailView(coordinator: coordinator)
-
-                Divider()
-
                 BottomNavigationView(coordinator: coordinator)
             }
         }
-        .frame(minWidth: 900, minHeight: 600)
+        .frame(minWidth: 760, minHeight: 520)
     }
 }
 
