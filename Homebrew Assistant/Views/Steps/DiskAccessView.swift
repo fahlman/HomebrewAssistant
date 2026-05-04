@@ -36,15 +36,12 @@ struct SDSelectionView: View {
     private var sdAccessSection: some View {
         VStack(alignment: .leading, spacing: 12) {
             Text(String(localized: "sdSelection.accessPrompt.title"))
-                .font(.headline)
+                .font(.title2)
+                .fontWeight(.semibold)
 
             Text(String(localized: "sdSelection.accessPrompt.message"))
                 .foregroundStyle(.secondary)
                 .lineLimit(nil)
-                .padding(.vertical, 10)
-                .padding(.horizontal, 12)
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .background(.quaternary, in: RoundedRectangle(cornerRadius: 12))
         }
     }
 
