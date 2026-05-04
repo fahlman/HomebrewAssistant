@@ -1,11 +1,10 @@
 //
-//  SDSelectionView.swift
+//  DiskAccessView.swift
 //  Homebrew Assistant
 //
-//  Purpose: Presents SD card selection and validation state.
-//  Owns: Choose SD Card action presentation, SD card validation result
-//  presentation, Open Disk Utility affordance presentation, and user-facing
-//  explanation of scoped SD card access.
+//  Purpose: Presents sandbox-friendly disk access state for the SD card step.
+//  Owns: Disk access explanation presentation, selected-drive card presentation,
+//  and user-facing valid/invalid disk readiness presentation.
 //  Does not own: Scoped access lifecycle, SD card picker presentation state,
 //  Disk Arbitration metadata resolution, SD card readiness policy, file writes,
 //  or eject behavior.
@@ -16,7 +15,7 @@ import AppKit
 import SwiftUI
 import UniformTypeIdentifiers
 
-struct SDSelectionView: View {
+struct DiskAccessView: View {
     @ObservedObject var controller: SDSelectionController
 
     var body: some View {
@@ -54,20 +53,6 @@ struct SDSelectionView: View {
         }
     }
 
-    
-}
-
-private extension SDCardReadinessFailureReason {
-    var displayMessage: String {
-        switch self {
-        case .metadataUnavailable:
-            String(localized: "sdSelection.readiness.metadataUnavailable")
-        case .notSecureDigital:
-            String(localized: "sdSelection.readiness.notSecureDigital")
-        case .notWritable:
-            String(localized: "sdSelection.readiness.notWritable")
-        }
-    }
 }
 
 private struct DriveSelectionCard: View {

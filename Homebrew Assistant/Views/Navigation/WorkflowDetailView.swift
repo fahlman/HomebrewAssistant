@@ -52,9 +52,9 @@ struct WorkflowDetailView: View {
     private func fixedStepView(for fixedStep: FixedStep) -> some View {
         switch fixedStep {
         case .sdCardSelection:
-            SDSelectionView(controller: sdSelectionController)
+            DiskAccessView(controller: sdSelectionController)
         case .chooseItems:
-            ChooseItemsView(coordinator: coordinator)
+            ChooseHomebrewView(coordinator: coordinator)
         case .reviewSetup:
             ReviewSetupView()
         case .writeAndVerifyFiles:

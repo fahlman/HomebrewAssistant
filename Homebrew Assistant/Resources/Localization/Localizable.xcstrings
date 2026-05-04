@@ -332,14 +332,26 @@
         }
       }
     },
-    "workflow.fixedStep.chooseItems.title" : {
-      "comment" : "Workflow step title for choosing internal workflows and public recipes.",
+    "workflow.fixedStep.chooseHomebrew.title" : {
+      "comment" : "Workflow step title for choosing homebrew components.",
       "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Choose Items"
+            "value" : "Choose Homebrew"
+          }
+        }
+      }
+    },
+    "workflow.fixedStep.grantDiskAccess.title" : {
+      "comment" : "Workflow step title for granting sandbox disk access to the SD card.",
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Grant Disk Access"
           }
         }
       }
@@ -351,18 +363,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Review Setup"
-          }
-        }
-      }
-    },
-    "workflow.fixedStep.sdCardSelection.title" : {
-      "comment" : "Workflow step title for selecting the SD card.",
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Select SD Card"
           }
         }
       }

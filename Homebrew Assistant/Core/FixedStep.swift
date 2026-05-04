@@ -4,7 +4,7 @@
 //
 //  Purpose: Defines fixed app-owned workflow steps that are not recipe or
 //  internal workflow preparation items.
-//  Owns: Fixed step identities for SD Card Selection, Choose Items, Review Setup,
+//  Owns: Fixed step identities for Grant Disk Access, Choose Homebrew, Review Setup,
 //  Write and Verify Files, and Success, plus fixed-step ordering and basic metadata.
 //  Does not own: View layout, scoped filesystem access, download execution,
 //  disk writes, recipe loading, or internal workflow behavior.
@@ -26,9 +26,9 @@ enum FixedStep: String, CaseIterable, Identifiable, Hashable {
     var titleKey: String {
         switch self {
         case .sdCardSelection:
-            "workflow.fixedStep.sdCardSelection.title"
+            "workflow.fixedStep.grantDiskAccess.title"
         case .chooseItems:
-            "workflow.fixedStep.chooseItems.title"
+            "workflow.fixedStep.chooseHomebrew.title"
         case .reviewSetup:
             "workflow.fixedStep.reviewSetup.title"
         case .writeAndVerifyFiles:

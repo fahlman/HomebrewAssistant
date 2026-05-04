@@ -1,5 +1,5 @@
 //
-//  ChooseItemsView.swift
+//  ChooseHomebrewView.swift
 //  Homebrew Assistant
 //
 //  Purpose: Presents selectable internal workflows and public recipes.
@@ -13,7 +13,7 @@
 
 import SwiftUI
 
-struct ChooseItemsView: View {
+struct ChooseHomebrewView: View {
     @ObservedObject var coordinator: WorkflowCoordinator
 
     var body: some View {
