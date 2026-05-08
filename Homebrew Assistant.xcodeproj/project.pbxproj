@@ -6,6 +6,13 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		941D21E82FAE4EE60013D2BC /* CONTRIBUTING.md in Resources */ = {isa = PBXBuildFile; fileRef = 941D21A72FAE4EE60013D2BC /* CONTRIBUTING.md */; };
+		941D21E92FAE4EE60013D2BC /* LICENSE in Resources */ = {isa = PBXBuildFile; fileRef = 941D21A82FAE4EE60013D2BC /* LICENSE */; };
+		941D21EB2FAE4EE60013D2BC /* ROADMAP.md in Resources */ = {isa = PBXBuildFile; fileRef = 941D21AA2FAE4EE60013D2BC /* ROADMAP.md */; };
+		941D21EC2FAE4EE60013D2BC /* SECURITY.md in Resources */ = {isa = PBXBuildFile; fileRef = 941D21AB2FAE4EE60013D2BC /* SECURITY.md */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXContainerItemProxy section */
 		94E96CA52FA449B2004218AD /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -24,6 +31,10 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		941D21A72FAE4EE60013D2BC /* CONTRIBUTING.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = CONTRIBUTING.md; sourceTree = "<group>"; };
+		941D21A82FAE4EE60013D2BC /* LICENSE */ = {isa = PBXFileReference; lastKnownFileType = text; path = LICENSE; sourceTree = "<group>"; };
+		941D21AA2FAE4EE60013D2BC /* ROADMAP.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = ROADMAP.md; sourceTree = "<group>"; };
+		941D21AB2FAE4EE60013D2BC /* SECURITY.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = SECURITY.md; sourceTree = "<group>"; };
 		94CC8BFD2FA70A3900F1B7D6 /* Homebrew Assistant.xctestplan */ = {isa = PBXFileReference; lastKnownFileType = text; path = "Homebrew Assistant.xctestplan"; sourceTree = "<group>"; };
 		94E96C972FA449B1004218AD /* Homebrew Assistant.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Homebrew Assistant.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		94E96CA42FA449B2004218AD /* Homebrew AssistantTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "Homebrew AssistantTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -81,6 +92,10 @@
 				948AF3662FA6DCFA0052B9AD /* Homebrew AssistantTests */,
 				948AF3672FA6DD310052B9AD /* Homebrew AssistantUITests */,
 				94E96C982FA449B1004218AD /* Products */,
+				941D21A72FAE4EE60013D2BC /* CONTRIBUTING.md */,
+				941D21A82FAE4EE60013D2BC /* LICENSE */,
+				941D21AA2FAE4EE60013D2BC /* ROADMAP.md */,
+				941D21AB2FAE4EE60013D2BC /* SECURITY.md */,
 			);
 			sourceTree = "<group>";
 		};
@@ -214,6 +229,10 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				941D21E82FAE4EE60013D2BC /* CONTRIBUTING.md in Resources */,
+				941D21E92FAE4EE60013D2BC /* LICENSE in Resources */,
+				941D21EB2FAE4EE60013D2BC /* ROADMAP.md in Resources */,
+				941D21EC2FAE4EE60013D2BC /* SECURITY.md in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
