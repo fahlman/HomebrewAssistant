@@ -12,12 +12,14 @@
 //  shared workflow state, and SDSelectionController.
 //
 
+import AppKit
 import SwiftUI
 
 struct ContentView: View {
     @StateObject private var coordinator = WorkflowCoordinator()
     @StateObject private var sdSelectionController = SDSelectionController()
     @State private var hasOpenedDiskUtilityForCurrentSelection = false
+    @State private var chooseHomebrewPhase: ChooseHomebrewPhase = .notDownloaded
 
     var body: some View {
         NavigationSplitView {
@@ -37,21 +39,34 @@ struct ContentView: View {
         .frame(minWidth: 720, minHeight: 520)
         .onChange(of: sdSelectionController.readiness) { _, _ in
             hasOpenedDiskUtilityForCurrentSelection = false
+            coordinator.invalidateWorkflow(after: .fixed(.sdCardSelection))
             coordinator.setWorkflowItem(.fixed(.sdCardSelection), isCompleted: isGrantDiskAccessComplete)
         }
+        .onChange(of: coordinator.selectedInternalWorkflows) { _, _ in
+            resetChooseHomebrewProgress()
+        }
+        .onChange(of: coordinator.selectedPublicRecipes) { _, _ in
+            resetChooseHomebrewProgress()
+        }
     }
-    
+
     private var bottomBarConfiguration: WorkflowBottomBarConfiguration {
-        guard case .fixed(.sdCardSelection)? = coordinator.selectedItem else {
+        switch coordinator.selectedItem {
+        case .fixed(.sdCardSelection):
+            let contextualActions = diskAccessContextualActions
+
+            return WorkflowBottomBarConfiguration(
+                contextualActions: contextualActions,
+                defaultAction: diskAccessDefaultAction(for: contextualActions)
+            )
+        case .fixed(.chooseItems):
+            return WorkflowBottomBarConfiguration(
+                contextualActions: chooseHomebrewContextualActions,
+                defaultAction: nil
+            )
+        case .internalWorkflow, .publicRecipe, .fixed, nil:
             return .automatic
         }
-
-        let contextualActions = diskAccessContextualActions
-
-        return WorkflowBottomBarConfiguration(
-            contextualActions: contextualActions,
-            defaultAction: diskAccessDefaultAction(for: contextualActions)
-        )
     }
 
     private var diskAccessContextualActions: [WorkflowStepAction] {
@@ -92,6 +107,65 @@ struct ContentView: View {
         return .contextualAction(index: contextualActions.index(before: contextualActions.endIndex))
     }
 
+    private var chooseHomebrewContextualActions: [WorkflowStepAction] {
+        guard hasSelectedHomebrew else { return [] }
+
+        if needsWilbrandSetup {
+            return [
+                WorkflowStepAction(
+                    titleKey: "chooseHomebrew.setupWilbrand.button",
+                    systemImageName: "safari"
+                ) {
+                    coordinator.select(.internalWorkflow(.wilbrand))
+                }
+            ]
+        }
+
+        switch chooseHomebrewPhase {
+        case .notDownloaded:
+            return [
+                WorkflowStepAction(
+                    titleKey: "chooseHomebrew.download.button",
+                    systemImageName: "arrow.down.circle"
+                ) {
+                    downloadSelectedHomebrew()
+                }
+            ]
+        case .downloaded:
+            return [
+                WorkflowStepAction(
+                    titleKey: "chooseHomebrew.save.button",
+                    systemImageName: "square.and.arrow.down"
+                ) {
+                    saveSelectedHomebrew()
+                }
+            ]
+        case .saved:
+            return []
+        }
+    }
+
+    private var hasSelectedHomebrew: Bool {
+        !coordinator.selectedInternalWorkflows.isEmpty || !coordinator.selectedPublicRecipes.isEmpty
+    }
+
+    private var needsWilbrandSetup: Bool {
+        coordinator.selectedInternalWorkflows.contains(.wilbrand)
+            && !coordinator.isCompleted(.internalWorkflow(.wilbrand))
+    }
+
+    private func resetChooseHomebrewProgress() {
+        chooseHomebrewPhase = .notDownloaded
+    }
+
+    private func downloadSelectedHomebrew() {
+        chooseHomebrewPhase = .downloaded
+    }
+
+    private func saveSelectedHomebrew() {
+        chooseHomebrewPhase = .saved
+    }
+
     private var shouldOfferDiskUtility: Bool {
         guard case .unavailable(reason: .unsupportedFileSystem, metadata: _) = sdSelectionController.readiness else {
             return false
@@ -108,6 +182,12 @@ struct ContentView: View {
     private var isGrantDiskAccessComplete: Bool {
         sdSelectionController.readiness?.isReady == true
     }
+}
+
+private enum ChooseHomebrewPhase {
+    case notDownloaded
+    case downloaded
+    case saved
 }
 
 private extension SDCardReadiness {

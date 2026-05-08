@@ -1,6 +1,17 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
+    "chooseHomebrew.availableHomebrew.description" : {
+      "comment" : "Description shown under the Available Homebrew title explaining what the user should select.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Choose the homebrew you want to add to your SD card."
+          }
+        }
+      }
+    },
     "chooseHomebrew.availableHomebrew.sectionTitle" : {
       "comment" : "Section title for the unified list of selectable homebrew options.",
       "localizations" : {
@@ -139,6 +150,94 @@
         }
       }
     },
+    "chooseHomebrew.status.downloading" : {
+      "comment" : "Status shown on a selected homebrew card while its files are downloading.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Downloading"
+          }
+        }
+      }
+    },
+    "chooseHomebrew.status.failed" : {
+      "comment" : "Status shown on a homebrew card when setup, download, verification, or saving fails.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Failed"
+          }
+        }
+      }
+    },
+    "chooseHomebrew.status.notSelected" : {
+      "comment" : "Status shown on a homebrew card when the homebrew option has not been selected.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Not selected"
+          }
+        }
+      }
+    },
+    "chooseHomebrew.status.ready" : {
+      "comment" : "Status shown on a selected homebrew card when the homebrew option is ready to be saved to the SD card.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ready"
+          }
+        }
+      }
+    },
+    "chooseHomebrew.status.readyToDownload" : {
+      "comment" : "Status shown on a selected homebrew card when the homebrew option is ready to download.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ready to download"
+          }
+        }
+      }
+    },
+    "chooseHomebrew.status.saved" : {
+      "comment" : "Status shown on a homebrew card after the homebrew option has been saved to the SD card.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Saved"
+          }
+        }
+      }
+    },
+    "chooseHomebrew.status.saving" : {
+      "comment" : "Status shown on a homebrew card while the homebrew option is being saved to the SD card.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Saving"
+          }
+        }
+      }
+    },
+    "chooseHomebrew.status.setupRequired" : {
+      "comment" : "Status shown on a selected homebrew card when the homebrew option requires setup before it can be saved.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Setup required"
+          }
+        }
+      }
+    },
     "chooseHomebrew.wilbrand.description" : {
       "comment" : "Description for the Wilbrand homebrew option.",
       "extractionState" : "stale",
@@ -153,6 +252,7 @@
     },
     "hackMii.placeholder.description" : {
       "comment" : "Placeholder description for the HackMii preparation screen.",
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -219,6 +319,7 @@
     },
     "reviewSetup.placeholder.description" : {
       "comment" : "Placeholder description for the review setup screen.",
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -496,6 +597,7 @@
     },
     "success.placeholder.description" : {
       "comment" : "Placeholder description for the success screen.",
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -575,6 +677,7 @@
     },
     "workflow.fixedStep.reviewSetup.title" : {
       "comment" : "Workflow step title for reviewing the prepared write plan.",
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -586,6 +689,7 @@
     },
     "workflow.fixedStep.success.title" : {
       "comment" : "Workflow step title for successful completion.",
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -597,6 +701,7 @@
     },
     "workflow.fixedStep.writeAndVerifyFiles.title" : {
       "comment" : "Workflow step title for writing and verifying files on the SD card.",
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -608,6 +713,7 @@
     },
     "workflow.internal.hackMii.title" : {
       "comment" : "Title for the app-owned HackMii internal workflow.",
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -714,6 +820,7 @@
     },
     "writeFiles.placeholder.description" : {
       "comment" : "Placeholder description for the write and verification screen.",
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {

@@ -5,7 +5,7 @@
 //  Purpose: Coordinates the active workflow session and generated workflow steps.
 //  Owns: Current workflow items, selected step, visible-step completion,
 //  sequential reachability rules, selected internal workflows and public recipes,
-//  high-level workflow transitions, and workflow reset behavior.
+//  high-level workflow transitions, special setup-step visibility, and workflow reset behavior.
 //  Does not own: Scoped filesystem access, disk metadata resolution, recipe
 //  catalog loading, public recipe parsing, downloads, archive extraction,
 //  staging file management, SD card writes, verification execution, eject
@@ -114,12 +114,14 @@ final class WorkflowCoordinator: ObservableObject {
 
     func updateSelectedInternalWorkflows(_ selectedWorkflows: Set<InternalWorkflowKind>) {
         selectedInternalWorkflows = selectedWorkflows
+        invalidateWorkflow(after: .fixed(.chooseItems))
         regenerateWorkflowItems()
         updateChooseHomebrewCompletion()
     }
 
     func updateSelectedPublicRecipes(_ selectedRecipes: Set<PublicRecipeWorkflowMetadata>) {
         selectedPublicRecipes = selectedRecipes
+        invalidateWorkflow(after: .fixed(.chooseItems))
         regenerateWorkflowItems()
         updateChooseHomebrewCompletion()
     }
@@ -133,6 +135,22 @@ final class WorkflowCoordinator: ObservableObject {
             completedWorkflowItemIDs.remove(item.id)
         }
         stepStateStore[item.id] = StepState(status: isCompleted ? .completed : .notStarted)
+
+        guard let selectedItem, canSelect(selectedItem) else {
+            setSelectedItemID(firstSelectableItem?.id)
+            return
+        }
+    }
+
+    func invalidateWorkflow(after item: WorkflowItem) {
+        guard let itemIndex = workflowItems.firstIndex(of: item) else { return }
+
+        let dependentItems = workflowItems.suffix(from: workflowItems.index(after: itemIndex))
+        let dependentItemIDs = Set(dependentItems.map(\.id))
+        let retainedItemIDs = Set(workflowItems.map(\.id)).subtracting(dependentItemIDs)
+
+        completedWorkflowItemIDs.subtract(dependentItemIDs)
+        stepStateStore.removeStates(except: retainedItemIDs)
 
         guard let selectedItem, canSelect(selectedItem) else {
             setSelectedItemID(firstSelectableItem?.id)
@@ -214,46 +232,24 @@ final class WorkflowCoordinator: ObservableObject {
     }
 
     private func generatedWorkflowItems() -> [WorkflowItem] {
-        let leadingItems = Self.leadingFixedItems()
+        var items = Self.fixedItems()
 
-        let internalItems = internalWorkflowCatalog.workflowItems.filter { item in
-            guard case .internalWorkflow(let kind) = item else { return false }
-            return selectedInternalWorkflows.contains(kind)
+        if selectedInternalWorkflows.contains(.wilbrand) {
+            items.append(.internalWorkflow(.wilbrand))
         }
 
-        let publicRecipeItems = selectedPublicRecipes
-            .sorted { first, second in
-                first.sortOrder < second.sortOrder
-            }
-            .map { recipe in
-                WorkflowItem.publicRecipe(recipe)
-            }
-
-        let preparationItems = (internalItems + publicRecipeItems).sorted { first, second in
-            first.sortOrder < second.sortOrder
-        }
-
-        let trailingItems = Self.trailingFixedItems()
-
-        return leadingItems + preparationItems + trailingItems
+        return items
     }
 
     private static func initialWorkflowItems() -> [WorkflowItem] {
-        leadingFixedItems() + trailingFixedItems()
+        fixedItems()
     }
 
-    private static func leadingFixedItems() -> [WorkflowItem] {
+    private static func fixedItems() -> [WorkflowItem] {
         [
             .fixed(.sdCardSelection),
             .fixed(.chooseItems)
         ]
     }
 
-    private static func trailingFixedItems() -> [WorkflowItem] {
-        [
-            .fixed(.reviewSetup),
-            .fixed(.writeAndVerifyFiles),
-            .fixed(.success)
-        ]
-    }
 }

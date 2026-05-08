@@ -14,29 +14,48 @@
 import SwiftUI
 
 struct ChooseHomebrewView: View {
+    private let internalWorkflowCatalog = InternalWorkflowCatalog()
     @ObservedObject var coordinator: WorkflowCoordinator
     @State private var selectedCategoryFilter: HomebrewCategoryFilter = .all
     @State private var selectedSortMode: HomebrewSortMode = .category
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
+            headerSection
+            controlSection
+            optionCards
+        }
+    }
+
+    private var headerSection: some View {
+        VStack(alignment: .leading, spacing: 12) {
             Text(String(localized: "chooseHomebrew.availableHomebrew.sectionTitle"))
-                .font(.headline)
+                .font(.title2)
+                .fontWeight(.semibold)
 
-            HStack(alignment: .center) {
-                Spacer()
+            Text(String(localized: "chooseHomebrew.availableHomebrew.description"))
+                .foregroundStyle(.secondary)
+                .lineLimit(nil)
+        }
+    }
 
-                filterMenu
-                sortMenu
-            }
+    private var controlSection: some View {
+        HStack(alignment: .center) {
+            Spacer()
 
-            VStack(spacing: 12) {
-                ForEach(visibleOptions) { option in
-                    HomebrewOptionCard(
-                        option: option,
-                        isSelected: binding(for: option)
-                    )
-                }
+            filterMenu
+            sortMenu
+        }
+    }
+
+    private var optionCards: some View {
+        VStack(spacing: 12) {
+            ForEach(visibleOptions) { option in
+                HomebrewOptionCard(
+                    option: option,
+                    isSelected: binding(for: option),
+                    status: status(for: option)
+                )
             }
         }
     }
@@ -68,7 +87,7 @@ struct ChooseHomebrewView: View {
     }
 
     private var homebrewOptions: [HomebrewOption] {
-        InternalWorkflowCatalog().homebrewOptions
+        internalWorkflowCatalog.homebrewOptions
     }
 
     private func binding(for option: HomebrewOption) -> Binding<Bool> {
@@ -94,33 +113,135 @@ struct ChooseHomebrewView: View {
             coordinator.updateSelectedInternalWorkflows(selectedWorkflows)
         }
     }
+
+    private func status(for option: HomebrewOption) -> HomebrewPreparationStatus {
+        guard case .internalWorkflow(let kind) = option.source else {
+            return .notSelected
+        }
+
+        guard coordinator.selectedInternalWorkflows.contains(kind) else {
+            return .notSelected
+        }
+
+        return status(for: kind)
+    }
+
+    private func status(for kind: InternalWorkflowKind) -> HomebrewPreparationStatus {
+        switch kind {
+        case .wilbrand:
+            coordinator.isCompleted(.internalWorkflow(.wilbrand)) ? .ready : .setupRequired
+        case .hackMii:
+            .readyToDownload
+        }
+    }
+}
+
+private enum HomebrewPreparationStatus {
+    case notSelected
+    case setupRequired
+    case readyToDownload
+    case downloading(progress: Double)
+    case ready
+    case saving(progress: Double)
+    case saved
+    case failed
+
+    var title: String {
+        switch self {
+        case .notSelected:
+            String(localized: "chooseHomebrew.status.notSelected")
+        case .setupRequired:
+            String(localized: "chooseHomebrew.status.setupRequired")
+        case .readyToDownload:
+            String(localized: "chooseHomebrew.status.readyToDownload")
+        case .downloading:
+            String(localized: "chooseHomebrew.status.downloading")
+        case .ready:
+            String(localized: "chooseHomebrew.status.ready")
+        case .saving:
+            String(localized: "chooseHomebrew.status.saving")
+        case .saved:
+            String(localized: "chooseHomebrew.status.saved")
+        case .failed:
+            String(localized: "chooseHomebrew.status.failed")
+        }
+    }
+
+    var style: Color {
+        switch self {
+        case .notSelected, .setupRequired, .readyToDownload, .downloading, .saving:
+            AppStatusStyle.neutral
+        case .ready, .saved:
+            AppStatusStyle.success
+        case .failed:
+            AppStatusStyle.failure
+        }
+    }
+
+    var progressValue: Double? {
+        switch self {
+        case .downloading(let progress), .saving(let progress):
+            progress
+        case .notSelected, .setupRequired, .readyToDownload, .ready, .saved, .failed:
+            nil
+        }
+    }
 }
 
 private struct HomebrewOptionCard: View {
     let option: HomebrewOption
     @Binding var isSelected: Bool
+    let status: HomebrewPreparationStatus
 
     var body: some View {
         Toggle(isOn: $isSelected) {
-            HStack(alignment: .top, spacing: 12) {
-                Image(systemName: option.systemImageName)
-                    .frame(width: 24)
-
-                VStack(alignment: .leading, spacing: 4) {
-                    Text(option.name)
-                        .font(.headline)
-
-                    Text(option.summary)
-                        .font(.subheadline)
-                        .foregroundStyle(.secondary)
-                        .lineLimit(nil)
-                }
+            VStack(alignment: .leading, spacing: 10) {
+                optionSummary
+                statusSummary
+                progressView
             }
         }
         .padding(.vertical, 12)
         .padding(.horizontal, 12)
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(.quaternary, in: RoundedRectangle(cornerRadius: 12))
+    }
+
+    private var optionSummary: some View {
+        HStack(alignment: .top, spacing: 12) {
+            Image(systemName: option.systemImageName)
+                .frame(width: 24)
+
+            VStack(alignment: .leading, spacing: 4) {
+                Text(option.name)
+                    .font(.headline)
+
+                Text(option.summary)
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+                    .lineLimit(nil)
+            }
+        }
+    }
+
+    private var statusSummary: some View {
+        HStack(alignment: .firstTextBaseline, spacing: 6) {
+            Circle()
+                .fill(status.style)
+                .frame(width: 8, height: 8)
+
+            Text(status.title)
+                .font(.caption)
+                .fontWeight(.semibold)
+                .foregroundStyle(status.style)
+        }
+    }
+
+    @ViewBuilder
+    private var progressView: some View {
+        if let progressValue = status.progressValue {
+            ProgressView(value: progressValue)
+        }
     }
 }
 

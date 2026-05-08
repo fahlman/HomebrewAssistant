@@ -3,11 +3,13 @@
 //  Homebrew Assistant
 //
 //  Purpose: Routes the selected workflow item to the correct detail view.
-//  Owns: Detail-view routing and fixed step, internal workflow, and public recipe
-//  presentation selection.
-//  Does not own: Workflow decisions, service work, recipe parsing, or file operations.
-//  Delegates to: Fixed step views, internal workflow views, RecipeStepView,
-//  WorkflowCoordinator, and shared step controllers such as SDSelectionController.
+//  Owns: Detail-view routing for fixed workflow steps, special setup steps,
+//  and public recipe placeholders.
+//  Does not own: Workflow decisions, service work, recipe parsing, downloads,
+//  writing, verification, or file operations.
+//  Delegates to: DiskAccessView, ChooseHomebrewView, WilbrandView,
+//  RecipeStepView, WorkflowCoordinator, and shared step controllers such as
+//  SDSelectionController.
 //
 
 import SwiftUI
@@ -55,12 +57,8 @@ struct WorkflowDetailView: View {
             DiskAccessView(controller: sdSelectionController)
         case .chooseItems:
             ChooseHomebrewView(coordinator: coordinator)
-        case .reviewSetup:
-            ReviewSetupView()
-        case .writeAndVerifyFiles:
-            WriteFilesView()
-        case .success:
-            SuccessView()
+        case .reviewSetup, .writeAndVerifyFiles, .success:
+            EmptyView()
         }
     }
 
@@ -70,7 +68,7 @@ struct WorkflowDetailView: View {
         case .wilbrand:
             WilbrandView()
         case .hackMii:
-            HackMiiView()
+            RecipeStepView()
         }
     }
 }
