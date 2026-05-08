@@ -4,8 +4,8 @@
 //
 //  Purpose: Provides app-owned internal workflow item definitions that are selectable alongside public recipes.
 //  Owns: Internal workflow kinds, internal workflow definition protocol, internal
-//  workflow list, ordering metadata, category metadata, localization keys, icon
-//  references, and mapping internal workflow identifiers to bundled app-owned behavior.
+//  workflow list, ordering metadata, internal option metadata, and mapping
+//  internal workflow identifiers to bundled app-owned behavior.
 //  Does not own: Public recipe catalog loading, public recipe parsing, network
 //  downloads, SD card writes, or view rendering.
 //  Delegates to: WilbrandWorkflow, HackMiiWorkflow, and WorkflowCoordinator.
@@ -63,40 +63,6 @@ enum InternalWorkflowKind: String, CaseIterable, Identifiable, Hashable {
             101
         }
     }
-
-}
-
-enum HomebrewCategory: Int, CaseIterable, Comparable, Identifiable {
-    case apps
-    case exploits
-    case installers
-    case utilities
-    case wads
-
-    var id: Self { self }
-
-    var titleKey: String {
-        switch self {
-        case .apps:
-            "chooseHomebrew.category.apps"
-        case .exploits:
-            "chooseHomebrew.category.exploits"
-        case .installers:
-            "chooseHomebrew.category.installers"
-        case .utilities:
-            "chooseHomebrew.category.utilities"
-        case .wads:
-            "chooseHomebrew.category.wads"
-        }
-    }
-
-    var title: String {
-        String(localized: String.LocalizationValue(titleKey))
-    }
-
-    static func < (lhs: HomebrewCategory, rhs: HomebrewCategory) -> Bool {
-        lhs.rawValue < rhs.rawValue
-    }
 }
 
 struct InternalWorkflowCatalog {
@@ -111,6 +77,12 @@ struct InternalWorkflowCatalog {
     var workflowItems: [WorkflowItem] {
         workflows.map { kind in
             .internalWorkflow(kind)
+        }
+    }
+
+    var homebrewOptions: [HomebrewOption] {
+        workflows.map { kind in
+            HomebrewOption(kind: kind)
         }
     }
 

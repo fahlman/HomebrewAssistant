@@ -17,6 +17,8 @@ struct HackMiiWorkflow: InternalWorkflowDefinition {
     let kind: InternalWorkflowKind = .hackMii
 
     var titleKey: String { kind.titleKey }
+    var summaryKey: String { kind.summaryKey }
+    var category: HomebrewCategory { kind.category }
     var systemImageName: String { kind.systemImageName }
     var sortOrder: Int { kind.sortOrder }
 }

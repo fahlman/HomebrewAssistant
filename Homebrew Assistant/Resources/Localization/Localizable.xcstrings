@@ -25,6 +25,7 @@
     },
     "chooseHomebrew.category.apps" : {
       "comment" : "Title for the Apps category filter option in the Homebrew selection screen.",
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -36,6 +37,7 @@
     },
     "chooseHomebrew.category.exploits" : {
       "comment" : "Title for the Exploits category filter option in the Homebrew selection screen.",
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -47,6 +49,7 @@
     },
     "chooseHomebrew.category.installers" : {
       "comment" : "Title for the Installers category filter option in the Homebrew selection screen.",
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -58,6 +61,7 @@
     },
     "chooseHomebrew.category.utilities" : {
       "comment" : "Title for the Utilities category filter option in the Homebrew selection screen.",
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -69,6 +73,7 @@
     },
     "chooseHomebrew.category.wads" : {
       "comment" : "Title for the WADs category filter option in the Homebrew selection screen.",
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {

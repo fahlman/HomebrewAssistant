@@ -3,10 +3,11 @@
 //  Homebrew Assistant
 //
 //  Purpose: Presents selectable homebrew options.
-//  Owns: Homebrew option list layout and selected/unselected presentation.
-//  Does not own: Public recipe catalog loading, signed index verification,
-//  source policy, internal workflow behavior, recipe preparation, downloads,
-//  or workflow navigation.
+//  Owns: Homebrew option filter, sort, card layout, and selected/unselected
+//  presentation.
+//  Does not own: Homebrew option metadata, public recipe catalog loading,
+//  signed index verification, source policy, internal workflow behavior,
+//  recipe preparation, downloads, or workflow navigation.
 //  Delegates to: WorkflowCoordinator and InternalWorkflowCatalog.
 //
 
@@ -19,10 +20,10 @@ struct ChooseHomebrewView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            HStack(alignment: .center) {
-                Text(String(localized: "chooseHomebrew.availableHomebrew.sectionTitle"))
-                    .font(.headline)
+            Text(String(localized: "chooseHomebrew.availableHomebrew.sectionTitle"))
+                .font(.headline)
 
+            HStack(alignment: .center) {
                 Spacer()
 
                 filterMenu
@@ -33,7 +34,7 @@ struct ChooseHomebrewView: View {
                 ForEach(visibleOptions) { option in
                     HomebrewOptionCard(
                         option: option,
-                        isSelected: binding(for: option.kind)
+                        isSelected: binding(for: option)
                     )
                 }
             }
@@ -67,15 +68,21 @@ struct ChooseHomebrewView: View {
     }
 
     private var homebrewOptions: [HomebrewOption] {
-        InternalWorkflowKind.allCases.map { kind in
-            HomebrewOption(kind: kind)
-        }
+        InternalWorkflowCatalog().homebrewOptions
     }
 
-    private func binding(for kind: InternalWorkflowKind) -> Binding<Bool> {
+    private func binding(for option: HomebrewOption) -> Binding<Bool> {
         Binding {
-            coordinator.selectedInternalWorkflows.contains(kind)
+            guard case .internalWorkflow(let kind) = option.source else {
+                return false
+            }
+
+            return coordinator.selectedInternalWorkflows.contains(kind)
         } set: { isSelected in
+            guard case .internalWorkflow(let kind) = option.source else {
+                return
+            }
+
             var selectedWorkflows = coordinator.selectedInternalWorkflows
 
             if isSelected {
@@ -100,10 +107,10 @@ private struct HomebrewOptionCard: View {
                     .frame(width: 24)
 
                 VStack(alignment: .leading, spacing: 4) {
-                    Text(option.title)
+                    Text(option.name)
                         .font(.headline)
 
-                    Text(option.description)
+                    Text(option.summary)
                         .font(.subheadline)
                         .foregroundStyle(.secondary)
                         .lineLimit(nil)
@@ -114,76 +121,6 @@ private struct HomebrewOptionCard: View {
         .padding(.horizontal, 12)
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(.quaternary, in: RoundedRectangle(cornerRadius: 12))
-    }
-}
-
-private struct HomebrewOption: Identifiable {
-    let kind: InternalWorkflowKind
-    let category: HomebrewCategory
-
-    var id: String {
-        kind.id
-    }
-
-    var title: String {
-        String(localized: String.LocalizationValue(kind.titleKey))
-    }
-
-    var description: String {
-        String(localized: String.LocalizationValue(descriptionKey))
-    }
-
-    var systemImageName: String {
-        kind.systemImageName
-    }
-
-    init(kind: InternalWorkflowKind) {
-        self.kind = kind
-
-        switch kind {
-        case .wilbrand:
-            self.category = .exploits
-        case .hackMii:
-            self.category = .installers
-        }
-    }
-
-    private var descriptionKey: String {
-        switch kind {
-        case .wilbrand:
-            "chooseHomebrew.wilbrand.description"
-        case .hackMii:
-            "chooseHomebrew.hackMii.description"
-        }
-    }
-}
-
-private enum HomebrewCategory: Int, CaseIterable, Comparable, Identifiable {
-    case apps
-    case exploits
-    case installers
-    case utilities
-    case wads
-
-    var id: Self { self }
-
-    var title: String {
-        switch self {
-        case .apps:
-            String(localized: "chooseHomebrew.category.apps")
-        case .exploits:
-            String(localized: "chooseHomebrew.category.exploits")
-        case .installers:
-            String(localized: "chooseHomebrew.category.installers")
-        case .utilities:
-            String(localized: "chooseHomebrew.category.utilities")
-        case .wads:
-            String(localized: "chooseHomebrew.category.wads")
-        }
-    }
-
-    static func < (lhs: HomebrewCategory, rhs: HomebrewCategory) -> Bool {
-        lhs.rawValue < rhs.rawValue
     }
 }
 
@@ -245,14 +182,14 @@ private extension Array where Element == HomebrewOption {
         case .category:
             sorted { lhs, rhs in
                 if lhs.category == rhs.category {
-                    return lhs.title.localizedStandardCompare(rhs.title) == .orderedAscending
+                    return lhs.name.localizedStandardCompare(rhs.name) == .orderedAscending
                 }
 
                 return lhs.category < rhs.category
             }
         case .alphabetical:
             sorted { lhs, rhs in
-                lhs.title.localizedStandardCompare(rhs.title) == .orderedAscending
+                lhs.name.localizedStandardCompare(rhs.name) == .orderedAscending
             }
         }
     }

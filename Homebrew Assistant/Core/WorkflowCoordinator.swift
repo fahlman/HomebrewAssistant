@@ -129,6 +129,7 @@ final class WorkflowCoordinator: ObservableObject {
         } else {
             completedWorkflowItemIDs.remove(item.id)
         }
+        stepStateStore[item.id] = StepState(status: isCompleted ? .completed : .notStarted)
 
         guard let selectedItem, canSelect(selectedItem) else {
             selectedItemID = firstSelectableItem?.id
