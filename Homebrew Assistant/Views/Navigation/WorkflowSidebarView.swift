@@ -41,7 +41,9 @@ struct WorkflowSidebarView: View {
                     return
                 }
 
-                coordinator.select(selectedItem)
+                DispatchQueue.main.async {
+                    coordinator.select(selectedItem)
+                }
             }
         )
     }

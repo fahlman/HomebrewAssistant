@@ -77,7 +77,7 @@ final class WorkflowCoordinator: ObservableObject {
     }
 
     func select(_ item: WorkflowItem) {
-        guard canSelect(item) else { return }
+        guard canSelect(item), selectedItemID != item.id else { return }
         selectedItemID = item.id
     }
 
@@ -90,7 +90,10 @@ final class WorkflowCoordinator: ObservableObject {
             return
         }
 
-        selectedItemID = workflowItems[workflowItems.index(before: currentIndex)].id
+        let previousItemID = workflowItems[workflowItems.index(before: currentIndex)].id
+        guard selectedItemID != previousItemID else { return }
+
+        selectedItemID = previousItemID
     }
 
     func goForward() {
@@ -104,7 +107,7 @@ final class WorkflowCoordinator: ObservableObject {
         guard isCompleted(selectedItem) else { return }
 
         let nextItem = workflowItems[workflowItems.index(after: currentIndex)]
-        guard canSelect(nextItem) else { return }
+        guard selectedItemID != nextItem.id else { return }
 
         selectedItemID = nextItem.id
     }
@@ -132,7 +135,7 @@ final class WorkflowCoordinator: ObservableObject {
         stepStateStore[item.id] = StepState(status: isCompleted ? .completed : .notStarted)
 
         guard let selectedItem, canSelect(selectedItem) else {
-            selectedItemID = firstSelectableItem?.id
+            setSelectedItemID(firstSelectableItem?.id)
             return
         }
     }
@@ -148,13 +151,18 @@ final class WorkflowCoordinator: ObservableObject {
         stepStateStore[item.id] = state
     }
 
+    private func setSelectedItemID(_ itemID: WorkflowItem.ID?) {
+        guard selectedItemID != itemID else { return }
+        selectedItemID = itemID
+    }
+
     func resetWorkflow() {
         selectedInternalWorkflows.removeAll()
         selectedPublicRecipes.removeAll()
         completedWorkflowItemIDs.removeAll()
         stepStateStore.reset()
         workflowItems = Self.initialWorkflowItems()
-        selectedItemID = workflowItems.first?.id
+        setSelectedItemID(workflowItems.first?.id)
     }
 
     private func regenerateWorkflowItems() {
@@ -170,9 +178,9 @@ final class WorkflowCoordinator: ObservableObject {
            allowedItemIDs.contains(previousSelectedItemID),
            let previousSelectedItem = workflowItems.first(where: { $0.id == previousSelectedItemID }),
            canSelect(previousSelectedItem) {
-            selectedItemID = previousSelectedItemID
+            setSelectedItemID(previousSelectedItemID)
         } else {
-            selectedItemID = firstSelectableItem?.id
+            setSelectedItemID(firstSelectableItem?.id)
         }
     }
 
