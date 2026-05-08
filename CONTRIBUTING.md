@@ -1,6 +1,3 @@
-#  <#Title#>
-
-
 # Contributing to Homebrew Assistant
 
 Thank you for your interest in Homebrew Assistant.
