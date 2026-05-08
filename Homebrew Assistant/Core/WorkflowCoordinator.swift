@@ -1,19 +1,17 @@
-
 //
 //  WorkflowCoordinator.swift
 //  Homebrew Assistant
 //
 //  Purpose: Coordinates the active workflow session and generated workflow steps.
-//  Owns: Current workflow state, selected step, navigation rules, workflow
-//  availability decisions, selected internal workflows and public recipes,
-//  available actions, high-level workflow transitions, and cleanup requests.
-//  Does not own: Scoped filesystem access implementation, disk metadata resolution,
-//  recipe catalog loading, public recipe parsing, downloads, archive extraction,
-//  staging file management, SD card write execution, verification execution,
-//  eject operations, cleanup implementation, or persistent preferences.
-//  Delegates to: ScopedAccessManager, DiskManager, RecipeCatalogLoader,
-//  InternalWorkflowCatalog, RecipeLoader, ItemPreparationService, DownloadService,
-//  StagingManager, SDWriteService, StepStateStore, and AppPreferences.
+//  Owns: Current workflow items, selected step, visible-step completion,
+//  sequential reachability rules, selected internal workflows and public recipes,
+//  high-level workflow transitions, and workflow reset behavior.
+//  Does not own: Scoped filesystem access, disk metadata resolution, recipe
+//  catalog loading, public recipe parsing, downloads, archive extraction,
+//  staging file management, SD card writes, verification execution, eject
+//  operations, or persistent preferences.
+//  Delegates to: InternalWorkflowCatalog for available internal workflow items
+//  and StepStateStore for per-step status storage.
 //
 
 import Foundation
@@ -25,6 +23,7 @@ final class WorkflowCoordinator: ObservableObject {
     @Published private(set) var stepStateStore: StepStateStore
     @Published private(set) var selectedInternalWorkflows: Set<InternalWorkflowKind>
     @Published private(set) var selectedPublicRecipes: Set<PublicRecipeWorkflowMetadata>
+    @Published private(set) var completedWorkflowItemIDs: Set<WorkflowItem.ID>
 
     private let internalWorkflowCatalog: InternalWorkflowCatalog
 
@@ -36,6 +35,7 @@ final class WorkflowCoordinator: ObservableObject {
         self.stepStateStore = stepStateStore
         self.selectedInternalWorkflows = []
         self.selectedPublicRecipes = []
+        self.completedWorkflowItemIDs = []
         self.workflowItems = Self.initialWorkflowItems()
         self.selectedItemID = workflowItems.first?.id
     }
@@ -55,15 +55,29 @@ final class WorkflowCoordinator: ObservableObject {
 
     var canGoForward: Bool {
         guard let selectedItem else { return false }
-        return workflowItems.last != selectedItem
+        return isCompleted(selectedItem)
+            && nextItem(after: selectedItem) != nil
+            && nextItem(after: selectedItem).map(canSelect) == true
     }
 
     func state(for item: WorkflowItem) -> StepState {
         stepStateStore[item.id]
     }
 
+    func canSelect(_ item: WorkflowItem) -> Bool {
+        guard let itemIndex = workflowItems.firstIndex(of: item) else {
+            return false
+        }
+
+        return itemIndex <= furthestReachableIndex
+    }
+
+    func isCompleted(_ item: WorkflowItem) -> Bool {
+        completedWorkflowItemIDs.contains(item.id)
+    }
+
     func select(_ item: WorkflowItem) {
-        guard workflowItems.contains(item) else { return }
+        guard canSelect(item) else { return }
         selectedItemID = item.id
     }
 
@@ -87,18 +101,46 @@ final class WorkflowCoordinator: ObservableObject {
         else {
             return
         }
+        guard isCompleted(selectedItem) else { return }
 
-        selectedItemID = workflowItems[workflowItems.index(after: currentIndex)].id
+        let nextItem = workflowItems[workflowItems.index(after: currentIndex)]
+        guard canSelect(nextItem) else { return }
+
+        selectedItemID = nextItem.id
     }
 
     func updateSelectedInternalWorkflows(_ selectedWorkflows: Set<InternalWorkflowKind>) {
         selectedInternalWorkflows = selectedWorkflows
         regenerateWorkflowItems()
+        updateChooseHomebrewCompletion()
     }
 
     func updateSelectedPublicRecipes(_ selectedRecipes: Set<PublicRecipeWorkflowMetadata>) {
         selectedPublicRecipes = selectedRecipes
         regenerateWorkflowItems()
+        updateChooseHomebrewCompletion()
+    }
+
+    func setWorkflowItem(_ item: WorkflowItem, isCompleted: Bool) {
+        guard workflowItems.contains(item) else { return }
+
+        if isCompleted {
+            completedWorkflowItemIDs.insert(item.id)
+        } else {
+            completedWorkflowItemIDs.remove(item.id)
+        }
+
+        guard let selectedItem, canSelect(selectedItem) else {
+            selectedItemID = firstSelectableItem?.id
+            return
+        }
+    }
+
+    private func updateChooseHomebrewCompletion() {
+        setWorkflowItem(
+            .fixed(.chooseItems),
+            isCompleted: !selectedInternalWorkflows.isEmpty || !selectedPublicRecipes.isEmpty
+        )
     }
 
     func mark(_ item: WorkflowItem, as state: StepState) {
@@ -108,6 +150,7 @@ final class WorkflowCoordinator: ObservableObject {
     func resetWorkflow() {
         selectedInternalWorkflows.removeAll()
         selectedPublicRecipes.removeAll()
+        completedWorkflowItemIDs.removeAll()
         stepStateStore.reset()
         workflowItems = Self.initialWorkflowItems()
         selectedItemID = workflowItems.first?.id
@@ -120,12 +163,45 @@ final class WorkflowCoordinator: ObservableObject {
 
         workflowItems = generatedItems
         stepStateStore.removeStates(except: allowedItemIDs)
+        completedWorkflowItemIDs = completedWorkflowItemIDs.intersection(allowedItemIDs)
 
-        if let previousSelectedItemID, allowedItemIDs.contains(previousSelectedItemID) {
+        if let previousSelectedItemID,
+           allowedItemIDs.contains(previousSelectedItemID),
+           let previousSelectedItem = workflowItems.first(where: { $0.id == previousSelectedItemID }),
+           canSelect(previousSelectedItem) {
             selectedItemID = previousSelectedItemID
         } else {
-            selectedItemID = workflowItems.first?.id
+            selectedItemID = firstSelectableItem?.id
         }
+    }
+
+    private var firstSelectableItem: WorkflowItem? {
+        workflowItems.first { item in
+            canSelect(item)
+        }
+    }
+
+    private var furthestReachableIndex: Int {
+        guard !workflowItems.isEmpty else { return workflowItems.startIndex }
+
+        for (index, item) in workflowItems.enumerated() {
+            if !isCompleted(item) {
+                return index
+            }
+        }
+
+        return workflowItems.index(before: workflowItems.endIndex)
+    }
+
+    private func nextItem(after item: WorkflowItem) -> WorkflowItem? {
+        guard
+            let currentIndex = workflowItems.firstIndex(of: item),
+            currentIndex < workflowItems.index(before: workflowItems.endIndex)
+        else {
+            return nil
+        }
+
+        return workflowItems[workflowItems.index(after: currentIndex)]
     }
 
     private func generatedWorkflowItems() -> [WorkflowItem] {

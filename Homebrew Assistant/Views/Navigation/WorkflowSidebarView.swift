@@ -1,4 +1,3 @@
-
 //
 //  WorkflowSidebarView.swift
 //  Homebrew Assistant
@@ -18,21 +17,40 @@ struct WorkflowSidebarView: View {
     @ObservedObject var coordinator: WorkflowCoordinator
 
     var body: some View {
-        List(selection: $coordinator.selectedItemID) {
+        List(selection: selectedItemBinding) {
             ForEach(coordinator.workflowItems) { item in
                 WorkflowSidebarRow(
                     item: item,
-                    state: coordinator.state(for: item)
+                    state: coordinator.state(for: item),
+                    isReachable: coordinator.canSelect(item)
                 )
                 .tag(item.id)
+                .disabled(!coordinator.canSelect(item))
             }
         }
+    }
+
+    private var selectedItemBinding: Binding<WorkflowItem.ID?> {
+        Binding(
+            get: {
+                coordinator.selectedItemID
+            },
+            set: { selectedItemID in
+                guard let selectedItemID,
+                      let selectedItem = coordinator.workflowItems.first(where: { $0.id == selectedItemID }) else {
+                    return
+                }
+
+                coordinator.select(selectedItem)
+            }
+        )
     }
 }
 
 private struct WorkflowSidebarRow: View {
     let item: WorkflowItem
     let state: StepState
+    let isReachable: Bool
 
     var body: some View {
         Label {
@@ -45,16 +63,22 @@ private struct WorkflowSidebarRow: View {
                     .foregroundStyle(.secondary)
             }
         } icon: {
-            Image(systemName: item.systemImageName)
-                .symbolVariant(state.status.symbolVariant)
+            Image(systemName: isReachable ? item.systemImageName : "lock.fill")
+                .symbolVariant(isReachable ? state.status.symbolVariant : .none)
+                .foregroundStyle(isReachable ? .primary : .secondary)
         }
+        .foregroundStyle(isReachable ? .primary : .secondary)
         .accessibilityLabel(accessibilityLabel)
     }
 
     private var accessibilityLabel: String {
         let itemTitle = String(localized: String.LocalizationValue(item.titleKey))
         let statusTitle = String(localized: String.LocalizationValue(state.status.titleKey))
-        return "\(itemTitle), \(statusTitle)"
+        if isReachable {
+            return "\(itemTitle), \(statusTitle)"
+        }
+
+        return "\(itemTitle), locked, \(statusTitle)"
     }
 }
 

@@ -1,46 +1,147 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
-    "chooseItems.internalWorkflows.sectionTitle" : {
-      "comment" : "Section title for app-owned internal workflow choices.",
+    "chooseHomebrew.availableHomebrew.sectionTitle" : {
+      "comment" : "Section title for the unified list of selectable homebrew options.",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Internal Workflows"
+            "value" : "Available Homebrew"
           }
         }
       }
     },
-    "chooseItems.publicRecipes.sectionTitle" : {
-      "comment" : "Section title for verified public recipe choices.",
+    "chooseHomebrew.category.all" : {
+      "comment" : "Title for the All category filter option in the Homebrew selection screen.",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Public Recipes"
+            "value" : "All"
           }
         }
       }
     },
-    "chooseItems.publicRecipes.unavailable.description" : {
-      "comment" : "Placeholder description shown before signed public recipe catalog loading is implemented.",
+    "chooseHomebrew.category.apps" : {
+      "comment" : "Title for the Apps category filter option in the Homebrew selection screen.",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Signed public recipe catalog loading will appear here."
+            "value" : "Apps"
           }
         }
       }
     },
-    "chooseItems.publicRecipes.unavailable.title" : {
-      "comment" : "Title shown when public recipes are unavailable.",
+    "chooseHomebrew.category.exploits" : {
+      "comment" : "Title for the Exploits category filter option in the Homebrew selection screen.",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Public Recipes Unavailable"
+            "value" : "Exploits"
+          }
+        }
+      }
+    },
+    "chooseHomebrew.category.installers" : {
+      "comment" : "Title for the Installers category filter option in the Homebrew selection screen.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Installers"
+          }
+        }
+      }
+    },
+    "chooseHomebrew.category.utilities" : {
+      "comment" : "Title for the Utilities category filter option in the Homebrew selection screen.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Utilities"
+          }
+        }
+      }
+    },
+    "chooseHomebrew.category.wads" : {
+      "comment" : "Title for the WADs category filter option in the Homebrew selection screen.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "WADs"
+          }
+        }
+      }
+    },
+    "chooseHomebrew.filter.label" : {
+      "comment" : "Accessibility label for the category filter menu in the Homebrew selection screen.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Filter"
+          }
+        }
+      }
+    },
+    "chooseHomebrew.hackMii.description" : {
+      "comment" : "Description for the HackMii homebrew option.",
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Installs the Homebrew Channel and BootMii."
+          }
+        }
+      }
+    },
+    "chooseHomebrew.sort.alphabetical" : {
+      "comment" : "Title for the alphabetical sort mode in the Homebrew selection screen.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Alphabetical"
+          }
+        }
+      }
+    },
+    "chooseHomebrew.sort.category" : {
+      "comment" : "Title for the category sort mode in the Homebrew selection screen.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Category"
+          }
+        }
+      }
+    },
+    "chooseHomebrew.sort.label" : {
+      "comment" : "Accessibility label for the sort menu in the Homebrew selection screen.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sort"
+          }
+        }
+      }
+    },
+    "chooseHomebrew.wilbrand.description" : {
+      "comment" : "Description for the Wilbrand homebrew option.",
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Creates a Wii Message Board exploit using your Wii's MAC address and system menu version."
           }
         }
       }
@@ -189,6 +290,61 @@
         }
       }
     },
+    "sdSelection.metadata.format.label" : {
+      "comment" : "Drive metadata label for the selected volume filesystem format.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Format:"
+          }
+        }
+      }
+    },
+    "sdSelection.metadata.freeSpace.label" : {
+      "comment" : "Drive metadata label for selected volume free space.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Free Space:"
+          }
+        }
+      }
+    },
+    "sdSelection.metadata.freeSpace.value%@%@" : {
+      "comment" : "Drive metadata value showing available capacity followed by total capacity. The first placeholder is available space and the second placeholder is total capacity.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ of %@"
+          }
+        }
+      }
+    },
+    "sdSelection.metadata.media.label" : {
+      "comment" : "Drive metadata label for the selected volume media type.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Media:"
+          }
+        }
+      }
+    },
+    "sdSelection.metadata.unknown" : {
+      "comment" : "Fallback value shown when selected drive metadata is unavailable.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Unknown"
+          }
+        }
+      }
+    },
     "sdSelection.noValidSDCard.label" : {
       "comment" : "Drive-card label shown when no valid SD card has been selected.",
       "localizations" : {
@@ -200,13 +356,14 @@
         }
       }
     },
-    "sdSelection.readiness.invalidDrive%@" : {
-      "comment" : "Readiness message shown when a selected drive is not a valid SD card. The placeholder is the user-facing drive name.",
+    "sdSelection.openDiskUtility.button" : {
+      "comment" : "Button title for opening Disk Utility when the selected SD card needs to be formatted as FAT32.",
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "%@ is not a valid SD card."
+            "value" : "Open Disk Utility…"
           }
         }
       }
@@ -233,6 +390,17 @@
         }
       }
     },
+    "sdSelection.readiness.notSecureDigital.recovery" : {
+      "comment" : "Recovery message shown below the selected-drive card when the selected volume is not an SD card.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Click Choose SD Card… and select a Secure Digital card."
+          }
+        }
+      }
+    },
     "sdSelection.readiness.notWritable" : {
       "comment" : "Readiness message shown when the selected Secure Digital volume is not writable.",
       "localizations" : {
@@ -255,6 +423,28 @@
         }
       }
     },
+    "sdSelection.readiness.noValidSDCard.recovery" : {
+      "comment" : "Instruction shown below the selected-drive card when no valid SD card has been selected.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Click Choose SD Card… and select your SD card."
+          }
+        }
+      }
+    },
+    "sdSelection.readiness.ready.recovery" : {
+      "comment" : "Instruction shown below the selected-drive card when the selected SD card is valid.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Click Next to continue."
+          }
+        }
+      }
+    },
     "sdSelection.readiness.readyDrive%@" : {
       "comment" : "Readiness message shown when a selected SD card is valid. The placeholder is the user-facing drive name.",
       "localizations" : {
@@ -262,6 +452,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "%@ is a valid SD card."
+          }
+        }
+      }
+    },
+    "sdSelection.readiness.unsupportedFileSystem.recovery" : {
+      "comment" : "Recovery message shown below the selected-drive card when the selected SD card needs to be reformatted as FAT32.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Open Disk Utility to erase and format it as MS-DOS (FAT) with a Master Boot Record scheme, then choose the SD card again."
+          }
+        }
+      }
+    },
+    "sdSelection.readiness.unsupportedFileSystem.short" : {
+      "comment" : "Short readiness message shown in the selected-drive card when the selected SD card is not formatted as FAT32.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The selected SD card is not formatted as FAT32."
           }
         }
       }

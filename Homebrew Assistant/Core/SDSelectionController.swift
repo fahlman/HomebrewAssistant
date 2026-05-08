@@ -90,8 +90,8 @@ final class SDSelectionController: ObservableObject {
         switch resolvedReadiness {
         case .ready:
             selectionErrorMessage = nil
-        case .unavailable(let reason, _):
-            selectionErrorMessage = reason.displayMessage
+        case .unavailable:
+            selectionErrorMessage = nil
             scopedAccessManager.stopAccessingSelectedVolume()
         }
     }
@@ -111,19 +111,6 @@ struct SelectedDrive: Equatable, Sendable {
             self.displayName = metadata.displayName
         case .unavailable(_, let metadata):
             self.displayName = metadata?.displayName ?? volumeURL.lastPathComponent
-        }
-    }
-}
-
-private extension SDCardReadinessFailureReason {
-    var displayMessage: String {
-        switch self {
-        case .metadataUnavailable:
-            String(localized: "sdSelection.readiness.metadataUnavailable")
-        case .notSecureDigital:
-            String(localized: "sdSelection.readiness.notSecureDigital")
-        case .notWritable:
-            String(localized: "sdSelection.readiness.notWritable")
         }
     }
 }

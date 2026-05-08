@@ -17,6 +17,7 @@ import SwiftUI
 struct ContentView: View {
     @StateObject private var coordinator = WorkflowCoordinator()
     @StateObject private var sdSelectionController = SDSelectionController()
+    @State private var hasOpenedDiskUtilityForCurrentSelection = false
 
     var body: some View {
         NavigationSplitView {
@@ -33,7 +34,11 @@ struct ContentView: View {
                 )
             }
         }
-        .frame(minWidth: 720, minHeight: 450)
+        .frame(minWidth: 720, minHeight: 520)
+        .onChange(of: sdSelectionController.readiness) { _, _ in
+            hasOpenedDiskUtilityForCurrentSelection = false
+            coordinator.setWorkflowItem(.fixed(.sdCardSelection), isCompleted: isGrantDiskAccessComplete)
+        }
     }
     
     private var bottomBarConfiguration: WorkflowBottomBarConfiguration {
@@ -41,18 +46,67 @@ struct ContentView: View {
             return .automatic
         }
 
-        let isValidSDCardSelected = sdSelectionController.readiness?.isReady == true
+        let contextualActions = diskAccessContextualActions
 
         return WorkflowBottomBarConfiguration(
-            contextualAction: WorkflowStepAction(
+            contextualActions: contextualActions,
+            defaultAction: diskAccessDefaultAction(for: contextualActions)
+        )
+    }
+
+    private var diskAccessContextualActions: [WorkflowStepAction] {
+        var actions: [WorkflowStepAction] = []
+
+        if shouldOfferDiskUtility {
+            actions.append(
+                WorkflowStepAction(
+                    titleKey: "sdSelection.openDiskUtility.button",
+                    systemImageName: "externaldrive.badge.gearshape"
+                ) {
+                    openDiskUtility()
+                }
+            )
+        }
+
+        actions.append(
+            WorkflowStepAction(
                 titleKey: "sdSelection.chooseSDCard.button",
                 systemImageName: "sdcard"
             ) {
                 sdSelectionController.presentVolumeImporter()
-            },
-            canGoForwardOverride: isValidSDCardSelected,
-            defaultAction: isValidSDCardSelected ? .next : .contextualAction
+            }
         )
+
+        return actions
+    }
+
+    private func diskAccessDefaultAction(for contextualActions: [WorkflowStepAction]) -> WorkflowBottomBarConfiguration.DefaultAction? {
+        if isGrantDiskAccessComplete {
+            return .next
+        }
+
+        if shouldOfferDiskUtility && !hasOpenedDiskUtilityForCurrentSelection {
+            return .contextualAction(index: 0)
+        }
+
+        return .contextualAction(index: contextualActions.index(before: contextualActions.endIndex))
+    }
+
+    private var shouldOfferDiskUtility: Bool {
+        guard case .unavailable(reason: .unsupportedFileSystem, metadata: _) = sdSelectionController.readiness else {
+            return false
+        }
+
+        return true
+    }
+
+    private func openDiskUtility() {
+        hasOpenedDiskUtilityForCurrentSelection = true
+        NSWorkspace.shared.openApplication(at: URL(fileURLWithPath: "/System/Applications/Utilities/Disk Utility.app"), configuration: .init())
+    }
+
+    private var isGrantDiskAccessComplete: Bool {
+        sdSelectionController.readiness?.isReady == true
     }
 }
 

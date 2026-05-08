@@ -107,6 +107,7 @@ Does not own:
 - Staging file management
 - SD card write execution
 - Verification execution
+- SD card preflight write/read/delete verification
 - Eject operations
 - Cleanup implementation
 - Persistent preferences
@@ -121,6 +122,7 @@ Delegates to:
 - `ItemPreparationService`
 - `DownloadService`
 - `StagingManager`
+- Future `SDCardVerificationService`
 - `SDWriteService`
 - `StepStateStore`
 - `AppPreferences`
@@ -159,7 +161,7 @@ Purpose: Defines fixed app-owned workflow steps that are not recipe or internal 
 
 Owns:
 
-- Fixed step identities for SD Card Selection, Choose Items, Review Setup, Write and Verify Files, and Success
+- Fixed step identities for Grant Disk Access, Choose Homebrew, Review Setup, Write and Verify Files, and Success
 - Fixed-step ordering
 - Basic metadata
 
@@ -319,7 +321,7 @@ Delegates to:
 
 ### WorkflowStepAction.swift
 
-Purpose: Describes an optional contextual action for the selected workflow step.
+Purpose: Describes optional contextual bottom-bar behavior for the selected workflow step.
 
 Owns:
 
@@ -328,6 +330,9 @@ Owns:
 - Enabled/disabled action state
 - Action execution closure
 - A generic model for step-specific actions that can be presented outside the step view
+- Bottom-bar configuration for optional contextual actions
+- Optional Next-button enabled override
+- Default-action selection between contextual action and Next
 
 Does not own:
 
@@ -339,28 +344,31 @@ Does not own:
 - SD card writes
 - Risky operation policy
 - Action availability decisions beyond the supplied enabled state
+- Next-button policy decisions for individual steps
 
 Delegates to:
 
 - `BottomNavigationView` for presentation
-- `WorkflowCoordinator` or step-specific controllers for action availability and behavior
+- `WorkflowCoordinator`, `ContentView`, or step-specific controllers for action availability, Next-button overrides, default-action policy, and behavior
 
 ### SDSelectionController.swift
 
-Purpose: Coordinates SD card selection state for the active workflow session.
+Purpose: Coordinates sandbox-friendly SD card access state for the active workflow session.
 
 Owns:
 
 - SD card picker presentation state
 - Selected-volume scoped access state
+- Selected or rejected drive display state
 - Selected-volume readiness result
 - SD card selection error state
 - SD card selection reset behavior
-- Shared SD-selection actions that can be triggered outside `SDSelectionView`
+- Safe display metadata for the most recently selected drive
+- Shared SD-selection actions that can be triggered outside `DiskAccessView`
 
 Does not own:
 
-- SD card selection UI layout
+- Disk access UI layout
 - Bottom button placement
 - Disk Arbitration metadata policy
 - File writes
@@ -408,6 +416,7 @@ Delegates to:
 Component files include:
 
 - `AppStateBadge.swift`
+- `AppStatusStyle.swift`
 - `PrimaryButton.swift`
 - `SecondaryButton.swift`
 - `StatusMessageView.swift`
@@ -420,6 +429,7 @@ Own:
 - Consistent button styling
 - Status badge presentation
 - Status message layout
+- Shared semantic success, failure, and neutral status styling
 - Accessibility labels and traits appropriate to the component
 
 Do not own:
@@ -486,6 +496,7 @@ Delegates to:
 - Internal workflow views
 - `RecipeStepView`
 - `WorkflowCoordinator`
+- Shared step controllers such as `SDSelectionController`
 
 ### BottomNavigationView.swift
 
@@ -496,8 +507,7 @@ Owns:
 - Lower-left Quit/Back placement
 - Lower-right action placement
 - Optional contextual step-action placement before the default Next action
-- Default button presentation rules
-- Rule that non-passive or risky actions are never default buttons
+- Rendering the configured default button
 - Disabled/enabled button presentation
 
 Does not own:
@@ -505,18 +515,19 @@ Does not own:
 - Action availability decisions
 - Workflow transitions
 - Risky operation execution
+- Determining whether a contextual action is safe to make the default button
 
 Delegates to:
 
 - `WorkflowCoordinator` for navigation availability and user intent handling
-- `WorkflowStepAction` for optional contextual step-action metadata
+- `WorkflowStepAction` and `WorkflowBottomBarConfiguration` for optional contextual step-action metadata, Next-button overrides, and default-action policy
 
 ### Step Views
 
 Step views include:
 
-- `SDSelectionView.swift`
-- `ChooseItemsView.swift`
+- `DiskAccessView.swift`
+- `ChooseHomebrewView.swift`
 - `WilbrandView.swift`
 - `HackMiiView.swift`
 - `ReviewSetupView.swift`
@@ -552,16 +563,17 @@ Delegate to:
 - Step-specific services
 - Shared state models
 
-### SDSelectionView.swift
+### DiskAccessView.swift
 
-Purpose: Presents SD card selection and validation state.
+Purpose: Presents sandbox-friendly disk access state for the SD card step.
 
 Owns:
 
-- Choose SD Card action presentation
-- SD card validation result presentation
-- Open Disk Utility affordance presentation
-- User-facing explanation of scoped SD card access
+- Disk access explanation presentation
+- Selected-drive card presentation
+- Finder-style drive icon presentation
+- No-selection, invalid-drive, and valid-SD-card readiness presentation
+- User-facing explanation of scoped disk access
 
 Does not own:
 
@@ -571,16 +583,18 @@ Does not own:
 - SD card readiness policy
 - File writes
 - Eject behavior
+- Bottom-bar action placement or default-button policy
 
 Delegates to:
 
 - `WorkflowCoordinator`
 - `SDSelectionController`
 - `SDCardReadiness`
+- `AppStatusStyle`
 
-### ChooseItemsView.swift
+### ChooseHomebrewView.swift
 
-Purpose: Presents selectable internal workflows and public recipes.
+Purpose: Presents selectable homebrew components, including internal workflows and public recipes.
 
 Owns:
 
@@ -663,7 +677,7 @@ Owns:
 
 - Recipe display layout
 - Localized recipe title/summary/instruction presentation
-- Download and Next control presentation for selected public recipes
+- Recipe-specific action and status presentation for selected public recipes
 - Recipe status presentation
 
 Does not own:
@@ -692,12 +706,14 @@ Owns:
 - User-approved, validated SD card summary presentation
 - Staged file/write manifest presentation
 - Required space and overwrite-warning presentation
+- Future SD card preflight verification summary presentation
 - Final write confirmation presentation
 
 Does not own:
 
 - Manifest generation
 - SD card validation
+- SD card preflight verification
 - File copying
 - Verification
 - Source trust decisions
@@ -726,6 +742,7 @@ Does not own:
 - Verification execution
 - Write diagnostics
 - SD card validation
+- SD card preflight verification
 - Staging layout creation
 
 Delegates to:
@@ -744,7 +761,7 @@ Owns:
 - Prepared item summary presentation
 - Verification result presentation
 - Next-step instruction presentation
-- Eject button presentation
+- Future eject button presentation
 - Start New Workflow presentation
 
 Does not own:
@@ -799,15 +816,18 @@ Owns:
 
 - Resolving the user-selected mounted volume to native disk metadata
 - Reading disk and volume metadata from macOS
+- Reading filesystem type metadata for the selected volume
+- Reading total and available capacity metadata for the selected volume
 - Validating selected-volume metadata for SD-card eligibility
 - Refreshing relevant disk state when hardware or mounted-volume state changes
-- User-initiated eject/unmount requests for the approved SD card volume
+- Future user-initiated eject/unmount support for the approved SD card volume
 - SD volume validation diagnostics
 
 Does not own:
 
 - Scoped filesystem access grants or active scoped-access lifecycle
 - SD card readiness policy beyond identity/metadata reporting
+- Temporary write/read/delete verification
 - Workflow navigation
 - File writes
 - Formatting
@@ -820,8 +840,8 @@ Does not own:
 Delegates to:
 
 - Disk Arbitration/native macOS APIs
-- `SDCard`
 - `SDCardReadiness`
+- Future `SDCardVerificationService` for real write/read/delete preflight checks
 - `DiagnosticsLog`
 
 Runtime behavior must accept only the user-selected mounted volume whose Disk Arbitration protocol name is exactly `Secure Digital`. The app must not trust a volume merely because the user selected it; selection grants scoped filesystem access, and Disk Arbitration validation determines eligibility.
@@ -875,7 +895,7 @@ Owns:
 - Catalog availability state
 - Catalog error mapping
 - Unavailable/invalid/empty catalog handling
-- Exposing eligible public recipes for `ChooseItemsView`
+- Exposing eligible public recipes for `ChooseHomebrewView`
 
 Does not own:
 
@@ -1084,9 +1104,37 @@ Delegates to:
 - FileManager/native or approved archive APIs
 - `DiagnosticsLog`
 
+### SDCardVerificationService.swift
+
+Purpose: Performs future preflight verification that an approved, metadata-valid SD card can actually accept a small write/read/delete operation before the real manifest write begins.
+
+Owns:
+
+- Creating a tiny temporary verification file on the approved SD card volume
+- Reading the temporary verification file back
+- Deleting the temporary verification file
+- Reporting preflight verification success or failure
+- Mapping preflight failures to actionable diagnostics
+- Ensuring the temporary verification file remains inside the approved SD card volume
+
+Does not own:
+
+- Disk Arbitration metadata validation
+- Scoped filesystem access lifecycle
+- Manifest-based file copying
+- Final write verification
+- Workflow navigation
+- UI presentation
+- Formatting, erasing, repartitioning, repairing, or other destructive disk operations
+
+Delegates to:
+
+- FileManager/native file APIs
+- `DiagnosticsLog`
+
 ### SDWriteService.swift
 
-Purpose: Executes the final manifest-based copy to the user-approved, validated SD card volume and verifies copied files.
+Purpose: Executes the final manifest-based copy to the user-approved, validated, and preflight-verified SD card volume and verifies copied files.
 
 Owns:
 
@@ -1094,7 +1142,7 @@ Owns:
 - Limiting writes to the approved SD card volume destination
 - Overwrite handling after user confirmation
 - Per-file and overall progress reporting
-- Post-copy verification
+- Post-copy verification of files written by the manifest operation
 - Write-related cancellation where safe
 - Write diagnostics
 
@@ -1107,13 +1155,13 @@ Does not own:
 - Staging layout creation
 - SD card discovery or selected-volume validation
 - SD card readiness validation
+- SD card preflight write/read/delete verification
 - Eject operations
 - Formatting, erasing, repartitioning, repairing, or other destructive disk operations
 
 Delegates to:
 
 - `StagingManifest`
-- `SDCard`
 - FileManager/native file APIs
 - `DiagnosticsLog`
 
@@ -1239,7 +1287,7 @@ Do not own:
 - User-facing text
 - Workflow decisions
 
-Colors belong in `Assets.xcassets`. User-facing text belongs in localization resources.
+Custom app colors belong in `Assets.xcassets`. System semantic colors may be exposed through typed helpers such as `AppStatusStyle`. User-facing text belongs in localization resources.
 
 ## Models Layer
 
@@ -1247,48 +1295,17 @@ Models should be plain, testable, and UI-independent where practical.
 
 Models must not perform downloads, writes, scoped-access checks, UI navigation, or source-trust decisions.
 
-### SDCard.swift
-
-Purpose: Represents a user-approved mounted volume that has been validated as a Secure Digital card.
-
-Owns:
-
-- Device identifiers
-- Volume name
-- Granted display path or mount reference
-- Capacity and free-space metadata
-- Filesystem metadata
-- Secure Digital protocol metadata
-- Writability/removability traits
-
-Does not own:
-
-- Disk Arbitration queries
-- Scoped-access lifecycle
-- Readiness policy
-- File writes
-- UI presentation
-
-Consumed by:
-
-- `DiskManager`
-- `SDCardReadiness`
-- `WorkflowCoordinator`
-- `ReviewSetupView`
-- `SuccessView`
-
-### SDCardReadiness.swift
+### SDCardReadiness model
 
 Purpose: Represents readiness validation results for the selected SD card volume.
 
+`SDCardReadiness` should stay small and model-only. It answers whether the selected drive can be used as the SD card target; it should not grow into a service, policy object, write-verification result, or localization owner.
+
 Owns:
 
-- Readiness status
+- Ready/unavailable validation result
 - Failure reasons
-- Warning reasons
-- Writable-state result
-- Temporary write/read/delete verification result when applicable
-- User-actionable readiness messages
+- Optional disk metadata for invalid but readable selected volumes
 
 Does not own:
 
@@ -1297,12 +1314,19 @@ Does not own:
 - File-copy execution
 - Formatting or repair
 - UI layout
+- User-facing readiness copy
+- Temporary write/read/delete verification
+- User-facing localized messages
+- Service orchestration or write policy
 
 Consumed by:
 
 - `DiskManager`
-- `SDSelectionView`
+- `SDSelectionController`
+- `DiskAccessView`
 - `WorkflowCoordinator`
+
+If `SDCardReadiness` grows or needs clearer file ownership, move it to a dedicated model file such as `Models/SDCardReadiness.swift`. Keep temporary write/read/delete checks in `SDCardVerificationService` instead of adding them to this model.
 
 ### PreparedTool.swift
 
@@ -1369,6 +1393,7 @@ Logic-heavy behavior should be testable without UI automation or physical hardwa
 Prioritize tests for:
 
 - User-selected volume validation using injected/fixture disk metadata
+- Future SD card preflight write/read/delete verification using injected filesystem dependencies
 - Scoped-access lifecycle behavior
 - Workflow availability and navigation
 - SourcePolicy trust decisions
@@ -1401,5 +1426,5 @@ Avoid:
 - Writes outside app-controlled staging directories or the user-approved, validated SD card volume.
 - Any path that allows Homebrew Assistant Recipes to modify Wilbrand or HackMii.
 - Hardcoded user-facing strings in production views or services.
-- Raw colors outside the asset catalog.
+- Uncentralized custom/raw colors in production views or services.
 - Private signing keys in the app repo.

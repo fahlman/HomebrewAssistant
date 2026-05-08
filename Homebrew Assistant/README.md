@@ -33,6 +33,9 @@ There is no Full Disk Access gate in the preferred workflow. The app uses sandbo
 - Downloads, imports, extraction, validation, and prepared layouts happen in app-controlled staging.
 - Files are copied to the selected, validated SD card only during **Write and Verify Files**.
 - Public recipes are declarative instructions, not executable scripts.
+- Public recipes are Homebrew Assistant Property List files, not Wii homebrew apps.
+- Homebrew refers to Wii homebrew apps and related files that run on a modified Wii.
+- Homebrew payloads referenced by recipes may be ZIP archives hosted by non-affiliated or third-party upstream sources, often also on GitHub.
 - Public recipes are loaded through the verified Homebrew Assistant Recipes signed catalog.
 - Wilbrand and HackMii remain app-owned internal/bootstrap workflows.
 - Ambiguous disk, scoped-access, recipe, source, archive, signature, or verification state fails safe.

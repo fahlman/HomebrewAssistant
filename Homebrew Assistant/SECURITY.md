@@ -1,4 +1,3 @@
-
 # Security Policy
 
 Homebrew Assistant is a safety-focused macOS utility that prepares removable SD cards for selected Wii homebrew workflows. Security issues may involve recipe trust, payload source validation, removable-storage safety, scoped filesystem access, staging, archive extraction, checksum/signature verification, signed recipe-index behavior, diagnostics, or final SD card writes.
@@ -36,8 +35,8 @@ The following areas are especially important:
 
 - User-selected SD card volume validation and rejection of non-Secure Digital media
 - Scoped filesystem access to the user-selected SD card volume
-- Recipe source validation
-- Payload source validation
+- Homebrew Assistant Recipe Property List source validation
+- Third-party Homebrew payload source validation
 - Signed recipe-index verification
 - Ed25519 public key and key identifier handling
 - Private recipe-signing key handling
@@ -71,7 +70,7 @@ Homebrew Assistant must never:
 - Modify internal disks.
 - Execute arbitrary recipe scripts.
 - Trust user-selected local recipes, drag-and-drop recipes, manually entered URLs, forks, mirrors, rehosts, or loose cached recipe files.
-- Allow public recipes to add, replace, override, or modify app-owned internal/bootstrap workflows such as Wilbrand or HackMii.
+      - Allow public recipes to add, replace, override, or modify built-in setup workflows such as Wilbrand or HackMii.
 - Write recipe or prepared files directly to the SD card during individual preparation steps.
 - Write outside app-controlled staging directories or the user-approved, validated SD card volume.
 - Automatically eject the SD card.
@@ -79,7 +78,7 @@ Homebrew Assistant must never:
 
 ## Recipe and Payload Trust
 
-Public recipes are declarative app-defined instructions, not executable scripts.
+Public recipes are declarative Homebrew Assistant Property List files, not executable scripts and not Wii homebrew apps. They describe what should be added to a workflow and where referenced files should be staged on the SD card.
 
 Version 1 loads public recipes through the verified Homebrew Assistant Recipes signed catalog. Public recipe files are trusted only when:
 
@@ -91,9 +90,11 @@ Version 1 loads public recipes through the verified Homebrew Assistant Recipes s
 
 Loose cached recipes, bundled public recipe definitions, unsigned indexes, invalid signatures, mismatched checksums, alternate repositories, forks, mirrors, rehosts, manually entered URLs, drag-and-drop recipe files, and user-selected recipe files must be rejected.
 
-Payload files are downloaded from each trusted public recipe’s declared approved upstream source and verified before extraction or staging. Homebrew Assistant does not bundle third-party homebrew payloads.
+Homebrew payload files are Wii homebrew apps and related files that run on a modified Wii. Public-recipe payloads are often ZIP archives hosted by non-affiliated or third-party upstream sources, often also on GitHub. Payload files referenced by public recipes are downloaded from each trusted public recipe’s declared approved upstream source and verified before extraction or staging.
 
-Wilbrand and HackMii are app-owned internal/bootstrap workflows. They may appear beside public recipes in Choose Items, but Homebrew Assistant Recipes updates must never add, replace, override, or modify them.
+Homebrew Assistant includes built-in setup workflows for selected third-party homebrew, such as Wilbrand and HackMii. The workflows are integrated into the app, but the third-party payload files are not owned by Homebrew Assistant and are not public recipes. When these workflows require third-party payload files, those files should be obtained from their original upstream sources and verified under explicit app-controlled trust rules.
+
+Wilbrand and HackMii are built-in setup workflows for third-party homebrew. They may appear beside public recipes in Choose Items, but Homebrew Assistant Recipes updates must never add, replace, override, or modify these workflows or their trust rules.
 
 Detailed trust rules are defined in `Docs/RecipeTrustModel.md`.
 

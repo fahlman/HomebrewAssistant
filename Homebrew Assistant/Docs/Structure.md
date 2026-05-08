@@ -3,7 +3,7 @@
 This document lists the planned folder and file hierarchy for the Homebrew Assistant app repository. Detailed file responsibilities live in `Architecture.md`.
 
 ```text
-HomebrewAssistant/
+Homebrew Assistant/
 ├── App/
 │   └── HomebrewAssistantApp.swift
 ├── Core/
@@ -55,6 +55,7 @@ HomebrewAssistant/
 └── Views/
     ├── Components/
     │   ├── AppStateBadge.swift
+    │   ├── AppStatusStyle.swift
     │   ├── PrimaryButton.swift
     │   ├── SecondaryButton.swift
     │   └── StatusMessageView.swift
@@ -66,10 +67,10 @@ HomebrewAssistant/
     ├── Recipe/
     │   └── RecipeStepView.swift
     └── Steps/
-        ├── ChooseItemsView.swift
+        ├── ChooseHomebrewView.swift
+        ├── DiskAccessView.swift
         ├── HackMiiView.swift
         ├── ReviewSetupView.swift
-        ├── SDSelectionView.swift
         ├── SuccessView.swift
         ├── WilbrandView.swift
         └── WriteFilesView.swift
@@ -79,7 +80,7 @@ HomebrewAssistant/
 ## Tests
 
 ```text
-Tests/
+Homebrew AssistantTests/
 ├── AppPreferencesTests.swift
 ├── ArchiveExtractorTests.swift
 ├── ChecksumVerifierTests.swift

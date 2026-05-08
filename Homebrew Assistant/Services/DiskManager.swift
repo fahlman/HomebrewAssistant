@@ -4,7 +4,8 @@
 //
 //  Purpose: Resolves native metadata for a user-selected mounted volume and classifies SD card readiness.
 //  Owns: Mounted-volume metadata lookup, Secure Digital protocol validation,
-//  writable-volume validation, and SD card readiness classification.
+//  FAT32 filesystem validation, writable-volume validation, and SD card
+//  readiness classification.
 //  Does not own: Scoped filesystem access lifecycle, UI presentation, file copying,
 //  staging, recipe preparation, or workflow navigation.
 //  Delegates to: DiskMetadataProvider for native metadata lookup and WorkflowCoordinator
@@ -30,6 +31,10 @@ struct DiskManager {
             return .unavailable(reason: .notSecureDigital, metadata: metadata)
         }
 
+        guard metadata.isFAT32 else {
+            return .unavailable(reason: .unsupportedFileSystem, metadata: metadata)
+        }
+
         guard metadata.isWritable else {
             return .unavailable(reason: .notWritable, metadata: metadata)
         }
@@ -42,11 +47,14 @@ protocol DiskMetadataProvider {
     func metadata(for volumeURL: URL) -> DiskVolumeMetadata?
 }
 
-struct DiskVolumeMetadata: Equatable, Sendable {
+nonisolated struct DiskVolumeMetadata: Equatable, Sendable {
     let volumeURL: URL
     let localizedName: String?
     let displayName: String
     let protocolName: String?
+    let fileSystemType: String?
+    let totalCapacityBytes: Int64?
+    let availableCapacityBytes: Int64?
     let isWritable: Bool
     let isRemovable: Bool?
     let isEjectable: Bool?
@@ -57,6 +65,9 @@ struct DiskVolumeMetadata: Equatable, Sendable {
         localizedName: String? = nil,
         displayName: String? = nil,
         protocolName: String? = nil,
+        fileSystemType: String? = nil,
+        totalCapacityBytes: Int64? = nil,
+        availableCapacityBytes: Int64? = nil,
         isWritable: Bool,
         isRemovable: Bool? = nil,
         isEjectable: Bool? = nil,
@@ -66,6 +77,9 @@ struct DiskVolumeMetadata: Equatable, Sendable {
         self.localizedName = localizedName
         self.displayName = displayName ?? localizedName ?? volumeURL.lastPathComponent
         self.protocolName = protocolName
+        self.fileSystemType = fileSystemType
+        self.totalCapacityBytes = totalCapacityBytes
+        self.availableCapacityBytes = availableCapacityBytes
         self.isWritable = isWritable
         self.isRemovable = isRemovable
         self.isEjectable = isEjectable
@@ -73,16 +87,19 @@ struct DiskVolumeMetadata: Equatable, Sendable {
     }
 }
 
-enum SDCardReadiness: Equatable {
-    case ready(DiskVolumeMetadata)
-    case unavailable(reason: SDCardReadinessFailureReason, metadata: DiskVolumeMetadata? = nil)
+
+private extension DiskVolumeMetadata {
+    var isFAT32: Bool {
+        guard let fileSystemType else {
+            return false
+        }
+
+        return fileSystemType.localizedCaseInsensitiveCompare("msdos") == .orderedSame
+            || fileSystemType.localizedCaseInsensitiveCompare("fat32") == .orderedSame
+            || fileSystemType.localizedCaseInsensitiveCompare("ms-dos fat32") == .orderedSame
+    }
 }
 
-enum SDCardReadinessFailureReason: Equatable {
-    case metadataUnavailable
-    case notSecureDigital
-    case notWritable
-}
 
 struct DiskArbitrationMetadataProvider: DiskMetadataProvider {
     func metadata(for volumeURL: URL) -> DiskVolumeMetadata? {
@@ -101,6 +118,13 @@ struct DiskArbitrationMetadataProvider: DiskMetadataProvider {
         let localizedName = description[kDADiskDescriptionVolumeNameKey as String] as? String
         let displayName = localizedName ?? volumeURL.lastPathComponent
         let protocolName = description[kDADiskDescriptionDeviceProtocolKey as String] as? String
+        let fileSystemType = description[kDADiskDescriptionVolumeKindKey as String] as? String
+        let volumeResourceValues = try? volumeURL.resourceValues(forKeys: [
+            .volumeTotalCapacityKey,
+            .volumeAvailableCapacityKey
+        ])
+        let totalCapacityBytes = volumeResourceValues?.volumeTotalCapacity.map(Int64.init)
+        let availableCapacityBytes = volumeResourceValues?.volumeAvailableCapacity.map(Int64.init)
         let isWritable = (description[kDADiskDescriptionMediaWritableKey as String] as? Bool) ?? false
         let isRemovable = description[kDADiskDescriptionMediaRemovableKey as String] as? Bool
         let isEjectable = description[kDADiskDescriptionMediaEjectableKey as String] as? Bool
@@ -111,6 +135,9 @@ struct DiskArbitrationMetadataProvider: DiskMetadataProvider {
             localizedName: localizedName,
             displayName: displayName,
             protocolName: protocolName,
+            fileSystemType: fileSystemType,
+            totalCapacityBytes: totalCapacityBytes,
+            availableCapacityBytes: availableCapacityBytes,
             isWritable: isWritable,
             isRemovable: isRemovable,
             isEjectable: isEjectable,

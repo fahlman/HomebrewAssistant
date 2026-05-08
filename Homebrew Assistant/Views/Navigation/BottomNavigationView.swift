@@ -5,7 +5,7 @@
 //  Purpose: Presents shared bottom navigation and step-specific actions.
 //  Owns: Lower-left Quit/Back placement, lower-right action placement,
 //  optional contextual step-action placement before the default Next action,
-//  default button presentation rules, and disabled/enabled button presentation.
+//  rendering the configured default button, and disabled/enabled button presentation.
 //  Does not own: Action availability decisions, workflow transitions, or risky
 //  operation execution.
 //  Delegates to: WorkflowCoordinator for navigation availability and user intent handling,
@@ -61,8 +61,8 @@ struct BottomNavigationView: View {
                 }
             }
 
-            if let contextualAction = configuration.contextualAction {
-                contextualActionButton(contextualAction)
+            ForEach(Array(configuration.contextualActions.enumerated()), id: \.offset) { index, contextualAction in
+                contextualActionButton(contextualAction, isDefaultCandidate: index == defaultContextualActionIndex)
             }
 
             nextButton
@@ -77,12 +77,15 @@ struct BottomNavigationView: View {
         .keyboardShortcut(isNextDefault ? .defaultAction : nil)
     }
 
-    private func contextualActionButton(_ action: WorkflowStepAction) -> some View {
+    private func contextualActionButton(
+        _ action: WorkflowStepAction,
+        isDefaultCandidate: Bool
+    ) -> some View {
         Button(String(localized: String.LocalizationValue(action.titleKey))) {
             action.perform()
         }
         .disabled(!action.isEnabled)
-        .keyboardShortcut(isContextualActionDefault && action.isEnabled ? .defaultAction : nil)
+        .keyboardShortcut(isContextualActionDefault && isDefaultCandidate && action.isEnabled ? .defaultAction : nil)
     }
 
     private var canGoForward: Bool {
@@ -90,12 +93,17 @@ struct BottomNavigationView: View {
     }
 
     private var isContextualActionDefault: Bool {
-        switch configuration.defaultAction {
-        case .contextualAction:
-            true
-        case .next, nil:
-            false
+        defaultContextualActionIndex != nil
+    }
+
+    private var defaultContextualActionIndex: Int? {
+        guard case .contextualAction(let index) = configuration.defaultAction,
+              configuration.contextualActions.indices.contains(index),
+              configuration.contextualActions[index].isEnabled else {
+            return nil
         }
+
+        return index
     }
 
     private var isNextDefault: Bool {
