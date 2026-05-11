@@ -2,15 +2,14 @@
 //  WorkflowStepAction.swift
 //  Homebrew Assistant
 //
-//  Purpose: Describes optional contextual workflow-step actions and bottom-bar
-//  configuration for the selected workflow item.
-//  Owns: Action title keys, optional action icon references, enabled states,
-//  action execution closures, contextual action lists, forward-button overrides,
-//  and default-action selection.
-//  Does not own: Workflow navigation execution, step UI presentation, file
-//  pickers, downloads, writes, validation policy, or button rendering.
-//  Consumed by: BottomNavigationView and step-specific controllers/coordinators
-//  that provide contextual workflow actions.
+//  Purpose: Describes one optional contextual workflow-step action.
+//  Owns: Action title key, optional action icon reference, enabled state, and
+//  action execution closure.
+//  Does not own: Bottom-bar configuration, workflow navigation execution, step
+//  UI presentation, file pickers, downloads, writes, validation policy, or button
+//  rendering.
+//  Consumed by: WorkflowBottomBarConfiguration, BottomNavigationView, and
+//  step-specific controllers/coordinators that provide contextual workflow actions.
 //
 
 import Foundation
@@ -32,27 +31,4 @@ struct WorkflowStepAction {
         self.isEnabled = isEnabled
         self.perform = perform
     }
-}
-
-struct WorkflowBottomBarConfiguration {
-    enum DefaultAction {
-        case contextualAction(index: Int)
-        case next
-    }
-
-    let contextualActions: [WorkflowStepAction]
-    let canGoForwardOverride: Bool?
-    let defaultAction: DefaultAction?
-
-    init(
-        contextualActions: [WorkflowStepAction] = [],
-        canGoForwardOverride: Bool? = nil,
-        defaultAction: DefaultAction? = nil
-    ) {
-        self.contextualActions = contextualActions
-        self.canGoForwardOverride = canGoForwardOverride
-        self.defaultAction = defaultAction
-    }
-
-    static let automatic = WorkflowBottomBarConfiguration()
 }

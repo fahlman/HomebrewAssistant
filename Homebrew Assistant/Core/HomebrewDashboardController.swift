@@ -8,7 +8,7 @@
 //  option selection updates, and option preparation status mapping.
 //  Does not own: Homebrew option rendering, internal workflow behavior, recipe
 //  loading, downloads, SD card writes, verification, or workflow navigation UI.
-//  Delegates to: WorkflowCoordinator for selected/completed internal workflow state
+//  Uses: WorkflowCoordinator for selected/completed internal workflow state
 //  and InternalWorkflowCatalog for built-in homebrew option metadata.
 //
 
@@ -21,6 +21,7 @@ final class HomebrewDashboardController: ObservableObject {
 
     private let coordinator: WorkflowCoordinator
     private let internalWorkflowCatalog: InternalWorkflowCatalog
+    private var coordinatorCancellable: AnyCancellable?
 
     init(
         coordinator: WorkflowCoordinator,
@@ -28,6 +29,10 @@ final class HomebrewDashboardController: ObservableObject {
     ) {
         self.coordinator = coordinator
         self.internalWorkflowCatalog = internalWorkflowCatalog
+        self.coordinatorCancellable = coordinator.objectWillChange
+            .sink { [weak self] _ in
+                self?.objectWillChange.send()
+            }
     }
 
     var visibleOptions: [HomebrewOption] {

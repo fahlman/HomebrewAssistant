@@ -85,12 +85,17 @@ private struct HomebrewOptionCard: View {
     let status: HomebrewPreparationStatus
 
     var body: some View {
-        Toggle(isOn: $isSelected) {
+        HStack(alignment: .top, spacing: 12) {
+            Toggle("", isOn: $isSelected)
+                .labelsHidden()
+                .padding(.top, 2)
+
             VStack(alignment: .leading, spacing: 10) {
                 optionSummary
                 statusSummary
                 progressView
             }
+            .frame(maxWidth: .infinity, alignment: .leading)
         }
         .padding(.vertical, 12)
         .padding(.horizontal, 12)

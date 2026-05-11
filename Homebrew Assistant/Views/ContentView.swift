@@ -74,9 +74,12 @@ struct ContentView: View {
                 defaultAction: diskAccessDefaultAction(for: contextualActions)
             )
         case .fixed(.chooseItems):
+            let contextualActions = chooseHomebrewContextualActions
+
             return WorkflowBottomBarConfiguration(
-                contextualActions: chooseHomebrewContextualActions,
-                defaultAction: nil
+                contextualActions: contextualActions,
+                canGoForwardOverride: chooseHomebrewCanGoForwardOverride(hasContextualActions: !contextualActions.isEmpty),
+                defaultAction: chooseHomebrewDefaultAction(for: contextualActions)
             )
         case .internalWorkflow, .publicRecipe, .fixed, nil:
             return .automatic
@@ -157,6 +160,16 @@ struct ContentView: View {
         case .saved:
             return []
         }
+    }
+
+    private func chooseHomebrewDefaultAction(for contextualActions: [WorkflowStepAction]) -> WorkflowBottomBarConfiguration.DefaultAction? {
+        guard !contextualActions.isEmpty else { return nil }
+
+        return .contextualAction(index: contextualActions.startIndex)
+    }
+
+    private func chooseHomebrewCanGoForwardOverride(hasContextualActions: Bool) -> Bool? {
+        hasContextualActions ? false : nil
     }
 
     private var hasSelectedHomebrew: Bool {
