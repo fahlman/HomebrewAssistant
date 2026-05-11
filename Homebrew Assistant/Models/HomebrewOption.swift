@@ -4,12 +4,11 @@
 //
 //  Purpose: Defines the shared selectable homebrew option model used by the
 //  Choose Homebrew step.
-//  Owns: User-facing option identity, title, summary, category, icon reference,
+//  Owns: Option identity, localized name, summary key, category, icon reference,
 //  and source mapping.
 //  Does not own: Option selection state, filtering UI, sorting UI, recipe
 //  loading, downloads, internal workflow behavior, or workflow navigation.
-//  Delegates to: InternalWorkflowKind and future public recipe metadata for
-//  source-specific option construction.
+//  Uses: InternalWorkflowKind for internal workflow option construction.
 //
 
 import Foundation

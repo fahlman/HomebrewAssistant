@@ -2,7 +2,7 @@
 
 Homebrew Assistant is a native macOS SwiftUI app for safely preparing a removable SD card for selected Wii homebrew workflows.
 
-The app helps users choose an SD card, choose which internal workflows and public recipes to prepare, stage and verify files safely, review the planned SD card layout, then write and verify files during the final write step.
+The app helps users choose a validated SD card, select the homebrew they want to add, complete any required setup such as Wilbrand, then download, save, and verify selected homebrew from a single dashboard.
 
 ## Project Status
 
@@ -13,11 +13,10 @@ Homebrew Assistant is in early development. The codebase is being built from pro
 At a high level, Homebrew Assistant guides users through:
 
 1. Selecting an SD card volume.
-2. Choosing app-owned internal workflows and verified public recipes.
-3. Preparing selected items in app-controlled staging.
-4. Reviewing the target SD card and write plan.
-5. Writing and verifying files.
-6. Showing success, next steps, and user-initiated eject guidance.
+2. Choosing the homebrew they want to add.
+3. Completing required setup for homebrew that needs user-provided files, such as Wilbrand.
+4. Downloading, saving, and verifying selected homebrew from the Choose Homebrew dashboard.
+5. Ejecting the SD card when the user chooses to do so.
 
 There is no Full Disk Access gate in the preferred workflow. The app uses sandbox-friendly scoped filesystem access for the SD card volume the user chooses, then validates that selected volume as Secure Digital media before enabling writes.
 
@@ -30,14 +29,15 @@ There is no Full Disk Access gate in the preferred workflow. The app uses sandbo
 - No shell commands or command-line fallbacks unless a future implementation review explicitly proves that a required task cannot be done safely with native APIs.
 - No disk formatting, erasing, repartitioning, repairing, or destructive disk operations.
 - Real SD-card detection is based on Disk Arbitration reporting the protocol name `Secure Digital`.
-- Downloads, imports, extraction, validation, and prepared layouts happen in app-controlled staging.
-- Files are copied to the selected, validated SD card only during **Write and Verify Files**.
+ - Downloads, imports, extraction, validation, saving, and verification are reflected as state on the selected homebrew cards.
+ - Files are copied to the selected, validated SD card only after the user explicitly chooses to save selected homebrew.
 - Public recipes are declarative instructions, not executable scripts.
 - Public recipes are Homebrew Assistant Property List files, not Wii homebrew apps.
 - Homebrew refers to Wii homebrew apps and related files that run on a modified Wii.
 - Homebrew payloads referenced by recipes may be ZIP archives hosted by non-affiliated or third-party upstream sources, often also on GitHub.
 - Public recipes are loaded through the verified Homebrew Assistant Recipes signed catalog.
-- Wilbrand and HackMii remain app-owned internal/bootstrap workflows.
+ - Wilbrand remains a special setup workflow because it requires the user to generate and provide a console-specific exploit file.
+ - HackMii is represented as bundled homebrew metadata in the Choose Homebrew dashboard.
 - Ambiguous disk, scoped-access, recipe, source, archive, signature, or verification state fails safe.
 
 ## Documentation

@@ -7,8 +7,8 @@
 //  disk metadata for invalid but readable selected volumes.
 //  Does not own: Disk metadata queries, scoped access, UI copy, workflow
 //  navigation, file writes, or preflight write/read/delete verification.
-//  Delegates to: DiskManager for construction and SDSelectionController / views
-//  for consumption.
+//  Consumed by: SDCardValidationService, SDSelectionController, and views that
+//  need selected SD card readiness state.
 //
 
 import Foundation

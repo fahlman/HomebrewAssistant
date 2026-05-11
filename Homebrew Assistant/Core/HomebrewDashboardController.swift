@@ -1,0 +1,166 @@
+//
+//  HomebrewDashboardController.swift
+//  Homebrew Assistant
+//
+//  Purpose: Coordinates the Homebrew dashboard's available options,
+//  filter/sort state, selection bindings, and preparation status mapping.
+//  Owns: Homebrew dashboard filter state, sort state, visible option ordering,
+//  option selection updates, and option preparation status mapping.
+//  Does not own: Homebrew option rendering, internal workflow behavior, recipe
+//  loading, downloads, SD card writes, verification, or workflow navigation UI.
+//  Delegates to: WorkflowCoordinator for selected/completed internal workflow state
+//  and InternalWorkflowCatalog for built-in homebrew option metadata.
+//
+
+import Combine
+import SwiftUI
+
+final class HomebrewDashboardController: ObservableObject {
+    @Published var selectedCategoryFilter: HomebrewCategoryFilter = .all
+    @Published var selectedSortMode: HomebrewSortMode = .category
+
+    private let coordinator: WorkflowCoordinator
+    private let internalWorkflowCatalog: InternalWorkflowCatalog
+
+    init(
+        coordinator: WorkflowCoordinator,
+        internalWorkflowCatalog: InternalWorkflowCatalog = InternalWorkflowCatalog()
+    ) {
+        self.coordinator = coordinator
+        self.internalWorkflowCatalog = internalWorkflowCatalog
+    }
+
+    var visibleOptions: [HomebrewOption] {
+        availableOptions
+            .filter { selectedCategoryFilter.includes($0.category) }
+            .sorted(using: selectedSortMode)
+    }
+
+    func binding(for option: HomebrewOption) -> Binding<Bool> {
+        Binding {
+            self.isSelected(option)
+        } set: { isSelected in
+            self.setOption(option, isSelected: isSelected)
+        }
+    }
+
+    func status(for option: HomebrewOption) -> HomebrewPreparationStatus {
+        guard case .internalWorkflow(let kind) = option.source else {
+            return .notSelected
+        }
+
+        guard coordinator.selectedInternalWorkflows.contains(kind) else {
+            return .notSelected
+        }
+
+        return status(for: kind)
+    }
+
+    private var availableOptions: [HomebrewOption] {
+        internalWorkflowCatalog.homebrewOptions
+    }
+
+    private func isSelected(_ option: HomebrewOption) -> Bool {
+        guard case .internalWorkflow(let kind) = option.source else {
+            return false
+        }
+
+        return coordinator.selectedInternalWorkflows.contains(kind)
+    }
+
+    private func setOption(_ option: HomebrewOption, isSelected: Bool) {
+        guard case .internalWorkflow(let kind) = option.source else {
+            return
+        }
+
+        var selectedWorkflows = coordinator.selectedInternalWorkflows
+
+        if isSelected {
+            selectedWorkflows.insert(kind)
+        } else {
+            selectedWorkflows.remove(kind)
+        }
+
+        coordinator.updateSelectedInternalWorkflows(selectedWorkflows)
+    }
+
+    private func status(for kind: InternalWorkflowKind) -> HomebrewPreparationStatus {
+        switch kind {
+        case .wilbrand:
+            coordinator.isCompleted(.internalWorkflow(.wilbrand)) ? .readyToSave : .setupRequired
+        case .hackMii:
+            .readyToDownload
+        }
+    }
+}
+
+enum HomebrewCategoryFilter: CaseIterable, Hashable, Identifiable {
+    case all
+    case category(HomebrewCategory)
+
+    var id: String {
+        switch self {
+        case .all:
+            "all"
+        case .category(let category):
+            "category-\(category.rawValue)"
+        }
+    }
+
+    static var allCases: [HomebrewCategoryFilter] {
+        [.all] + HomebrewCategory.allCases.map(HomebrewCategoryFilter.category)
+    }
+
+    var title: String {
+        switch self {
+        case .all:
+            String(localized: "chooseHomebrew.category.all")
+        case .category(let category):
+            category.title
+        }
+    }
+
+    func includes(_ category: HomebrewCategory) -> Bool {
+        switch self {
+        case .all:
+            true
+        case .category(let filteredCategory):
+            category == filteredCategory
+        }
+    }
+}
+
+enum HomebrewSortMode: CaseIterable, Hashable, Identifiable {
+    case category
+    case alphabetical
+
+    var id: Self { self }
+
+    var title: String {
+        switch self {
+        case .category:
+            String(localized: "chooseHomebrew.sort.category")
+        case .alphabetical:
+            String(localized: "chooseHomebrew.sort.alphabetical")
+        }
+    }
+}
+
+private extension Array where Element == HomebrewOption {
+    func sorted(using sortMode: HomebrewSortMode) -> [HomebrewOption] {
+        switch sortMode {
+        case .category:
+            sorted { lhs, rhs in
+                if lhs.category == rhs.category {
+                    return lhs.name.localizedStandardCompare(rhs.name) == .orderedAscending
+                }
+
+                return lhs.category < rhs.category
+            }
+        case .alphabetical:
+            sorted { lhs, rhs in
+                lhs.name.localizedStandardCompare(rhs.name) == .orderedAscending
+            }
+        }
+    }
+}

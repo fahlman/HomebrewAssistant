@@ -2,16 +2,16 @@
 //  WorkflowCoordinator.swift
 //  Homebrew Assistant
 //
-//  Purpose: Coordinates the active workflow session and generated workflow steps.
-//  Owns: Current workflow items, selected step, visible-step completion,
-//  sequential reachability rules, selected internal workflows and public recipes,
-//  high-level workflow transitions, special setup-step visibility, and workflow reset behavior.
+//  Purpose: Coordinates the active workflow session and generated workflow items.
+//  Owns: Current workflow items, selected item, completed item IDs,
+//  sequential reachability rules, selected internal workflows, selected public
+//  recipes, workflow regeneration, and workflow reset behavior.
 //  Does not own: Scoped filesystem access, disk metadata resolution, recipe
 //  catalog loading, public recipe parsing, downloads, archive extraction,
 //  staging file management, SD card writes, verification execution, eject
 //  operations, or persistent preferences.
-//  Delegates to: InternalWorkflowCatalog for available internal workflow items
-//  and StepStateStore for per-step status storage.
+//  Uses: StepStateStore for per-item status storage and accepts
+//  InternalWorkflowCatalog as an injected dependency.
 //
 
 import Foundation

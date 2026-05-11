@@ -1,21 +1,22 @@
 //
-//  DiskManager.swift
+//  SDCardValidationService.swift
 //  Homebrew Assistant
 //
-//  Purpose: Resolves native metadata for a user-selected mounted volume and classifies SD card readiness.
-//  Owns: Mounted-volume metadata lookup, Secure Digital protocol validation,
-//  FAT32 filesystem validation, writable-volume validation, and SD card
-//  readiness classification.
+//  Purpose: Resolves native metadata for a user-selected mounted volume and
+//  classifies SD card readiness.
+//  Owns: Disk metadata provider protocol, Disk Arbitration metadata lookup,
+//  mounted-volume metadata modeling, Secure Digital protocol validation, FAT32
+//  filesystem validation, writable-volume validation, and SD card readiness
+//  classification.
 //  Does not own: Scoped filesystem access lifecycle, UI presentation, file copying,
-//  staging, recipe preparation, or workflow navigation.
-//  Delegates to: DiskMetadataProvider for native metadata lookup and WorkflowCoordinator
-//  for workflow state transitions.
+//  staging, recipe preparation, workflow navigation, or workflow state transitions.
+//  Uses: Disk Arbitration and URL resource values for mounted-volume metadata.
 //
 
 import Foundation
 import DiskArbitration
 
-struct DiskManager {
+struct SDCardValidationService {
     private let metadataProvider: any DiskMetadataProvider
 
     init(metadataProvider: any DiskMetadataProvider = DiskArbitrationMetadataProvider()) {

@@ -6,10 +6,9 @@
 //  Owns: Starting scoped access, stopping scoped access, active scoped-access
 //  tracking, selected-volume URL tracking, session cleanup for scoped access,
 //  and injectable scoped-access session creation.
-//  Does not own: SD card validation, Disk Arbitration metadata resolution,
+//  Does not own: SD card validation, native volume metadata resolution,
 //  file copying, archive extraction, staging, or workflow navigation.
-//  Delegates to: WorkflowCoordinator for lifecycle timing and DiskManager for
-//  validating the selected mounted volume.
+//  Delegates to: SecurityScopedAccessSessionFactory for creating scoped access sessions.
 //
 
 import Foundation

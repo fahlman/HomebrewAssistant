@@ -3,12 +3,14 @@
 //  Homebrew Assistant
 //
 //  Purpose: Renders the generated workflow sidebar.
-//  Owns: Sidebar row presentation, step icons and labels, state indicators,
-//  selection affordances, and accessibility labels for meaningful state.
+//  Owns: Sidebar list and row presentation, step icons and labels, status title
+//  and symbol-variant mapping, selection affordances, locked-state presentation,
+//  and accessibility labels.
 //  Does not own: Step ordering decisions, workflow availability rules, workflow
 //  advancement, scoped filesystem access, disk operations, or recipe operations.
-//  Delegates to: WorkflowCoordinator for selection and reachability decisions,
-//  and WorkflowItem for step metadata.
+//  Uses: WorkflowCoordinator for workflow items, selected item binding,
+//  reachability, state lookup, and selection; WorkflowItem and StepState for
+//  sidebar row metadata.
 //
 
 import SwiftUI

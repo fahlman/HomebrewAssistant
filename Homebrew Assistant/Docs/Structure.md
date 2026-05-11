@@ -9,6 +9,7 @@ Homebrew Assistant/
 ├── Core/
 │   ├── FixedStep.swift
 │   ├── HackMiiWorkflow.swift
+│   ├── HomebrewDashboardController.swift
 │   ├── InternalWorkflowCatalog.swift
 │   ├── Recipe.swift
 │   ├── SDSelectionController.swift
@@ -19,11 +20,14 @@ Homebrew Assistant/
 │   └── WorkflowStepAction.swift
 ├── Docs/
 │   ├── Architecture.md
+│   ├── RecipeTrustModel.md
 │   ├── Specification.md
 │   ├── Structure.md
-│   ├── RecipeTrustModel.md
 │   └── Workflow.md
 ├── Models/
+│   ├── HomebrewCategory.swift
+│   ├── HomebrewOption.swift
+│   ├── HomebrewPreparationStatus.swift
 │   ├── PreparedTool.swift
 │   ├── SDCard.swift
 │   ├── SDCardReadiness.swift
@@ -36,12 +40,12 @@ Homebrew Assistant/
 ├── Services/
 │   ├── ArchiveExtractor.swift
 │   ├── ChecksumVerifier.swift
-│   ├── DiskManager.swift
 │   ├── DownloadService.swift
 │   ├── ItemPreparationService.swift
 │   ├── RecipeCatalogLoader.swift
 │   ├── RecipeLoader.swift
 │   ├── ScopedAccessManager.swift
+│   ├── SDCardValidationService.swift
 │   ├── SDWriteService.swift
 │   ├── SignedRecipeIndexVerifier.swift
 │   └── SourcePolicy.swift
@@ -67,15 +71,10 @@ Homebrew Assistant/
     ├── Recipe/
     │   └── RecipeStepView.swift
     └── Steps/
-        ├── ChooseHomebrewView.swift
         ├── DiskAccessView.swift
-        ├── HackMiiView.swift
-        ├── ReviewSetupView.swift
-        ├── SuccessView.swift
-        ├── WilbrandView.swift
-        └── WriteFilesView.swift
+        ├── HomebrewDashboardView.swift
+        └── WilbrandView.swift
 ```
-
 
 ## Tests
 
@@ -84,21 +83,21 @@ Homebrew AssistantTests/
 ├── AppPreferencesTests.swift
 ├── ArchiveExtractorTests.swift
 ├── ChecksumVerifierTests.swift
-├── DiskManagerTests.swift
 ├── DownloadServiceTests.swift
 ├── HackMiiWorkflowTests.swift
+├── HomebrewDashboardControllerTests.swift
 ├── ItemPreparationServiceTests.swift
 ├── LocalizationTests.swift
 ├── PersistenceTests.swift
 ├── RecipeCatalogLoaderTests.swift
 ├── RecipeLoaderTests.swift
+├── SDCardValidationServiceTests.swift
 ├── SDWriteServiceTests.swift
 ├── ScopedAccessManagerTests.swift
 ├── SignedRecipeIndexVerifierTests.swift
 ├── SourcePolicyTests.swift
 ├── StagingManagerTests.swift
 ├── StagingManifestTests.swift
-├── SuccessViewTests.swift
 ├── WilbrandWorkflowTests.swift
 └── WorkflowCoordinatorTests.swift
 ```

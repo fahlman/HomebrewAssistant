@@ -2,13 +2,17 @@
 //  DiskAccessView.swift
 //  Homebrew Assistant
 //
-//  Purpose: Presents sandbox-friendly disk access state for the SD card step.
-//  Owns: Disk access explanation presentation, selected-drive card presentation,
-//  and user-facing valid/invalid disk readiness presentation.
-//  Does not own: Scoped access lifecycle, SD card picker presentation state,
-//  Disk Arbitration metadata resolution, SD card readiness policy, file writes,
-//  or eject behavior.
-//  Delegates to: WorkflowCoordinator, SDSelectionController, and SDCardReadiness.
+//  Purpose: Presents sandbox-friendly SD card selection and readiness state.
+//  Owns: Disk access explanation UI, selected-drive card presentation,
+//  readiness status/recovery presentation, metadata row presentation,
+//  file-system display formatting, capacity display formatting, and selected
+//  drive icon/status styling.
+//  Does not own: Scoped access lifecycle, SD card picker state, native volume
+//  metadata resolution, SD card readiness policy, file writes, workflow
+//  navigation, or eject behavior.
+//  Uses: SDSelectionController for selection state, SDCardReadiness and
+//  DiskVolumeMetadata for readiness/metadata display, AppStatusStyle for status
+//  colors, and localized strings for user-facing copy.
 //
 
 import AppKit

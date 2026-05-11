@@ -4,12 +4,13 @@
 //
 //  Purpose: Defines fixed app-owned workflow steps that are not recipe or
 //  internal workflow preparation items.
-//  Owns: Fixed step identities for Grant Disk Access, Choose Homebrew, Review Setup,
-//  Write and Verify Files, and Success, plus fixed-step ordering and basic metadata.
+//  Owns: Fixed step identities for SD card selection, choosing homebrew,
+//  review setup, writing/verifying files, and success, plus localization keys,
+//  SF Symbol names, and fixed-step ordering.
 //  Does not own: View layout, scoped filesystem access, download execution,
-//  disk writes, recipe loading, or internal workflow behavior.
-//  Delegates to: WorkflowCoordinator for runtime transitions and step-specific
-//  views/services for presentation and work.
+//  disk writes, recipe loading, internal workflow behavior, or navigation execution.
+//  Consumed by: WorkflowCoordinator and views/controllers that need fixed-step
+//  identity, title, icon, or ordering metadata.
 //
 
 import Foundation

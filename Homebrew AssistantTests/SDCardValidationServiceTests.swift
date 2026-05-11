@@ -2,17 +2,17 @@ import Foundation
 import Testing
 @testable import Homebrew_Assistant
 
-struct DiskManagerTests {
+struct SDCardValidationServiceTests {
     @Test func metadataUnavailableReturnsMetadataUnavailable() {
         let volumeURL = URL(fileURLWithPath: "/Volumes/TestSD")
-        let manager = DiskManager(metadataProvider: FakeDiskMetadataProvider(metadata: nil))
+        let manager = SDCardValidationService(metadataProvider: FakeDiskMetadataProvider(metadata: nil))
 
         #expect(manager.readiness(for: volumeURL) == .unavailable(reason: .metadataUnavailable))
     }
 
     @Test func nilProtocolReturnsNotSecureDigital() {
         let volumeURL = URL(fileURLWithPath: "/Volumes/TestSD")
-        let manager = DiskManager(metadataProvider: FakeDiskMetadataProvider(metadata: DiskVolumeMetadata(
+        let manager = SDCardValidationService(metadataProvider: FakeDiskMetadataProvider(metadata: DiskVolumeMetadata(
             volumeURL: volumeURL,
             protocolName: nil,
             isWritable: true,
@@ -33,7 +33,7 @@ struct DiskManagerTests {
 
     @Test func nonSecureDigitalProtocolReturnsNotSecureDigital() {
         let volumeURL = URL(fileURLWithPath: "/Volumes/USBDrive")
-        let manager = DiskManager(metadataProvider: FakeDiskMetadataProvider(metadata: DiskVolumeMetadata(
+        let manager = SDCardValidationService(metadataProvider: FakeDiskMetadataProvider(metadata: DiskVolumeMetadata(
             volumeURL: volumeURL,
             protocolName: "USB",
             isWritable: true,
@@ -55,7 +55,7 @@ struct DiskManagerTests {
 
     @Test func secureDigitalButReadOnlyReturnsNotWritable() {
         let volumeURL = URL(fileURLWithPath: "/Volumes/TestSD")
-        let manager = DiskManager(metadataProvider: FakeDiskMetadataProvider(metadata: DiskVolumeMetadata(
+        let manager = SDCardValidationService(metadataProvider: FakeDiskMetadataProvider(metadata: DiskVolumeMetadata(
             volumeURL: volumeURL,
             protocolName: "Secure Digital",
             isWritable: false,
@@ -87,14 +87,14 @@ struct DiskManagerTests {
             isEjectable: true,
             isInternal: false
         )
-        let manager = DiskManager(metadataProvider: FakeDiskMetadataProvider(metadata: metadata))
+        let manager = SDCardValidationService(metadataProvider: FakeDiskMetadataProvider(metadata: metadata))
 
         #expect(manager.readiness(for: volumeURL) == .ready(metadata))
     }
 
     @Test func removableEjectableExternalTraitsWithoutSecureDigitalAreNotEnough() {
         let volumeURL = URL(fileURLWithPath: "/Volumes/ExternalDrive")
-        let manager = DiskManager(metadataProvider: FakeDiskMetadataProvider(metadata: DiskVolumeMetadata(
+        let manager = SDCardValidationService(metadataProvider: FakeDiskMetadataProvider(metadata: DiskVolumeMetadata(
             volumeURL: volumeURL,
             protocolName: "USB",
             isWritable: true,

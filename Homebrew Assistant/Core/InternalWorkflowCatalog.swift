@@ -3,12 +3,13 @@
 //  Homebrew Assistant
 //
 //  Purpose: Provides app-owned internal workflow item definitions that are selectable alongside public recipes.
-//  Owns: Internal workflow kinds, internal workflow definition protocol, internal
-//  workflow list, ordering metadata, internal option metadata, and mapping
-//  internal workflow identifiers to bundled app-owned behavior.
+//  Owns: Internal workflow kinds, the internal workflow definition protocol,
+//  ordered internal workflow lists, internal option metadata, and mapping
+//  internal workflow kinds to their workflow definition objects.
 //  Does not own: Public recipe catalog loading, public recipe parsing, network
-//  downloads, SD card writes, or view rendering.
-//  Delegates to: WilbrandWorkflow, HackMiiWorkflow, and WorkflowCoordinator.
+//  downloads, SD card writes, workflow execution, or view rendering.
+//  Uses: WilbrandWorkflow and HackMiiWorkflow for workflow-specific
+//  definitions.
 //
 
 import Foundation

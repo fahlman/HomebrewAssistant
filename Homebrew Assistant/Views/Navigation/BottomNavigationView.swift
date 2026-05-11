@@ -4,12 +4,14 @@
 //
 //  Purpose: Presents shared bottom navigation and step-specific actions.
 //  Owns: Lower-left Quit/Back placement, lower-right action placement,
-//  optional contextual step-action placement before the default Next action,
-//  rendering the configured default button, and disabled/enabled button presentation.
-//  Does not own: Action availability decisions, workflow transitions, or risky
-//  operation execution.
-//  Delegates to: WorkflowCoordinator for navigation availability and user intent handling,
-//  and WorkflowStepAction for optional contextual step-action metadata.
+//  contextual action rendering, Next button rendering, Start New Workflow
+//  rendering on the success step, default-button assignment, and disabled/enabled
+//  button presentation.
+//  Does not own: Action availability decisions, workflow transitions, workflow
+//  reset policy, or risky operation execution.
+//  Uses: WorkflowCoordinator for navigation state and user-intent handling,
+//  WorkflowBottomBarConfiguration for bottom-bar behavior, and WorkflowStepAction
+//  for contextual action metadata and execution.
 //
 
 import SwiftUI

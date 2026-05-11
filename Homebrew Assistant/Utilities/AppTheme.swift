@@ -1,4 +1,0 @@
-import SwiftUI
-
-struct AppTheme {
-}

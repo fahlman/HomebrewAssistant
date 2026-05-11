@@ -2,12 +2,13 @@
 //  WilbrandView.swift
 //  Homebrew Assistant
 //
-//  Purpose: Presents the app-owned Wilbrand preparation step when selected.
-//  Owns: Wilbrand instructions presentation, Open Browser button presentation,
-//  Choose File button presentation, and Wilbrand validation/progress/status presentation.
-//  Does not own: Approved Wilbrand URL policy, archive extraction implementation,
-//  path safety checks, staging implementation, or SD card writes.
-//  Delegates to: WorkflowCoordinator, WilbrandWorkflow, and ItemPreparationService.
+//  Purpose: Presents the placeholder UI for the app-owned Wilbrand workflow.
+//  Owns: Content-unavailable presentation for Wilbrand while preparation UI is
+//  not yet implemented.
+//  Does not own: Wilbrand instructions, browser actions, file selection,
+//  validation, progress, archive extraction, staging, SD card writes, workflow
+//  navigation, or preparation execution.
+//  Uses: Localizable strings for placeholder title and description.
 //
 
 import SwiftUI

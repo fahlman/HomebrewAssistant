@@ -3,12 +3,12 @@
 //  Homebrew Assistant
 //
 //  Purpose: Represents an item in the generated workflow sidebar and navigation model.
-//  Owns: Stable workflow identifiers, ordering metadata, step type metadata,
-//  localization keys, and icon references.
+//  Owns: Public recipe workflow metadata, stable workflow item identifiers,
+//  ordering metadata, item type metadata, localization keys, and icon references.
 //  Does not own: Runtime workflow decisions, availability/completion state,
 //  scoped filesystem access, disk operations, downloads, writes, or UI rendering.
-//  Delegates to: WorkflowCoordinator for runtime state and navigation decisions,
-//  and FixedStep, InternalWorkflowCatalog, and Recipe for step-specific metadata.
+//  Uses: FixedStep, InternalWorkflowKind, and PublicRecipeWorkflowMetadata for
+//  item-specific metadata.
 //
 
 import Foundation

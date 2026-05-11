@@ -2,13 +2,12 @@
 //  StepStateStore.swift
 //  Homebrew Assistant
 //
-//  Purpose: Stores per-step session state for the active workflow.
-//  Owns: Step status, progress values, selected options, diagnostic messages,
-//  recoverable error metadata, and session-only step state.
+//  Purpose: Stores per-workflow-item session state for the active workflow.
+//  Owns: Step status, progress values, selected option IDs, diagnostic messages,
+//  recoverable error messages, and session-only step state.
 //  Does not own: Workflow navigation rules, scoped filesystem access, disk operations,
-//  downloads, writes, or persistent workflow restoration.
-//  Delegates to: WorkflowCoordinator for state transitions and DiagnosticsLog for
-//  diagnostic event recording.
+//  downloads, writes, diagnostics recording, or persistent workflow restoration.
+//  Consumed by: WorkflowCoordinator and views/controllers that need step state.
 //
 
 import Foundation

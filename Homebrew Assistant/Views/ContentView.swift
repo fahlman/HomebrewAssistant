@@ -2,22 +2,35 @@
 //  ContentView.swift
 //  Homebrew Assistant
 //
-//  Purpose: Hosts the app's top-level sidebar/detail window layout.
-//  Owns: Main window layout composition, placement of sidebar, detail, and
-//  bottom navigation regions, and creation/injection of shared view-session
-//  controllers needed by multiple app regions.
-//  Does not own: Workflow business logic, disk operations, scoped filesystem access,
-//  downloads, staging, or file writes.
-//  Delegates to: WorkflowSidebarView, WorkflowDetailView, BottomNavigationView,
-//  shared workflow state, and SDSelectionController.
+//  Purpose: Hosts the app's top-level sidebar/detail window layout and wires
+//  shared view-session controllers into the main workflow UI.
+//  Owns: NavigationSplitView composition, sidebar/detail/bottom navigation
+//  placement, WorkflowCoordinator creation, SDSelectionController creation,
+//  HomebrewDashboardController creation, bottom-bar configuration, Disk Utility
+//  launch action, and temporary choose-homebrew placeholder phase state.
+//  Does not own: SD card validation policy, scoped filesystem access lifecycle,
+//  recipe catalog loading, public recipe parsing, downloads, staging, file writes,
+//  workflow item rendering, sidebar row rendering, detail-view routing, or bottom
+//  button rendering.
+//  Uses: WorkflowSidebarView, WorkflowDetailView, BottomNavigationView,
+//  WorkflowCoordinator, SDSelectionController, HomebrewDashboardController,
+//  WorkflowStepAction, and WorkflowBottomBarConfiguration.
 //
 
 import AppKit
 import SwiftUI
 
 struct ContentView: View {
-    @StateObject private var coordinator = WorkflowCoordinator()
+    @StateObject private var coordinator: WorkflowCoordinator
     @StateObject private var sdSelectionController = SDSelectionController()
+    @StateObject private var homebrewDashboardController: HomebrewDashboardController
+    init() {
+        let coordinator = WorkflowCoordinator()
+        _coordinator = StateObject(wrappedValue: coordinator)
+        _homebrewDashboardController = StateObject(
+            wrappedValue: HomebrewDashboardController(coordinator: coordinator)
+        )
+    }
     @State private var hasOpenedDiskUtilityForCurrentSelection = false
     @State private var chooseHomebrewPhase: ChooseHomebrewPhase = .notDownloaded
 
@@ -28,7 +41,8 @@ struct ContentView: View {
             VStack(spacing: 0) {
                 WorkflowDetailView(
                     coordinator: coordinator,
-                    sdSelectionController: sdSelectionController
+                    sdSelectionController: sdSelectionController,
+                    homebrewDashboardController: homebrewDashboardController
                 )
                 BottomNavigationView(
                     coordinator: coordinator,

@@ -2,13 +2,15 @@
 //  WorkflowStepAction.swift
 //  Homebrew Assistant
 //
-//  Purpose: Describes optional contextual actions for the selected workflow step.
-//  Owns: User-facing action title keys, optional icon references, enabled states,
-//  and action execution closures.
-//  Does not own: Button placement, workflow navigation, step UI presentation,
-//  file pickers, downloads, writes, or validation policy.
-//  Delegates to: BottomNavigationView for presentation and step-specific
-//  controllers/coordinators for behavior.
+//  Purpose: Describes optional contextual workflow-step actions and bottom-bar
+//  configuration for the selected workflow item.
+//  Owns: Action title keys, optional action icon references, enabled states,
+//  action execution closures, contextual action lists, forward-button overrides,
+//  and default-action selection.
+//  Does not own: Workflow navigation execution, step UI presentation, file
+//  pickers, downloads, writes, validation policy, or button rendering.
+//  Consumed by: BottomNavigationView and step-specific controllers/coordinators
+//  that provide contextual workflow actions.
 //
 
 import Foundation

@@ -4,12 +4,12 @@
 //
 //  Purpose: Coordinates SD card selection state for the active workflow session.
 //  Owns: SD card picker presentation state, selected-volume scoped access,
-//  selected/rejected drive display state, selected-volume readiness, selection
-//  error state, and SD card selection reset.
-//  Does not own: SD card selection UI layout, bottom button placement, Disk
-//  Arbitration metadata policy, file writes, staging, recipe preparation, or
+//  selected drive display state, selected-volume readiness, selection error
+//  state, and SD card selection reset.
+//  Does not own: SD card selection UI layout, bottom button placement, native
+//  volume metadata lookup policy, file writes, staging, recipe preparation, or
 //  workflow navigation.
-//  Delegates to: ScopedAccessManager for scoped filesystem access and DiskManager
+//  Delegates to: ScopedAccessManager for scoped filesystem access and SDCardValidationService
 //  for SD card readiness classification.
 //
 
@@ -25,19 +25,19 @@ final class SDSelectionController: ObservableObject {
 
     let scopedAccessManager: ScopedAccessManager
 
-    private let diskManager: DiskManager
+    private let sdCardValidationService: SDCardValidationService
 
     init() {
         self.scopedAccessManager = ScopedAccessManager()
-        self.diskManager = DiskManager()
+        self.sdCardValidationService = SDCardValidationService()
     }
 
     init(
         scopedAccessManager: ScopedAccessManager,
-        diskManager: DiskManager
+        sdCardValidationService: SDCardValidationService
     ) {
         self.scopedAccessManager = scopedAccessManager
-        self.diskManager = diskManager
+        self.sdCardValidationService = sdCardValidationService
     }
 
     var selectedVolumeURL: URL? {
@@ -83,7 +83,7 @@ final class SDSelectionController: ObservableObject {
             return
         }
 
-        let resolvedReadiness = diskManager.readiness(for: selectedURL)
+        let resolvedReadiness = sdCardValidationService.readiness(for: selectedURL)
         readiness = resolvedReadiness
         selectedDrive = SelectedDrive(volumeURL: selectedURL, readiness: resolvedReadiness)
 

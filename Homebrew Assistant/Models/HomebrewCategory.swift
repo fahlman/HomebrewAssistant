@@ -2,21 +2,14 @@
 //  HomebrewCategory.swift
 //  Homebrew Assistant
 //
-//  Created by Ryan Fahlsing on 5/7/26.
-//
-
-
-//
-//  HomebrewCategory.swift
-//  Homebrew Assistant
-//
 //  Purpose: Defines shared homebrew category values used by internal workflows
 //  and public recipes.
-//  Owns: Category identifiers, localized category title keys, category display
-//  titles, and category sort order.
+//  Owns: Category identifiers, localized category title keys, localized title
+//  lookup, and raw-value category ordering.
 //  Does not own: Homebrew option selection, recipe loading, internal workflow
-//  behavior, filtering UI, sorting UI, or workflow navigation.
-//  Delegates to: Localizable strings for user-facing category titles.
+//  behavior, filtering UI, sorting UI, workflow navigation, or localized string
+//  content.
+//  Uses: Localizable strings for user-facing category titles.
 //
 
 import Foundation

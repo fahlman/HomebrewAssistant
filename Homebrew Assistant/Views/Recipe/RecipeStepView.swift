@@ -2,12 +2,13 @@
 //  RecipeStepView.swift
 //  Homebrew Assistant
 //
-//  Purpose: Presents selected public recipe-driven preparation steps using validated recipe metadata.
-//  Owns: Recipe display layout, localized recipe title/summary/instruction
-//  presentation, download and Next control presentation, and recipe status presentation.
-//  Does not own: Recipe catalog loading, recipe parsing, source trust decisions,
-//  downloads, checksums, extraction, staging, or SD writes.
-//  Delegates to: WorkflowCoordinator and ItemPreparationService.
+//  Purpose: Presents the placeholder UI for public recipe workflow items.
+//  Owns: Content-unavailable presentation for recipe steps that are not yet
+//  implemented.
+//  Does not own: Recipe metadata display, recipe catalog loading, recipe parsing,
+//  source trust decisions, downloads, checksums, extraction, staging, SD writes,
+//  workflow navigation, or preparation execution.
+//  Uses: Localizable strings for placeholder title and description.
 //
 
 import SwiftUI
