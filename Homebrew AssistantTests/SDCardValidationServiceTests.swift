@@ -1,3 +1,17 @@
+//
+//  SDCardValidationServiceTests.swift
+//  Homebrew Assistant Tests
+//
+//  Purpose: Verifies SD card readiness classification from injected disk metadata.
+//  Covers: Missing metadata, missing protocol name, non-Secure-Digital volumes,
+//  read-only Secure Digital volumes, writable Secure Digital volumes, and the
+//  rule that removable/ejectable/external traits are not enough without the
+//  Secure Digital protocol.
+//  Does not cover: Native Disk Arbitration metadata lookup, scoped filesystem
+//  access, UI presentation, workflow navigation, file writes, or physical SD card
+//  hardware behavior.
+//
+
 import Foundation
 import Testing
 @testable import Homebrew_Assistant
@@ -58,6 +72,7 @@ struct SDCardValidationServiceTests {
         let manager = SDCardValidationService(metadataProvider: FakeDiskMetadataProvider(metadata: DiskVolumeMetadata(
             volumeURL: volumeURL,
             protocolName: "Secure Digital",
+            fileSystemType: "msdos",
             isWritable: false,
             isRemovable: true,
             isEjectable: true,
@@ -82,6 +97,7 @@ struct SDCardValidationServiceTests {
             volumeURL: volumeURL,
             localizedName: "Test SD",
             protocolName: "Secure Digital",
+            fileSystemType: "msdos",
             isWritable: true,
             isRemovable: true,
             isEjectable: true,

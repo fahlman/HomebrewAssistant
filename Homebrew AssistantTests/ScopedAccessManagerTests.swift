@@ -1,3 +1,14 @@
+//
+//  ScopedAccessManagerTests.swift
+//  Homebrew Assistant Tests
+//
+//  Purpose: Verifies scoped-access session state behavior.
+//  Covers: Initial state, failed access attempts, successful access attempts,
+//  reset behavior, and replacing an active access session.
+//  Does not cover: Native security-scoped resource APIs, user file pickers,
+//  SD card readiness validation, workflow navigation, or filesystem writes.
+//
+
 import Foundation
 import Testing
 @testable import Homebrew_Assistant

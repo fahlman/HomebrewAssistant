@@ -1,21 +1,30 @@
+//
+//  WorkflowCoordinatorTests.swift
+//  Homebrew Assistant Tests
+//
+//  Purpose: Verifies generated workflow items, selection reachability, and
+//  workflow reset behavior.
+//  Covers: Initial visible fixed workflow generation, locked-step behavior, completed
+//  item gating, Wilbrand workflow insertion/removal, HackMii selection tracking,
+//  discarded generated-item state, and reset-to-starting workflow behavior.
+//  Does not cover: UI rendering, SD card validation, scoped filesystem access,
+//  downloads, staging, SD writes, or physical device behavior.
+//
 import Testing
 @testable import Homebrew_Assistant
 
 @MainActor
 struct WorkflowCoordinatorTests {
-    @Test func initialWorkflowContainsFixedSteps() {
+    @Test func initialWorkflowContainsStartingFixedSteps() {
         let coordinator = WorkflowCoordinator()
 
         #expect(coordinator.workflowItems == [
             .fixed(.sdCardSelection),
-            .fixed(.chooseItems),
-            .fixed(.reviewSetup),
-            .fixed(.writeAndVerifyFiles),
-            .fixed(.success)
+            .fixed(.chooseItems)
         ])
     }
 
-    @Test func futureStepsAreLockedUntilGrantDiskAccessIsComplete() {
+    @Test func futureStepsAreLockedUntilSDCardSelectionIsComplete() {
         let coordinator = WorkflowCoordinator()
 
         #expect(coordinator.canSelect(.fixed(.sdCardSelection)))
@@ -24,7 +33,7 @@ struct WorkflowCoordinatorTests {
         #expect(!coordinator.canGoForward)
     }
 
-    @Test func completingGrantDiskAccessUnlocksChooseHomebrew() {
+    @Test func completingSDCardSelectionUnlocksChooseHomebrew() {
         let coordinator = WorkflowCoordinator()
 
         coordinator.setWorkflowItem(.fixed(.sdCardSelection), isCompleted: true)
@@ -32,6 +41,7 @@ struct WorkflowCoordinatorTests {
         #expect(coordinator.canSelect(.fixed(.chooseItems)))
         #expect(coordinator.canGoForward)
     }
+
 
     @Test func selectingLockedFutureStepDoesNothing() {
         let coordinator = WorkflowCoordinator()
@@ -41,7 +51,20 @@ struct WorkflowCoordinatorTests {
         #expect(coordinator.selectedItemID == WorkflowItem.fixed(.sdCardSelection).id)
     }
 
-    @Test func lockingGrantDiskAccessAgainReturnsSelectionToReachableStep() {
+    @Test func selectingReachableInternalWorkflowUpdatesSelectedItem() {
+        let coordinator = WorkflowCoordinator()
+        let wilbrandItem = WorkflowItem.internalWorkflow(.wilbrand)
+
+        coordinator.setWorkflowItem(.fixed(.sdCardSelection), isCompleted: true)
+        coordinator.updateSelectedInternalWorkflows([.wilbrand])
+        coordinator.setWorkflowItem(.fixed(.chooseItems), isCompleted: true)
+
+        coordinator.select(wilbrandItem)
+
+        #expect(coordinator.selectedItemID == wilbrandItem.id)
+    }
+
+    @Test func lockingSDCardSelectionAgainReturnsSelectionToReachableStep() {
         let coordinator = WorkflowCoordinator()
 
         coordinator.setWorkflowItem(.fixed(.sdCardSelection), isCompleted: true)
@@ -52,7 +75,7 @@ struct WorkflowCoordinatorTests {
         #expect(!coordinator.canSelect(.fixed(.chooseItems)))
     }
 
-    @Test func chooseHomebrewGatesReviewSetupUntilAnItemIsSelected() {
+    @Test func chooseHomebrewGatesVisibleInternalWorkflowUntilAnItemIsSelected() {
         let coordinator = WorkflowCoordinator()
 
         coordinator.setWorkflowItem(.fixed(.sdCardSelection), isCompleted: true)
@@ -62,33 +85,31 @@ struct WorkflowCoordinatorTests {
         #expect(!coordinator.canSelect(.fixed(.reviewSetup)))
         #expect(!coordinator.canGoForward)
 
-        coordinator.updateSelectedInternalWorkflows([.hackMii])
+        coordinator.updateSelectedInternalWorkflows([.wilbrand])
         coordinator.setWorkflowItem(.fixed(.chooseItems), isCompleted: true)
 
-        #expect(coordinator.canSelect(.internalWorkflow(.hackMii)))
+        #expect(coordinator.canSelect(.internalWorkflow(.wilbrand)))
         #expect(coordinator.canGoForward)
     }
 
     @Test func visibleInternalWorkflowGatesFollowingSteps() {
         let coordinator = WorkflowCoordinator()
-        let hackMiiItem = WorkflowItem.internalWorkflow(.hackMii)
+        let wilbrandItem = WorkflowItem.internalWorkflow(.wilbrand)
 
         coordinator.setWorkflowItem(.fixed(.sdCardSelection), isCompleted: true)
-        coordinator.updateSelectedInternalWorkflows([.hackMii])
+        coordinator.updateSelectedInternalWorkflows([.wilbrand])
         coordinator.setWorkflowItem(.fixed(.chooseItems), isCompleted: true)
-        coordinator.select(hackMiiItem)
+        coordinator.select(wilbrandItem)
 
-        #expect(coordinator.canSelect(hackMiiItem))
-        #expect(!coordinator.canSelect(.fixed(.reviewSetup)))
+        #expect(coordinator.canSelect(wilbrandItem))
         #expect(!coordinator.canGoForward)
 
-        coordinator.setWorkflowItem(hackMiiItem, isCompleted: true)
+        coordinator.setWorkflowItem(wilbrandItem, isCompleted: true)
 
-        #expect(coordinator.canSelect(.fixed(.reviewSetup)))
-        #expect(coordinator.canGoForward)
+        #expect(!coordinator.canGoForward)
     }
 
-    @Test func selectingWilbrandInsertsWilbrandBeforeReviewSetup() {
+    @Test func selectingWilbrandInsertsWilbrandAfterChooseItems() {
         let coordinator = WorkflowCoordinator()
 
         coordinator.updateSelectedInternalWorkflows([.wilbrand])
@@ -96,44 +117,55 @@ struct WorkflowCoordinatorTests {
         #expect(coordinator.workflowItems == [
             .fixed(.sdCardSelection),
             .fixed(.chooseItems),
-            .internalWorkflow(.wilbrand),
-            .fixed(.reviewSetup),
-            .fixed(.writeAndVerifyFiles),
-            .fixed(.success)
+            .internalWorkflow(.wilbrand)
         ])
     }
 
-    @Test func selectingWilbrandAndHackMiiInsertsInternalWorkflowsInCatalogOrder() {
+
+    @Test func selectedHackMiiIsTrackedButNotInsertedIntoGeneratedWorkflowYet() {
         let coordinator = WorkflowCoordinator()
 
         coordinator.updateSelectedInternalWorkflows([.hackMii, .wilbrand])
 
+        #expect(coordinator.selectedInternalWorkflows == [.wilbrand, .hackMii])
         #expect(coordinator.workflowItems == [
             .fixed(.sdCardSelection),
             .fixed(.chooseItems),
-            .internalWorkflow(.wilbrand),
-            .internalWorkflow(.hackMii),
-            .fixed(.reviewSetup),
-            .fixed(.writeAndVerifyFiles),
-            .fixed(.success)
+            .internalWorkflow(.wilbrand)
         ])
     }
 
-    @Test func removingSelectedInternalWorkflowRemovesItFromGeneratedWorkflow() {
+    @Test func selectedPublicRecipesAreTrackedButNotInsertedIntoGeneratedWorkflowYet() {
+        let coordinator = WorkflowCoordinator()
+        let recipe = PublicRecipeWorkflowMetadata(
+            id: "sample.recipe",
+            titleKey: "recipe.sample.title",
+            systemImageName: "shippingbox",
+            sortOrder: 10
+        )
+
+        coordinator.updateSelectedPublicRecipes([recipe])
+
+        #expect(coordinator.selectedPublicRecipes == [recipe])
+        #expect(coordinator.workflowItems == [
+            .fixed(.sdCardSelection),
+            .fixed(.chooseItems)
+        ])
+    }
+
+    @Test func removingWilbrandRemovesItFromGeneratedWorkflow() {
         let coordinator = WorkflowCoordinator()
 
         coordinator.updateSelectedInternalWorkflows([.wilbrand, .hackMii])
         coordinator.updateSelectedInternalWorkflows([.hackMii])
 
+        #expect(coordinator.selectedInternalWorkflows == [.hackMii])
         #expect(coordinator.workflowItems == [
             .fixed(.sdCardSelection),
-            .fixed(.chooseItems),
-            .internalWorkflow(.hackMii),
-            .fixed(.reviewSetup),
-            .fixed(.writeAndVerifyFiles),
-            .fixed(.success)
+            .fixed(.chooseItems)
         ])
     }
+
 
     @Test func removingSelectedInternalWorkflowDiscardsItsStepState() {
         let coordinator = WorkflowCoordinator()
@@ -148,22 +180,50 @@ struct WorkflowCoordinatorTests {
         #expect(!coordinator.isCompleted(wilbrandItem))
     }
 
-    @Test func resetWorkflowReturnsToInitialFixedWorkflow() {
+    @Test func removingOneSelectedInternalWorkflowPreservesRemainingSelectionButInvalidatesGeneratedState() {
         let coordinator = WorkflowCoordinator()
+        let wilbrandItem = WorkflowItem.internalWorkflow(.wilbrand)
 
         coordinator.updateSelectedInternalWorkflows([.wilbrand, .hackMii])
+        coordinator.mark(wilbrandItem, as: StepState(status: .completed))
+        coordinator.setWorkflowItem(wilbrandItem, isCompleted: true)
+
+        coordinator.updateSelectedInternalWorkflows([.wilbrand])
+
+        #expect(coordinator.selectedInternalWorkflows == [.wilbrand])
+        #expect(coordinator.workflowItems.contains(wilbrandItem))
+        #expect(coordinator.state(for: wilbrandItem).status == .notStarted)
+        #expect(!coordinator.isCompleted(wilbrandItem))
+    }
+
+    @Test func resetWorkflowReturnsToStartingFixedWorkflowAndClearsGeneratedItemState() {
+        let coordinator = WorkflowCoordinator()
+        let sdCardItem = WorkflowItem.fixed(.sdCardSelection)
+        let chooseItemsItem = WorkflowItem.fixed(.chooseItems)
+        let wilbrandItem = WorkflowItem.internalWorkflow(.wilbrand)
+
+        coordinator.updateSelectedInternalWorkflows([.wilbrand])
+        coordinator.mark(sdCardItem, as: StepState(status: .completed))
+        coordinator.mark(chooseItemsItem, as: StepState(status: .completed))
+        coordinator.mark(wilbrandItem, as: StepState(status: .completed))
+        coordinator.setWorkflowItem(sdCardItem, isCompleted: true)
+        coordinator.setWorkflowItem(chooseItemsItem, isCompleted: true)
+        coordinator.setWorkflowItem(wilbrandItem, isCompleted: true)
+
         coordinator.resetWorkflow()
 
         #expect(coordinator.workflowItems == [
             .fixed(.sdCardSelection),
-            .fixed(.chooseItems),
-            .fixed(.reviewSetup),
-            .fixed(.writeAndVerifyFiles),
-            .fixed(.success)
+            .fixed(.chooseItems)
         ])
         #expect(coordinator.selectedInternalWorkflows.isEmpty)
         #expect(coordinator.selectedPublicRecipes.isEmpty)
-        #expect(coordinator.selectedItemID == WorkflowItem.fixed(.sdCardSelection).id)
-        #expect(!coordinator.isCompleted(.fixed(.sdCardSelection)))
+        #expect(coordinator.selectedItemID == sdCardItem.id)
+        #expect(coordinator.state(for: sdCardItem).status == .notStarted)
+        #expect(coordinator.state(for: chooseItemsItem).status == .notStarted)
+        #expect(coordinator.state(for: wilbrandItem).status == .notStarted)
+        #expect(!coordinator.isCompleted(sdCardItem))
+        #expect(!coordinator.isCompleted(chooseItemsItem))
+        #expect(!coordinator.isCompleted(wilbrandItem))
     }
 }
