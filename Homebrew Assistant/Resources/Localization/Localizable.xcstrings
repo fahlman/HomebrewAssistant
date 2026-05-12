@@ -301,17 +301,6 @@
         }
       }
     },
-    "hackMii.placeholder.description" : {
-      "comment" : "Placeholder description for the HackMii preparation screen.",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "HackMii preparation UI will appear here."
-          }
-        }
-      }
-    },
     "navigation.back" : {
       "comment" : "Button title for moving to the previous workflow step.",
       "localizations" : {
@@ -341,28 +330,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Quit"
-          }
-        }
-      }
-    },
-    "recipeStep.placeholder.description" : {
-      "comment" : "Placeholder description for a public recipe preparation screen.",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Recipe preparation UI will appear here."
-          }
-        }
-      }
-    },
-    "recipeStep.title" : {
-      "comment" : "Generic title for a public recipe preparation screen before recipe metadata is displayed.",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Recipe"
           }
         }
       }
@@ -633,17 +600,6 @@
         }
       }
     },
-    "wilbrand.placeholder.description" : {
-      "comment" : "Placeholder description for the Wilbrand preparation screen.",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Wilbrand preparation UI will appear here."
-          }
-        }
-      }
-    },
     "workflow.action.startNewWorkflow" : {
       "comment" : "Button title for clearing the current session and starting over.",
       "localizations" : {
@@ -703,6 +659,7 @@
     },
     "workflow.internal.hackMii.title" : {
       "comment" : "Title for the app-owned HackMii internal workflow.",
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -714,6 +671,7 @@
     },
     "workflow.internal.wilbrand.title" : {
       "comment" : "Title for the app-owned Wilbrand internal workflow.",
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {

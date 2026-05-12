@@ -5,7 +5,7 @@
 //  Purpose: Coordinates the active workflow session and generated workflow items.
 //  Owns: Current workflow items, selected item, completed item IDs,
 //  sequential reachability rules, selected internal workflows, selected public
-//  recipes, workflow regeneration, and workflow reset behavior.
+//  recipes, and workflow reset behavior.
 //  Does not own: Scoped filesystem access, disk metadata resolution, recipe
 //  catalog loading, public recipe parsing, downloads, archive extraction,
 //  staging file management, SD card writes, verification execution, eject
@@ -232,13 +232,7 @@ final class WorkflowCoordinator: ObservableObject {
     }
 
     private func generatedWorkflowItems() -> [WorkflowItem] {
-        var items = Self.fixedItems()
-
-        if selectedInternalWorkflows.contains(.wilbrand) {
-            items.append(.internalWorkflow(.wilbrand))
-        }
-
-        return items
+        Self.fixedItems()
     }
 
     private static func initialWorkflowItems() -> [WorkflowItem] {

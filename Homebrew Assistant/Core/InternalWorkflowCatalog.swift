@@ -2,9 +2,10 @@
 //  InternalWorkflowCatalog.swift
 //  Homebrew Assistant
 //
-//  Purpose: Provides app-owned internal workflow item definitions that are selectable alongside public recipes.
+//  Purpose: Provides app-owned internal workflow metadata that is selectable
+//  through the Homebrew dashboard.
 //  Owns: Internal workflow kinds, the internal workflow definition protocol,
-//  ordered internal workflow lists, internal option metadata, and mapping
+//  ordered internal workflow metadata, internal option metadata, and mapping
 //  internal workflow kinds to their workflow definition objects.
 //  Does not own: Public recipe catalog loading, public recipe parsing, network
 //  downloads, SD card writes, workflow execution, or view rendering.
@@ -75,11 +76,6 @@ struct InternalWorkflowCatalog {
         }
     }
 
-    var workflowItems: [WorkflowItem] {
-        workflows.map { kind in
-            .internalWorkflow(kind)
-        }
-    }
 
     var homebrewOptions: [HomebrewOption] {
         workflows.map { kind in

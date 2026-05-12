@@ -1,4 +1,3 @@
-
 //
 //  HomebrewDashboardControllerTests.swift
 //  Homebrew Assistant Tests
@@ -69,7 +68,7 @@ struct HomebrewDashboardControllerTests {
         #expect(!controller.binding(for: hackMiiOption).wrappedValue)
     }
 
-    @Test func wilbrandStatusReflectsSelectionAndCompletion() {
+    @Test func wilbrandStatusReflectsSelection() {
         let coordinator = WorkflowCoordinator()
         let controller = HomebrewDashboardController(coordinator: coordinator)
         let wilbrandOption = controller.visibleOptions.first { option in
@@ -83,9 +82,6 @@ struct HomebrewDashboardControllerTests {
 
         controller.binding(for: wilbrandOption).wrappedValue = true
         #expect(controller.status(for: wilbrandOption) == .setupRequired)
-
-        coordinator.setWorkflowItem(.internalWorkflow(.wilbrand), isCompleted: true)
-        #expect(controller.status(for: wilbrandOption) == .readyToSave)
     }
 
     @Test func hackMiiStatusReflectsSelection() {
@@ -104,4 +100,3 @@ struct HomebrewDashboardControllerTests {
         #expect(controller.status(for: hackMiiOption) == .readyToDownload)
     }
 }
-

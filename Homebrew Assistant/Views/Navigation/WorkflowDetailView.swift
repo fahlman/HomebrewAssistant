@@ -2,14 +2,14 @@
 //  WorkflowDetailView.swift
 //  Homebrew Assistant
 //
-//  Purpose: Routes the selected workflow item to the correct detail view.
-//  Owns: Detail-view routing for fixed workflow steps, internal workflows,
-//  public recipe placeholders, and the no-selection placeholder.
+//  Purpose: Routes the selected fixed workflow item to the correct detail view.
+//  Owns: Detail-view routing for fixed workflow steps and the no-selection
+//  placeholder.
 //  Does not own: Workflow decisions, service work, recipe parsing, downloads,
 //  writing, verification, or file operations.
 //  Uses: WorkflowCoordinator, SDSelectionController, and
-//  HomebrewDashboardController for state, and routes to DiskAccessView,
-//  HomebrewDashboardView, WilbrandView, and RecipeStepView.
+//  HomebrewDashboardController for state, and routes to DiskAccessView and
+//  HomebrewDashboardView.
 //
 
 import SwiftUI
@@ -44,10 +44,8 @@ struct WorkflowDetailView: View {
         switch item {
         case .fixed(let fixedStep):
             fixedStepView(for: fixedStep)
-        case .internalWorkflow(let kind):
-            internalWorkflowView(for: kind)
-        case .publicRecipe:
-            RecipeStepView()
+        case .internalWorkflow, .publicRecipe:
+            EmptyView()
         }
     }
 
@@ -60,16 +58,6 @@ struct WorkflowDetailView: View {
             HomebrewDashboardView(controller: homebrewDashboardController)
         case .reviewSetup, .writeAndVerifyFiles, .success:
             EmptyView()
-        }
-    }
-
-    @ViewBuilder
-    private func internalWorkflowView(for kind: InternalWorkflowKind) -> some View {
-        switch kind {
-        case .wilbrand:
-            WilbrandView()
-        case .hackMii:
-            RecipeStepView()
         }
     }
 }
