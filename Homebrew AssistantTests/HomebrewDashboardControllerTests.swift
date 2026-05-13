@@ -6,7 +6,8 @@
 //  selection binding, and preparation status mapping.
 //  Covers: Default filter/sort state, category filtering, alphabetical sorting,
 //  internal workflow selection updates, initial Wilbrand/HackMii status mapping,
-//  and injected preparation-state status mapping.
+//  injected preparation-state status mapping, next preparation action selection,
+//  bottom-bar configuration, and preparation action transitions.
 //  Does not cover: Dashboard SwiftUI rendering, public recipe catalog loading,
 //  downloads, staging, SD card writes, verification, or workflow navigation.
 //
@@ -141,5 +142,135 @@ struct HomebrewDashboardControllerTests {
         controller.binding(for: hackMiiOption).wrappedValue = true
 
         #expect(controller.status(for: hackMiiOption) == .readyToDownload)
+    }
+
+
+    @Test func noSelectedHomebrewHasNoNextPreparationActionOrBottomBarAction() {
+        let coordinator = WorkflowCoordinator()
+        let controller = HomebrewDashboardController(coordinator: coordinator)
+
+        #expect(controller.nextPreparationAction == nil)
+        #expect(controller.bottomBarConfiguration.contextualActions.isEmpty)
+        #expect(controller.bottomBarConfiguration.canGoForwardOverride == nil)
+        #expect(controller.bottomBarConfiguration.defaultAction == nil)
+    }
+
+    @Test func selectedWilbrandMakesSetUpWilbrandTheDefaultBottomBarAction() {
+        let coordinator = WorkflowCoordinator()
+        let controller = HomebrewDashboardController(coordinator: coordinator)
+        let wilbrandOption = controller.visibleOptions.first { option in
+            option.source == .internalWorkflow(.wilbrand)
+        }
+
+        #expect(wilbrandOption != nil)
+        guard let wilbrandOption else { return }
+
+        controller.binding(for: wilbrandOption).wrappedValue = true
+
+        #expect(controller.nextPreparationAction == .setUpWilbrand)
+        #expect(controller.bottomBarConfiguration.contextualActions.map(\.titleKey) == [
+            HomebrewPreparationAction.setUpWilbrand.titleKey
+        ])
+        #expect(controller.bottomBarConfiguration.contextualActions.map(\.systemImageName) == [
+            HomebrewPreparationAction.setUpWilbrand.systemImageName
+        ])
+        #expect(controller.bottomBarConfiguration.canGoForwardOverride == false)
+        #expect(controller.bottomBarConfiguration.defaultAction == .contextualAction(index: 0))
+    }
+
+    @Test func selectedHackMiiMakesDownloadTheDefaultBottomBarAction() {
+        let coordinator = WorkflowCoordinator()
+        let controller = HomebrewDashboardController(coordinator: coordinator)
+        let hackMiiOption = controller.visibleOptions.first { option in
+            option.source == .internalWorkflow(.hackMii)
+        }
+
+        #expect(hackMiiOption != nil)
+        guard let hackMiiOption else { return }
+
+        controller.binding(for: hackMiiOption).wrappedValue = true
+
+        #expect(controller.nextPreparationAction == .download)
+        #expect(controller.bottomBarConfiguration.contextualActions.map(\.titleKey) == [
+            HomebrewPreparationAction.download.titleKey
+        ])
+        #expect(controller.bottomBarConfiguration.contextualActions.map(\.systemImageName) == [
+            HomebrewPreparationAction.download.systemImageName
+        ])
+        #expect(controller.bottomBarConfiguration.canGoForwardOverride == false)
+        #expect(controller.bottomBarConfiguration.defaultAction == .contextualAction(index: 0))
+    }
+
+    @Test func wilbrandSetupTakesPriorityOverDownload() {
+        let coordinator = WorkflowCoordinator()
+        let controller = HomebrewDashboardController(coordinator: coordinator)
+        let wilbrandOption = controller.visibleOptions.first { option in
+            option.source == .internalWorkflow(.wilbrand)
+        }
+        let hackMiiOption = controller.visibleOptions.first { option in
+            option.source == .internalWorkflow(.hackMii)
+        }
+
+        #expect(wilbrandOption != nil)
+        #expect(hackMiiOption != nil)
+        guard let wilbrandOption, let hackMiiOption else { return }
+
+        controller.binding(for: wilbrandOption).wrappedValue = true
+        controller.binding(for: hackMiiOption).wrappedValue = true
+
+        #expect(controller.nextPreparationAction == .setUpWilbrand)
+    }
+
+    @Test func performSetUpWilbrandMovesWilbrandToReadyToSave() {
+        let coordinator = WorkflowCoordinator()
+        let controller = HomebrewDashboardController(coordinator: coordinator)
+        let wilbrandOption = controller.visibleOptions.first { option in
+            option.source == .internalWorkflow(.wilbrand)
+        }
+
+        #expect(wilbrandOption != nil)
+        guard let wilbrandOption else { return }
+
+        controller.binding(for: wilbrandOption).wrappedValue = true
+        controller.perform(.setUpWilbrand)
+
+        #expect(controller.status(for: wilbrandOption) == .readyToSave)
+        #expect(controller.nextPreparationAction == .save)
+    }
+
+    @Test func performDownloadMovesReadyToDownloadOptionsToReadyToSave() {
+        let coordinator = WorkflowCoordinator()
+        let controller = HomebrewDashboardController(coordinator: coordinator)
+        let hackMiiOption = controller.visibleOptions.first { option in
+            option.source == .internalWorkflow(.hackMii)
+        }
+
+        #expect(hackMiiOption != nil)
+        guard let hackMiiOption else { return }
+
+        controller.binding(for: hackMiiOption).wrappedValue = true
+        controller.perform(.download)
+
+        #expect(controller.status(for: hackMiiOption) == .readyToSave)
+        #expect(controller.nextPreparationAction == .save)
+    }
+
+    @Test func performSaveMovesReadyToSaveOptionsToSaved() {
+        let coordinator = WorkflowCoordinator()
+        let controller = HomebrewDashboardController(coordinator: coordinator)
+        let hackMiiOption = controller.visibleOptions.first { option in
+            option.source == .internalWorkflow(.hackMii)
+        }
+
+        #expect(hackMiiOption != nil)
+        guard let hackMiiOption else { return }
+
+        controller.binding(for: hackMiiOption).wrappedValue = true
+        controller.perform(.download)
+        controller.perform(.save)
+
+        #expect(controller.status(for: hackMiiOption) == .saved)
+        #expect(controller.nextPreparationAction == nil)
+        #expect(controller.bottomBarConfiguration.contextualActions.isEmpty)
     }
 }

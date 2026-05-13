@@ -2,14 +2,17 @@
 //  HomebrewDashboardController.swift
 //  Homebrew Assistant
 //
-//  Purpose: Coordinates the Homebrew dashboard's available options,
-//  filter/sort state, selection bindings, and preparation status mapping.
-//  Owns: Homebrew dashboard filter state, sort state, visible option ordering,
-//  option selection updates, and option preparation status storage/mapping.
-//  Does not own: Homebrew option rendering, internal workflow behavior, recipe
-//  loading, downloads, SD card writes, verification, or workflow navigation UI.
-//  Uses: WorkflowCoordinator for selected/completed internal workflow state
-//  and InternalWorkflowCatalog for built-in homebrew option metadata.
+//  Purpose: Coordinates the Choose Homebrew dashboard's options, selection,
+//  preparation state, and bottom-bar action policy.
+//  Owns: Dashboard filter state, sort state, visible option ordering, option
+//  selection updates, preparation status storage/mapping, next preparation
+//  action selection, and Choose Homebrew bottom-bar configuration.
+//  Does not own: Homebrew option rendering, recipe loading, download execution,
+//  verification, archive extraction, staging, SD card writes, or workflow
+//  navigation UI.
+//  Uses: WorkflowCoordinator for selected built-in homebrew state,
+//  InternalWorkflowCatalog for built-in homebrew option metadata, and
+//  HomebrewPreparationStateStore for per-option preparation state.
 //
 
 import Combine
@@ -65,6 +68,87 @@ final class HomebrewDashboardController: ObservableObject {
         return initialPreparationStatus(for: option)
     }
 
+    var nextPreparationAction: HomebrewPreparationAction? {
+        let selectedOptions = visibleOptions.filter(isSelected)
+
+        if selectedOptions.contains(where: { option in
+            option.source == .internalWorkflow(.wilbrand)
+                && status(for: option) == .setupRequired
+        }) {
+            return .setUpWilbrand
+        }
+
+        if selectedOptions.contains(where: { option in
+            status(for: option) == .readyToDownload
+        }) {
+            return .download
+        }
+
+        if selectedOptions.contains(where: { option in
+            status(for: option) == .readyToSave
+        }) {
+            return .save
+        }
+
+        return nil
+    }
+
+    var bottomBarConfiguration: WorkflowBottomBarConfiguration {
+        let contextualActions = bottomBarActions
+
+        return WorkflowBottomBarConfiguration(
+            contextualActions: contextualActions,
+            canGoForwardOverride: contextualActions.isEmpty ? nil : false,
+            defaultAction: contextualActions.isEmpty ? nil : .contextualAction(index: contextualActions.startIndex)
+        )
+    }
+
+    private var bottomBarActions: [WorkflowStepAction] {
+        guard let nextPreparationAction else { return [] }
+
+        return [
+            WorkflowStepAction(
+                titleKey: nextPreparationAction.titleKey,
+                systemImageName: nextPreparationAction.systemImageName
+            ) { [weak self] in
+                self?.perform(nextPreparationAction)
+            }
+        ]
+    }
+
+    func perform(_ action: HomebrewPreparationAction) {
+        switch action {
+        case .setUpWilbrand:
+            markWilbrandSetupHandled()
+        case .download:
+            markReadyToDownloadOptionsPrepared()
+        case .save:
+            markReadyToSaveOptionsSaved()
+        }
+    }
+
+    private func markWilbrandSetupHandled() {
+        guard let wilbrandOption = availableOptions.first(where: { option in
+            option.source == .internalWorkflow(.wilbrand)
+        }), isSelected(wilbrandOption) else {
+            return
+        }
+
+        preparationStateStore[wilbrandOption.id] = .readyToSave
+    }
+
+    private func markReadyToDownloadOptionsPrepared() {
+        for option in visibleOptions where isSelected(option) && status(for: option) == .readyToDownload {
+            preparationStateStore[option.id] = .readyToSave
+        }
+    }
+
+    private func markReadyToSaveOptionsSaved() {
+        for option in visibleOptions where isSelected(option) && status(for: option) == .readyToSave {
+            preparationStateStore[option.id] = .saved
+        }
+    }
+
     private var availableOptions: [HomebrewOption] {
         internalWorkflowCatalog.homebrewOptions
     }
@@ -109,6 +193,34 @@ final class HomebrewDashboardController: ObservableObject {
             .readyToDownload
         case .publicRecipe:
             .readyToDownload
+        }
+    }
+}
+
+enum HomebrewPreparationAction: Equatable {
+    case setUpWilbrand
+    case download
+    case save
+
+    var titleKey: String {
+        switch self {
+        case .setUpWilbrand:
+            "chooseHomebrew.setupWilbrand.button"
+        case .download:
+            "chooseHomebrew.download.button"
+        case .save:
+            "chooseHomebrew.save.button"
+        }
+    }
+
+    var systemImageName: String {
+        switch self {
+        case .setUpWilbrand:
+            "safari"
+        case .download:
+            "arrow.down.circle"
+        case .save:
+            "square.and.arrow.down"
         }
     }
 }

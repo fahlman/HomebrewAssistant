@@ -3,7 +3,7 @@
 //  Homebrew Assistant
 //
 //  Purpose: Represents readiness validation results for a selected SD card volume.
-//  Owns: Ready/unavailable validation state, failure reasons, and optional
+//  Owns: Ready/unavailable validation state, readiness convenience, failure reasons, and optional
 //  disk metadata for invalid but readable selected volumes.
 //  Does not own: Disk metadata queries, scoped access, UI copy, workflow
 //  navigation, file writes, or preflight write/read/delete verification.
@@ -16,6 +16,14 @@ import Foundation
 nonisolated enum SDCardReadiness: Equatable {
     case ready(DiskVolumeMetadata)
     case unavailable(reason: SDCardReadinessFailureReason, metadata: DiskVolumeMetadata? = nil)
+
+    var isReady: Bool {
+        guard case .ready = self else {
+            return false
+        }
+
+        return true
+    }
 }
 
 nonisolated enum SDCardReadinessFailureReason: Equatable {
