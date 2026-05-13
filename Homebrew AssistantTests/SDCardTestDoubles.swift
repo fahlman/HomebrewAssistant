@@ -1,0 +1,48 @@
+//
+//  SDCardTestDoubles.swift
+//  Homebrew Assistant Tests
+//
+//  Purpose: Shared SD-card-related test doubles for controller tests.
+//
+
+import Foundation
+@testable import Homebrew_Assistant
+
+final class MutableDiskMetadataProvider: DiskMetadataProvider {
+    var metadata: DiskVolumeMetadata?
+
+    init(metadata: DiskVolumeMetadata?) {
+        self.metadata = metadata
+    }
+
+    func metadata(for volumeURL: URL) -> DiskVolumeMetadata? {
+        metadata
+    }
+}
+
+final class FakeDiskUtilityOpener: DiskUtilityOpening {
+    private(set) var didOpenDiskUtility = false
+
+    func openDiskUtility() {
+        didOpenDiskUtility = true
+    }
+}
+
+struct FakeSecurityScopedAccessSessionFactory: SecurityScopedAccessSessionFactory {
+    func makeSession(for volumeURL: URL) -> (any SecurityScopedAccessSession)? {
+        FakeSecurityScopedAccessSession(volumeURL: volumeURL)
+    }
+}
+
+final class FakeSecurityScopedAccessSession: SecurityScopedAccessSession {
+    let volumeURL: URL
+    private(set) var didStop = false
+
+    init(volumeURL: URL) {
+        self.volumeURL = volumeURL
+    }
+
+    func stop() {
+        didStop = true
+    }
+}
