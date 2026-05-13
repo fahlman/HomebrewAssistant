@@ -110,34 +110,3 @@ struct WorkflowSessionControllerTests {
     }
 }
 
-private final class MutableDiskMetadataProvider: DiskMetadataProvider {
-    var metadata: DiskVolumeMetadata?
-
-    init(metadata: DiskVolumeMetadata?) {
-        self.metadata = metadata
-    }
-
-    func metadata(for volumeURL: URL) -> DiskVolumeMetadata? {
-        metadata
-    }
-}
-
-private struct FakeSecurityScopedAccessSessionFactory: SecurityScopedAccessSessionFactory {
-    func makeSession(for volumeURL: URL) -> (any SecurityScopedAccessSession)? {
-        FakeSecurityScopedAccessSession(volumeURL: volumeURL)
-    }
-}
-
-private final class FakeSecurityScopedAccessSession: SecurityScopedAccessSession {
-    let volumeURL: URL
-    private(set) var didStop = false
-
-    init(volumeURL: URL) {
-        self.volumeURL = volumeURL
-    }
-
-    func stop() {
-        didStop = true
-    }
-}
-

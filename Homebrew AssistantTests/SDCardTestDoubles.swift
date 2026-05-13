@@ -2,7 +2,11 @@
 //  SDCardTestDoubles.swift
 //  Homebrew Assistant Tests
 //
-//  Purpose: Shared SD-card-related test doubles for controller tests.
+//  Purpose: Provides shared SD-card-related test doubles for controller tests.
+//  Owns: Mutable disk metadata provider, fake Disk Utility opener, and fake
+//  security-scoped access session/factory implementations.
+//  Does not own: Production disk metadata lookup, AppKit launching, scoped
+//  access behavior, SD card validation policy, or test assertions.
 //
 
 import Foundation
