@@ -3,36 +3,23 @@
 //  Homebrew Assistant
 //
 //  Purpose: Represents an item in the generated workflow sidebar and navigation model.
-//  Owns: Public recipe workflow metadata, stable workflow item identifiers,
-//  ordering metadata, item type metadata, localization keys, and icon references.
-//  Does not own: Runtime workflow decisions, availability/completion state,
+//  Owns: Fixed-step workflow item identifiers, localization keys, icon references,
+//  and ordering metadata.
+//  Does not own: Homebrew dashboard options, public recipe metadata, internal
+//  workflow metadata, runtime workflow decisions, availability/completion state,
 //  scoped filesystem access, disk operations, downloads, writes, or UI rendering.
-//  Uses: FixedStep, InternalWorkflowKind, and PublicRecipeWorkflowMetadata for
-//  item-specific metadata.
+//  Uses: FixedStep for item-specific metadata.
 //
 
 import Foundation
 
-struct PublicRecipeWorkflowMetadata: Identifiable, Hashable, Sendable {
-    let id: String
-    let titleKey: String
-    let systemImageName: String
-    let sortOrder: Int
-}
-
 enum WorkflowItem: Identifiable, Hashable {
     case fixed(FixedStep)
-    case internalWorkflow(InternalWorkflowKind)
-    case publicRecipe(PublicRecipeWorkflowMetadata)
 
     var id: String {
         switch self {
         case .fixed(let fixedStep):
             "fixed.\(fixedStep.id)"
-        case .internalWorkflow(let kind):
-            "internal.\(kind.id)"
-        case .publicRecipe(let metadata):
-            "recipe.\(metadata.id)"
         }
     }
 
@@ -40,10 +27,6 @@ enum WorkflowItem: Identifiable, Hashable {
         switch self {
         case .fixed(let fixedStep):
             fixedStep.titleKey
-        case .internalWorkflow(let kind):
-            kind.titleKey
-        case .publicRecipe(let metadata):
-            metadata.titleKey
         }
     }
 
@@ -51,10 +34,6 @@ enum WorkflowItem: Identifiable, Hashable {
         switch self {
         case .fixed(let fixedStep):
             fixedStep.systemImageName
-        case .internalWorkflow(let kind):
-            kind.systemImageName
-        case .publicRecipe(let metadata):
-            metadata.systemImageName
         }
     }
 
@@ -62,10 +41,6 @@ enum WorkflowItem: Identifiable, Hashable {
         switch self {
         case .fixed(let fixedStep):
             fixedStep.sortOrder
-        case .internalWorkflow(let kind):
-            kind.sortOrder
-        case .publicRecipe(let metadata):
-            metadata.sortOrder
         }
     }
 
@@ -73,15 +48,6 @@ enum WorkflowItem: Identifiable, Hashable {
         if case .fixed = self {
             true
         } else {
-            false
-        }
-    }
-
-    var isPreparationStep: Bool {
-        switch self {
-        case .internalWorkflow, .publicRecipe:
-            true
-        case .fixed:
             false
         }
     }

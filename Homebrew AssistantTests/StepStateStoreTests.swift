@@ -1,4 +1,3 @@
-
 //
 //  StepStateStoreTests.swift
 //  Homebrew Assistant Tests
@@ -70,17 +69,16 @@ struct StepStateStoreTests {
         var store = StepStateStore()
         let sdCardItemID = WorkflowItem.fixed(.sdCardSelection).id
         let chooseItemsItemID = WorkflowItem.fixed(.chooseItems).id
-        let wilbrandItemID = WorkflowItem.internalWorkflow(.wilbrand).id
+        let discardedItemID = "discarded.generated.item"
 
         store[sdCardItemID] = StepState(status: .completed)
         store[chooseItemsItemID] = StepState(status: .completed)
-        store[wilbrandItemID] = StepState(status: .prepared)
+        store[discardedItemID] = StepState(status: .prepared)
 
-        store.removeStates(except: [sdCardItemID, wilbrandItemID])
+        store.removeStates(except: [sdCardItemID, discardedItemID])
 
         #expect(store[sdCardItemID].status == .completed)
         #expect(store[chooseItemsItemID] == .notStarted)
-        #expect(store[wilbrandItemID].status == .prepared)
+        #expect(store[discardedItemID].status == .prepared)
     }
 }
-

@@ -4,8 +4,8 @@
 //
 //  Purpose: Coordinates the active workflow session and generated workflow items.
 //  Owns: Current workflow items, selected item, completed item IDs,
-//  sequential reachability rules, selected internal workflows, selected public
-//  recipes, and workflow reset behavior.
+//  sequential reachability rules, selected internal workflows, and workflow reset
+//  behavior.
 //  Does not own: Scoped filesystem access, disk metadata resolution, recipe
 //  catalog loading, public recipe parsing, downloads, archive extraction,
 //  staging file management, SD card writes, verification execution, eject
@@ -22,7 +22,6 @@ final class WorkflowCoordinator: ObservableObject {
     @Published var selectedItemID: WorkflowItem.ID?
     @Published private(set) var stepStateStore: StepStateStore
     @Published private(set) var selectedInternalWorkflows: Set<InternalWorkflowKind>
-    @Published private(set) var selectedPublicRecipes: Set<PublicRecipeWorkflowMetadata>
     @Published private(set) var completedWorkflowItemIDs: Set<WorkflowItem.ID>
 
     private let internalWorkflowCatalog: InternalWorkflowCatalog
@@ -34,7 +33,6 @@ final class WorkflowCoordinator: ObservableObject {
         self.internalWorkflowCatalog = internalWorkflowCatalog
         self.stepStateStore = stepStateStore
         self.selectedInternalWorkflows = []
-        self.selectedPublicRecipes = []
         self.completedWorkflowItemIDs = []
         self.workflowItems = Self.initialWorkflowItems()
         self.selectedItemID = workflowItems.first?.id
@@ -119,13 +117,6 @@ final class WorkflowCoordinator: ObservableObject {
         updateChooseHomebrewCompletion()
     }
 
-    func updateSelectedPublicRecipes(_ selectedRecipes: Set<PublicRecipeWorkflowMetadata>) {
-        selectedPublicRecipes = selectedRecipes
-        invalidateWorkflow(after: .fixed(.chooseItems))
-        regenerateWorkflowItems()
-        updateChooseHomebrewCompletion()
-    }
-
     func setWorkflowItem(_ item: WorkflowItem, isCompleted: Bool) {
         guard workflowItems.contains(item) else { return }
 
@@ -161,7 +152,7 @@ final class WorkflowCoordinator: ObservableObject {
     private func updateChooseHomebrewCompletion() {
         setWorkflowItem(
             .fixed(.chooseItems),
-            isCompleted: !selectedInternalWorkflows.isEmpty || !selectedPublicRecipes.isEmpty
+            isCompleted: !selectedInternalWorkflows.isEmpty
         )
     }
 
@@ -176,7 +167,6 @@ final class WorkflowCoordinator: ObservableObject {
 
     func resetWorkflow() {
         selectedInternalWorkflows.removeAll()
-        selectedPublicRecipes.removeAll()
         completedWorkflowItemIDs.removeAll()
         stepStateStore.reset()
         workflowItems = Self.initialWorkflowItems()

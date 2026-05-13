@@ -44,8 +44,6 @@ struct WorkflowDetailView: View {
         switch item {
         case .fixed(let fixedStep):
             fixedStepView(for: fixedStep)
-        case .internalWorkflow, .publicRecipe:
-            EmptyView()
         }
     }
 
@@ -56,8 +54,6 @@ struct WorkflowDetailView: View {
             DiskAccessView(controller: sdSelectionController)
         case .chooseItems:
             HomebrewDashboardView(controller: homebrewDashboardController)
-        case .reviewSetup, .writeAndVerifyFiles, .success:
-            EmptyView()
         }
     }
 }

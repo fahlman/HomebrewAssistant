@@ -5,7 +5,7 @@
 //  Purpose: Verifies generated workflow items, selection reachability, and
 //  workflow reset behavior.
 //  Covers: Initial visible fixed workflow generation, locked-step behavior, completed
-//  item gating, selected internal/public recipe tracking, discarded generated-item
+//  item gating, selected internal workflow tracking, discarded generated-item
 //  state, and reset-to-starting workflow behavior.
 //  Does not cover: UI rendering, SD card validation, scoped filesystem access,
 //  downloads, staging, SD writes, or physical device behavior.
@@ -29,7 +29,6 @@ struct WorkflowCoordinatorTests {
 
         #expect(coordinator.canSelect(.fixed(.sdCardSelection)))
         #expect(!coordinator.canSelect(.fixed(.chooseItems)))
-        #expect(!coordinator.canSelect(.fixed(.reviewSetup)))
         #expect(!coordinator.canGoForward)
     }
 
@@ -69,7 +68,6 @@ struct WorkflowCoordinatorTests {
         coordinator.select(.fixed(.chooseItems))
 
         #expect(coordinator.canSelect(.fixed(.chooseItems)))
-        #expect(!coordinator.canSelect(.fixed(.reviewSetup)))
         #expect(!coordinator.canGoForward)
 
         coordinator.updateSelectedInternalWorkflows([.wilbrand])
@@ -119,17 +117,6 @@ struct WorkflowCoordinatorTests {
     }
 
 
-    @Test func removingSelectedInternalWorkflowDiscardsItsStepState() {
-        let coordinator = WorkflowCoordinator()
-        let wilbrandItem = WorkflowItem.internalWorkflow(.wilbrand)
-
-        coordinator.updateSelectedInternalWorkflows([.wilbrand])
-        coordinator.updateSelectedInternalWorkflows([])
-
-        #expect(coordinator.state(for: wilbrandItem).status == .notStarted)
-        #expect(!coordinator.isCompleted(wilbrandItem))
-    }
-
     @Test func resetWorkflowReturnsToStartingFixedWorkflowAndClearsGeneratedItemState() {
         let coordinator = WorkflowCoordinator()
         let sdCardItem = WorkflowItem.fixed(.sdCardSelection)
@@ -148,7 +135,6 @@ struct WorkflowCoordinatorTests {
             .fixed(.chooseItems)
         ])
         #expect(coordinator.selectedInternalWorkflows.isEmpty)
-        #expect(coordinator.selectedPublicRecipes.isEmpty)
         #expect(coordinator.selectedItemID == sdCardItem.id)
         #expect(coordinator.state(for: sdCardItem).status == .notStarted)
         #expect(coordinator.state(for: chooseItemsItem).status == .notStarted)

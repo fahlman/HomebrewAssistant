@@ -4,9 +4,8 @@
 //
 //  Purpose: Presents shared bottom navigation and step-specific actions.
 //  Owns: Lower-left Quit/Back placement, lower-right action placement,
-//  contextual action rendering, Next button rendering, Start New Workflow
-//  rendering on the success step, default-button assignment, and disabled/enabled
-//  button presentation.
+//  contextual action rendering, Next button rendering, default-button assignment,
+//  and disabled/enabled button presentation.
 //  Does not own: Action availability decisions, workflow transitions, workflow
 //  reset policy, or risky operation execution.
 //  Uses: WorkflowCoordinator for navigation state and user-intent handling,
@@ -57,12 +56,6 @@ struct BottomNavigationView: View {
     @ViewBuilder
     private var rightActions: some View {
         HStack {
-            if shouldShowStartNewWorkflow {
-                Button(String(localized: "workflow.action.startNewWorkflow")) {
-                    coordinator.resetWorkflow()
-                }
-            }
-
             ForEach(Array(configuration.contextualActions.enumerated()), id: \.offset) { index, contextualAction in
                 contextualActionButton(contextualAction, isDefaultCandidate: index == defaultContextualActionIndex)
             }
@@ -117,13 +110,5 @@ struct BottomNavigationView: View {
         case nil:
             canGoForward
         }
-    }
-
-    private var shouldShowStartNewWorkflow: Bool {
-        guard case .fixed(.success)? = coordinator.selectedItem else {
-            return false
-        }
-
-        return true
     }
 }

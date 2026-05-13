@@ -59,9 +59,6 @@ struct ContentView: View {
         .onChange(of: coordinator.selectedInternalWorkflows) { _, _ in
             resetChooseHomebrewProgress()
         }
-        .onChange(of: coordinator.selectedPublicRecipes) { _, _ in
-            resetChooseHomebrewProgress()
-        }
     }
 
     private var bottomBarConfiguration: WorkflowBottomBarConfiguration {
@@ -81,7 +78,7 @@ struct ContentView: View {
                 canGoForwardOverride: chooseHomebrewCanGoForwardOverride(hasContextualActions: !contextualActions.isEmpty),
                 defaultAction: chooseHomebrewDefaultAction(for: contextualActions)
             )
-        case .internalWorkflow, .publicRecipe, .fixed, nil:
+        case nil:
             return .automatic
         }
     }
@@ -133,7 +130,7 @@ struct ContentView: View {
                     titleKey: "chooseHomebrew.setupWilbrand.button",
                     systemImageName: "safari"
                 ) {
-                    coordinator.select(.internalWorkflow(.wilbrand))
+                    openWilbrandSetup()
                 }
             ]
         }
@@ -173,12 +170,16 @@ struct ContentView: View {
     }
 
     private var hasSelectedHomebrew: Bool {
-        !coordinator.selectedInternalWorkflows.isEmpty || !coordinator.selectedPublicRecipes.isEmpty
+        !coordinator.selectedInternalWorkflows.isEmpty
     }
 
     private var needsWilbrandSetup: Bool {
         coordinator.selectedInternalWorkflows.contains(.wilbrand)
-            && !coordinator.isCompleted(.internalWorkflow(.wilbrand))
+            && chooseHomebrewPhase == .notDownloaded
+    }
+
+    private func openWilbrandSetup() {
+        chooseHomebrewPhase = .downloaded
     }
 
     private func resetChooseHomebrewProgress() {

@@ -602,6 +602,7 @@
     },
     "workflow.action.startNewWorkflow" : {
       "comment" : "Button title for clearing the current session and starting over.",
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {

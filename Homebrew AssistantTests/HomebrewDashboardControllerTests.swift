@@ -5,7 +5,8 @@
 //  Purpose: Verifies Homebrew dashboard controller option visibility, filtering,
 //  selection binding, and preparation status mapping.
 //  Covers: Default filter/sort state, category filtering, alphabetical sorting,
-//  internal workflow selection updates, and Wilbrand/HackMii status mapping.
+//  internal workflow selection updates, initial Wilbrand/HackMii status mapping,
+//  and injected preparation-state status mapping.
 //  Does not cover: Dashboard SwiftUI rendering, public recipe catalog loading,
 //  downloads, staging, SD card writes, verification, or workflow navigation.
 //
@@ -97,6 +98,48 @@ struct HomebrewDashboardControllerTests {
         #expect(controller.status(for: hackMiiOption) == .notSelected)
 
         controller.binding(for: hackMiiOption).wrappedValue = true
+        #expect(controller.status(for: hackMiiOption) == .readyToDownload)
+    }
+
+    @Test func injectedPreparationStatusOverridesInitialStatusForSelectedOption() {
+        let coordinator = WorkflowCoordinator()
+        var preparationStateStore = HomebrewPreparationStateStore()
+        preparationStateStore[InternalWorkflowKind.hackMii.id] = .downloading(progress: 0.5)
+        let controller = HomebrewDashboardController(
+            coordinator: coordinator,
+            preparationStateStore: preparationStateStore
+        )
+        let hackMiiOption = controller.visibleOptions.first { option in
+            option.source == .internalWorkflow(.hackMii)
+        }
+
+        #expect(hackMiiOption != nil)
+        guard let hackMiiOption else { return }
+
+        controller.binding(for: hackMiiOption).wrappedValue = true
+
+        #expect(controller.status(for: hackMiiOption) == .downloading(progress: 0.5))
+    }
+
+    @Test func deselectingOptionClearsPreparationStatus() {
+        let coordinator = WorkflowCoordinator()
+        var preparationStateStore = HomebrewPreparationStateStore()
+        preparationStateStore[InternalWorkflowKind.hackMii.id] = .downloading(progress: 0.5)
+        let controller = HomebrewDashboardController(
+            coordinator: coordinator,
+            preparationStateStore: preparationStateStore
+        )
+        let hackMiiOption = controller.visibleOptions.first { option in
+            option.source == .internalWorkflow(.hackMii)
+        }
+
+        #expect(hackMiiOption != nil)
+        guard let hackMiiOption else { return }
+
+        controller.binding(for: hackMiiOption).wrappedValue = true
+        controller.binding(for: hackMiiOption).wrappedValue = false
+        controller.binding(for: hackMiiOption).wrappedValue = true
+
         #expect(controller.status(for: hackMiiOption) == .readyToDownload)
     }
 }
