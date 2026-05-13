@@ -24,7 +24,7 @@ struct SDSelectionControllerTests {
         #expect(controller.bottomBarConfiguration.contextualActions.map(\.systemImageName) == [
             "sdcard"
         ])
-        #expect(controller.bottomBarConfiguration.defaultAction == .contextualAction(index: 0))
+        #expect(isContextualAction(controller.bottomBarConfiguration.defaultAction, index: 0))
     }
 
     @Test func chooseSDCardActionPresentsVolumeImporter() {
@@ -51,7 +51,7 @@ struct SDSelectionControllerTests {
             "externaldrive.badge.gearshape",
             "sdcard"
         ])
-        #expect(controller.bottomBarConfiguration.defaultAction == .contextualAction(index: 0))
+        #expect(isContextualAction(controller.bottomBarConfiguration.defaultAction, index: 0))
     }
 
     @Test func readySDCardMakesNextTheDefaultAction() {
@@ -64,7 +64,7 @@ struct SDSelectionControllerTests {
         #expect(controller.bottomBarConfiguration.contextualActions.map(\.titleKey) == [
             "sdSelection.chooseSDCard.button"
         ])
-        #expect(controller.bottomBarConfiguration.defaultAction == .next)
+        #expect(isNextAction(controller.bottomBarConfiguration.defaultAction))
     }
 
     @Test func clearSelectionClearsReadinessDriveErrorAndDiskUtilityTracking() {
@@ -129,6 +129,22 @@ struct SDSelectionControllerTests {
             isInternal: false
         )
     }
+
+    private func isContextualAction(_ action: WorkflowBottomBarConfiguration.DefaultAction?, index: Int) -> Bool {
+        guard case .contextualAction(let actionIndex) = action else {
+            return false
+        }
+
+        return actionIndex == index
+    }
+
+    private func isNextAction(_ action: WorkflowBottomBarConfiguration.DefaultAction?) -> Bool {
+        guard case .next = action else {
+            return false
+        }
+
+        return true
+    }
 }
 
 private final class MutableDiskMetadataProvider: DiskMetadataProvider {
@@ -161,4 +177,3 @@ private final class FakeSecurityScopedAccessSession: SecurityScopedAccessSession
         didStop = true
     }
 }
-

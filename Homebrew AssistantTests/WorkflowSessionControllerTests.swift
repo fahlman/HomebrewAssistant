@@ -77,7 +77,10 @@ struct WorkflowSessionControllerTests {
             sdCardValidationService: sdCardValidationService
         )
 
-        return WorkflowSessionController(sdSelectionController: sdSelectionController)
+        return WorkflowSessionController(
+            coordinator: WorkflowCoordinator(),
+            sdSelectionController: sdSelectionController
+        )
     }
 
     private func readyMetadata(for volumeURL: URL) -> DiskVolumeMetadata {

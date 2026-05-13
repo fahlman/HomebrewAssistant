@@ -175,7 +175,7 @@ struct HomebrewDashboardControllerTests {
             HomebrewPreparationAction.setUpWilbrand.systemImageName
         ])
         #expect(controller.bottomBarConfiguration.canGoForwardOverride == false)
-        #expect(controller.bottomBarConfiguration.defaultAction == .contextualAction(index: 0))
+        #expect(isContextualAction(controller.bottomBarConfiguration.defaultAction, index: 0))
     }
 
     @Test func selectedHackMiiMakesDownloadTheDefaultBottomBarAction() {
@@ -198,7 +198,7 @@ struct HomebrewDashboardControllerTests {
             HomebrewPreparationAction.download.systemImageName
         ])
         #expect(controller.bottomBarConfiguration.canGoForwardOverride == false)
-        #expect(controller.bottomBarConfiguration.defaultAction == .contextualAction(index: 0))
+        #expect(isContextualAction(controller.bottomBarConfiguration.defaultAction, index: 0))
     }
 
     @Test func wilbrandSetupTakesPriorityOverDownload() {
@@ -272,5 +272,12 @@ struct HomebrewDashboardControllerTests {
         #expect(controller.status(for: hackMiiOption) == .saved)
         #expect(controller.nextPreparationAction == nil)
         #expect(controller.bottomBarConfiguration.contextualActions.isEmpty)
+    }
+    private func isContextualAction(_ action: WorkflowBottomBarConfiguration.DefaultAction?, index: Int) -> Bool {
+        guard case .contextualAction(let actionIndex) = action else {
+            return false
+        }
+
+        return actionIndex == index
     }
 }
