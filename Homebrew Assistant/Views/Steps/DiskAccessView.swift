@@ -196,14 +196,14 @@ private struct DriveSelectionPresentation {
 
     var statusStyle: Color {
         guard let selectedDrive else {
-            return AppStatusStyle.neutral
+            return AppStatusStyle.neutralForeground
         }
 
         switch selectedDrive.readiness {
         case .ready:
-            return AppStatusStyle.success
+            return AppStatusStyle.successForeground
         case .unavailable:
-            return AppStatusStyle.failure
+            return AppStatusStyle.failureForeground
         }
     }
 
@@ -306,4 +306,3 @@ private extension SDCardReadinessFailureReason {
         }
     }
 }
-

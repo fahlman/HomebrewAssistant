@@ -8,7 +8,7 @@
 //  Does not own: Homebrew selection, setup validation, downloads, checksum
 //  verification, SD card writes, failure recovery, or workflow navigation.
 //  Uses: Localizable strings for user-facing status titles and AppStatusStyle
-//  for shared status colors.
+//  for shared status foreground colors.
 //
 
 import SwiftUI
@@ -47,11 +47,11 @@ enum HomebrewPreparationStatus: Equatable {
     var style: Color {
         switch self {
         case .notSelected, .setupRequired, .readyToDownload, .downloading, .readyToSave, .saving:
-            AppStatusStyle.neutral
+            AppStatusStyle.neutralForeground
         case .saved:
-            AppStatusStyle.success
+            AppStatusStyle.successForeground
         case .failed:
-            AppStatusStyle.failure
+            AppStatusStyle.failureForeground
         }
     }
 

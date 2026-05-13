@@ -2,17 +2,17 @@
 //  AppStatusStyle.swift
 //  Homebrew Assistant
 //
-//  Purpose: Provides shared semantic status styling for app UI components.
-//  Owns: Shared success, failure, and neutral foreground styles for status UI.
+//  Purpose: Provides shared semantic foreground colors for app status UI.
+//  Owns: Shared success, failure, and neutral foreground colors.
 //  Does not own: View layout, status text, workflow state, or domain-specific
 //  readiness decisions.
-//  Delegates to: Individual views for applying these styles in context.
+//  Used by: Views and status models that need shared semantic foreground colors.
 //
 
 import SwiftUI
 
 enum AppStatusStyle {
-    static let success = Color.green
-    static let failure = Color.red
-    static let neutral = Color.secondary
+    static let successForeground = Color.green
+    static let failureForeground = Color.red
+    static let neutralForeground = Color.secondary
 }
