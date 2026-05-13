@@ -14,7 +14,7 @@
 import Foundation
 
 struct WorkflowBottomBarConfiguration {
-    enum DefaultAction {
+    enum DefaultAction: Equatable {
         case contextualAction(index: Int)
         case next
     }

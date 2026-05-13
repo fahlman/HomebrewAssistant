@@ -5,8 +5,8 @@
 //  Purpose: Hosts the app's top-level sidebar/detail window layout.
 //  Owns: NavigationSplitView composition, sidebar/detail/bottom navigation
 //  placement, and selected-step bottom-bar configuration dispatch.
-//  Does not own: Workflow session controller construction details, SD card
-//  validation policy, scoped filesystem access lifecycle, recipe catalog loading,
+//  Does not own: Workflow session orchestration, SD card validation policy,
+//  scoped filesystem access lifecycle, recipe catalog loading,
 //  public recipe parsing, downloads, staging, file writes, workflow item rendering,
 //  sidebar row rendering, detail-view routing, or bottom button rendering.
 //  Uses: WorkflowSessionController for session state, WorkflowSidebarView,

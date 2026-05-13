@@ -2,11 +2,11 @@
 //  WorkflowSessionController.swift
 //  Homebrew Assistant
 //
-//  Purpose: Owns the active workflow session controllers and cross-controller
-//  workflow state synchronization.
+//  Purpose: Coordinates the active workflow session and cross-controller state
+//  synchronization.
 //  Owns: WorkflowCoordinator, SDSelectionController, HomebrewDashboardController,
-//  and synchronization from SD card readiness into fixed workflow-step
-//  completion state.
+//  session display-change forwarding, and synchronization from SD card readiness
+//  into fixed workflow-step completion state.
 //  Does not own: App launch, SwiftUI layout, sidebar rendering, detail-view
 //  routing, bottom button rendering, SD card validation policy, scoped filesystem
 //  access implementation, recipe loading, downloads, staging, or file writes.
@@ -32,7 +32,7 @@ final class WorkflowSessionController: ObservableObject {
         self.coordinator = coordinator
         self.sdSelectionController = sdSelectionController
         self.homebrewDashboardController = HomebrewDashboardController(coordinator: coordinator)
-
+        bindSessionDisplayChanges()
         bindSDSelectionReadinessToWorkflowCompletion()
     }
 
@@ -43,8 +43,28 @@ final class WorkflowSessionController: ObservableObject {
         self.coordinator = coordinator
         self.sdSelectionController = sdSelectionController
         self.homebrewDashboardController = HomebrewDashboardController(coordinator: coordinator)
-
+        bindSessionDisplayChanges()
         bindSDSelectionReadinessToWorkflowCompletion()
+    }
+
+    private func bindSessionDisplayChanges() {
+        coordinator.objectWillChange
+            .sink { [weak self] _ in
+                self?.objectWillChange.send()
+            }
+            .store(in: &cancellables)
+
+        sdSelectionController.objectWillChange
+            .sink { [weak self] _ in
+                self?.objectWillChange.send()
+            }
+            .store(in: &cancellables)
+
+        homebrewDashboardController.objectWillChange
+            .sink { [weak self] _ in
+                self?.objectWillChange.send()
+            }
+            .store(in: &cancellables)
     }
 
     private func bindSDSelectionReadinessToWorkflowCompletion() {
@@ -63,5 +83,4 @@ final class WorkflowSessionController: ObservableObject {
             isCompleted: readiness?.isReady == true
         )
     }
-
 }

@@ -5,14 +5,15 @@
 //  Purpose: Coordinates the Choose Homebrew dashboard's options, selection,
 //  preparation state, and bottom-bar action policy.
 //  Owns: Dashboard filter state, sort state, visible option ordering, option
-//  selection updates, preparation status storage/mapping, next preparation
-//  action selection, and Choose Homebrew bottom-bar configuration.
-//  Does not own: Homebrew option rendering, recipe loading, download execution,
-//  verification, archive extraction, staging, SD card writes, or workflow
-//  navigation UI.
+//  selection updates, preparation status storage/mapping, dashboard action state,
+//  and Choose Homebrew bottom-bar configuration.
+//  Does not own: Homebrew option rendering, bottom-bar rendering, recipe
+//  loading, download execution, verification, archive extraction, staging,
+//  SD card writes, or workflow navigation.
 //  Uses: WorkflowCoordinator for selected built-in homebrew state,
-//  InternalWorkflowCatalog for built-in homebrew option metadata, and
-//  HomebrewPreparationStateStore for per-option preparation state.
+//  InternalWorkflowCatalog for built-in homebrew option metadata,
+//  HomebrewPreparationStateStore for per-option preparation state, and
+//  HomebrewPreparationAction for setup/download/save intents.
 //
 
 import Combine
@@ -68,52 +69,37 @@ final class HomebrewDashboardController: ObservableObject {
         return initialPreparationStatus(for: option)
     }
 
-    var nextPreparationAction: HomebrewPreparationAction? {
+    var actionState: HomebrewDashboardActionState {
         let selectedOptions = visibleOptions.filter(isSelected)
+
+        guard !selectedOptions.isEmpty else {
+            return .nothingSelected
+        }
 
         if selectedOptions.contains(where: { option in
             option.source == .internalWorkflow(.wilbrand)
                 && status(for: option) == .setupRequired
         }) {
-            return .setUpWilbrand
+            return .needsWilbrandSetup
         }
 
         if selectedOptions.contains(where: { option in
             status(for: option) == .readyToDownload
         }) {
-            return .download
+            return .readyToDownload
         }
 
         if selectedOptions.contains(where: { option in
             status(for: option) == .readyToSave
         }) {
-            return .save
+            return .readyToSave
         }
 
-        return nil
+        return .complete
     }
 
     var bottomBarConfiguration: WorkflowBottomBarConfiguration {
-        let contextualActions = bottomBarActions
-
-        return WorkflowBottomBarConfiguration(
-            contextualActions: contextualActions,
-            canGoForwardOverride: contextualActions.isEmpty ? nil : false,
-            defaultAction: contextualActions.isEmpty ? nil : .contextualAction(index: contextualActions.startIndex)
-        )
-    }
-
-    private var bottomBarActions: [WorkflowStepAction] {
-        guard let nextPreparationAction else { return [] }
-
-        return [
-            WorkflowStepAction(
-                titleKey: nextPreparationAction.titleKey,
-                systemImageName: nextPreparationAction.systemImageName
-            ) { [weak self] in
-                self?.perform(nextPreparationAction)
-            }
-        ]
+        actionState.bottomBarConfiguration(controller: self)
     }
 
     func perform(_ action: HomebrewPreparationAction) {
@@ -197,31 +183,47 @@ final class HomebrewDashboardController: ObservableObject {
     }
 }
 
-enum HomebrewPreparationAction: Equatable {
-    case setUpWilbrand
-    case download
-    case save
+enum HomebrewDashboardActionState: Equatable {
+    case nothingSelected
+    case needsWilbrandSetup
+    case readyToDownload
+    case readyToSave
+    case complete
 
-    var titleKey: String {
+    var preparationAction: HomebrewPreparationAction? {
         switch self {
-        case .setUpWilbrand:
-            "chooseHomebrew.setupWilbrand.button"
-        case .download:
-            "chooseHomebrew.download.button"
-        case .save:
-            "chooseHomebrew.save.button"
+        case .needsWilbrandSetup:
+            .setUpWilbrand
+        case .readyToDownload:
+            .download
+        case .readyToSave:
+            .save
+        case .nothingSelected, .complete:
+            nil
         }
     }
 
-    var systemImageName: String {
-        switch self {
-        case .setUpWilbrand:
-            "safari"
-        case .download:
-            "arrow.down.circle"
-        case .save:
-            "square.and.arrow.down"
-        }
+    func bottomBarConfiguration(controller: HomebrewDashboardController) -> WorkflowBottomBarConfiguration {
+        let contextualActions = contextualActions(controller: controller)
+
+        return WorkflowBottomBarConfiguration(
+            contextualActions: contextualActions,
+            canGoForwardOverride: contextualActions.isEmpty ? nil : false,
+            defaultAction: contextualActions.isEmpty ? nil : .contextualAction(index: contextualActions.startIndex)
+        )
+    }
+
+    private func contextualActions(controller: HomebrewDashboardController) -> [WorkflowStepAction] {
+        guard let preparationAction else { return [] }
+
+        return [
+            WorkflowStepAction(
+                titleKey: preparationAction.titleKey,
+                systemImageName: preparationAction.systemImageName
+            ) { [weak controller] in
+                controller?.perform(preparationAction)
+            }
+        ]
     }
 }
 

@@ -2,17 +2,18 @@
 //  SDSelectionController.swift
 //  Homebrew Assistant
 //
-//  Purpose: Coordinates SD card selection state and SD selection bottom-bar
+//  Purpose: Coordinates SD card selection state and SD card selection bottom-bar
 //  action policy for the active workflow session.
 //  Owns: SD card picker presentation state, selected-volume scoped access,
 //  selected drive display state, selected-volume readiness, selection error
-//  state, SD card selection reset, Disk Utility launch intent tracking, and SD
-//  selection bottom-bar configuration.
-//  Does not own: SD card selection UI layout, bottom button placement, native
+//  state, SD card selection reset, Disk Utility launch intent tracking, SD card
+//  selection action state, and SD card selection bottom-bar configuration.
+//  Does not own: SD card selection UI layout, bottom-bar rendering, native
 //  volume metadata lookup policy, file writes, staging, recipe preparation, or
 //  workflow navigation.
 //  Uses: ScopedAccessManager for scoped filesystem access, SDCardValidationService
-//  for SD card readiness classification, and AppKit to open Disk Utility.
+//  for SD card readiness classification, and DiskUtilityOpening for Disk Utility
+//  launch requests.
 //
 
 import AppKit
@@ -30,85 +31,58 @@ final class SDSelectionController: ObservableObject {
     let scopedAccessManager: ScopedAccessManager
 
     private let sdCardValidationService: SDCardValidationService
+    private let diskUtilityOpener: any DiskUtilityOpening
 
     init() {
         self.scopedAccessManager = ScopedAccessManager()
         self.sdCardValidationService = SDCardValidationService()
+        self.diskUtilityOpener = AppKitDiskUtilityOpener()
+    }
+
+    convenience init(
+        scopedAccessManager: ScopedAccessManager,
+        sdCardValidationService: SDCardValidationService
+    ) {
+        self.init(
+            scopedAccessManager: scopedAccessManager,
+            sdCardValidationService: sdCardValidationService,
+            diskUtilityOpener: AppKitDiskUtilityOpener()
+        )
     }
 
     init(
         scopedAccessManager: ScopedAccessManager,
-        sdCardValidationService: SDCardValidationService
+        sdCardValidationService: SDCardValidationService,
+        diskUtilityOpener: any DiskUtilityOpening
     ) {
         self.scopedAccessManager = scopedAccessManager
         self.sdCardValidationService = sdCardValidationService
+        self.diskUtilityOpener = diskUtilityOpener
     }
 
     var selectedVolumeURL: URL? {
         scopedAccessManager.selectedVolumeURL
     }
 
-    var bottomBarConfiguration: WorkflowBottomBarConfiguration {
-        let contextualActions = bottomBarActions
-
-        return WorkflowBottomBarConfiguration(
-            contextualActions: contextualActions,
-            defaultAction: defaultBottomBarAction(for: contextualActions)
-        )
-    }
-
-    private var bottomBarActions: [WorkflowStepAction] {
-        var actions: [WorkflowStepAction] = []
-
-        if shouldOfferDiskUtility {
-            actions.append(
-                WorkflowStepAction(
-                    titleKey: "sdSelection.openDiskUtility.button",
-                    systemImageName: "externaldrive.badge.gearshape"
-                ) { [weak self] in
-                    self?.openDiskUtility()
-                }
-            )
-        }
-
-        actions.append(
-            WorkflowStepAction(
-                titleKey: "sdSelection.chooseSDCard.button",
-                systemImageName: "sdcard"
-            ) { [weak self] in
-                self?.presentVolumeImporter()
-            }
-        )
-
-        return actions
-    }
-
-    private func defaultBottomBarAction(for contextualActions: [WorkflowStepAction]) -> WorkflowBottomBarConfiguration.DefaultAction? {
+    var actionState: SDSelectionActionState {
         if readiness?.isReady == true {
-            return .next
+            return .ready
         }
 
-        if shouldOfferDiskUtility && !hasOpenedDiskUtilityForCurrentSelection {
-            return .contextualAction(index: contextualActions.startIndex)
+        if case .unavailable(reason: .unsupportedFileSystem, metadata: _) = readiness {
+            return .unsupportedFilesystem(hasOpenedDiskUtility: hasOpenedDiskUtilityForCurrentSelection)
         }
 
-        return .contextualAction(index: contextualActions.index(before: contextualActions.endIndex))
+        return .needsSelection
     }
 
-    private var shouldOfferDiskUtility: Bool {
-        guard case .unavailable(reason: .unsupportedFileSystem, metadata: _) = readiness else {
-            return false
-        }
-
-        return true
+    var bottomBarConfiguration: WorkflowBottomBarConfiguration {
+        actionState.bottomBarConfiguration(controller: self)
     }
 
-    private func openDiskUtility() {
+    func openDiskUtility() {
         hasOpenedDiskUtilityForCurrentSelection = true
-        NSWorkspace.shared.openApplication(
-            at: URL(fileURLWithPath: "/System/Applications/Utilities/Disk Utility.app"),
-            configuration: .init()
-        )
+        diskUtilityOpener.openDiskUtility()
     }
 
     func presentVolumeImporter() {
@@ -166,6 +140,77 @@ final class SDSelectionController: ObservableObject {
     }
 }
 
+protocol DiskUtilityOpening {
+    func openDiskUtility()
+}
+
+private struct AppKitDiskUtilityOpener: DiskUtilityOpening {
+    func openDiskUtility() {
+        NSWorkspace.shared.openApplication(
+            at: URL(fileURLWithPath: "/System/Applications/Utilities/Disk Utility.app"),
+            configuration: .init()
+        )
+    }
+}
+
+enum SDSelectionActionState: Equatable {
+    case needsSelection
+    case unsupportedFilesystem(hasOpenedDiskUtility: Bool)
+    case ready
+
+    func bottomBarConfiguration(controller: SDSelectionController) -> WorkflowBottomBarConfiguration {
+        let contextualActions = contextualActions(controller: controller)
+
+        return WorkflowBottomBarConfiguration(
+            contextualActions: contextualActions,
+            defaultAction: defaultAction(for: contextualActions)
+        )
+    }
+
+    private func contextualActions(controller: SDSelectionController) -> [WorkflowStepAction] {
+        switch self {
+        case .needsSelection, .ready:
+            [chooseSDCardAction(controller: controller)]
+        case .unsupportedFilesystem:
+            [
+                openDiskUtilityAction(controller: controller),
+                chooseSDCardAction(controller: controller)
+            ]
+        }
+    }
+
+    private func defaultAction(for contextualActions: [WorkflowStepAction]) -> WorkflowBottomBarConfiguration.DefaultAction? {
+        switch self {
+        case .ready:
+            .next
+        case .needsSelection:
+            .contextualAction(index: contextualActions.startIndex)
+        case .unsupportedFilesystem(let hasOpenedDiskUtility):
+            hasOpenedDiskUtility
+                ? .contextualAction(index: contextualActions.index(before: contextualActions.endIndex))
+                : .contextualAction(index: contextualActions.startIndex)
+        }
+    }
+
+    private func openDiskUtilityAction(controller: SDSelectionController) -> WorkflowStepAction {
+        WorkflowStepAction(
+            titleKey: "sdSelection.openDiskUtility.button",
+            systemImageName: "externaldrive.badge.gearshape"
+        ) { [weak controller] in
+            controller?.openDiskUtility()
+        }
+    }
+
+    private func chooseSDCardAction(controller: SDSelectionController) -> WorkflowStepAction {
+        WorkflowStepAction(
+            titleKey: "sdSelection.chooseSDCard.button",
+            systemImageName: "sdcard"
+        ) { [weak controller] in
+            controller?.presentVolumeImporter()
+        }
+    }
+}
+
 struct SelectedDrive: Equatable, Sendable {
     let volumeURL: URL
     let displayName: String
@@ -183,4 +228,3 @@ struct SelectedDrive: Equatable, Sendable {
         }
     }
 }
-

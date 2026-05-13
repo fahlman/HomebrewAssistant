@@ -3,7 +3,7 @@
 //  Homebrew Assistant Tests
 //
 //  Purpose: Verifies SD card selection controller state and bottom-bar policy.
-//  Covers: Default picker action, unsupported-filesystem Disk Utility action,
+//  Covers: Action-state mapping, default picker action, unsupported-filesystem Disk Utility action,
 //  ready-card Next default behavior, clear/reset state, and picker presentation.
 //  Does not cover: SwiftUI rendering, native security-scoped access, native disk
 //  metadata lookup, Disk Utility process behavior, downloads, staging, or writes.
@@ -18,13 +18,14 @@ struct SDSelectionControllerTests {
     @Test func defaultBottomBarActionChoosesSDCard() {
         let controller = makeController(metadata: nil)
 
+        #expect(controller.actionState == .needsSelection)
         #expect(controller.bottomBarConfiguration.contextualActions.map(\.titleKey) == [
             "sdSelection.chooseSDCard.button"
         ])
         #expect(controller.bottomBarConfiguration.contextualActions.map(\.systemImageName) == [
             "sdcard"
         ])
-        #expect(isContextualAction(controller.bottomBarConfiguration.defaultAction, index: 0))
+        #expect(controller.bottomBarConfiguration.defaultAction == .contextualAction(index: 0))
     }
 
     @Test func chooseSDCardActionPresentsVolumeImporter() {
@@ -43,6 +44,7 @@ struct SDSelectionControllerTests {
 
         controller.handleVolumeSelection(.success([volumeURL]))
 
+        #expect(controller.actionState == .unsupportedFilesystem(hasOpenedDiskUtility: false))
         #expect(controller.bottomBarConfiguration.contextualActions.map(\.titleKey) == [
             "sdSelection.openDiskUtility.button",
             "sdSelection.chooseSDCard.button"
@@ -51,7 +53,27 @@ struct SDSelectionControllerTests {
             "externaldrive.badge.gearshape",
             "sdcard"
         ])
-        #expect(isContextualAction(controller.bottomBarConfiguration.defaultAction, index: 0))
+        #expect(controller.bottomBarConfiguration.defaultAction == .contextualAction(index: 0))
+    }
+
+    @Test func openedDiskUtilityUnsupportedFilesystemDefaultsBackToChooseSDCard() {
+        let volumeURL = URL(fileURLWithPath: "/Volumes/TestSD")
+        let diskUtilityOpener = FakeDiskUtilityOpener()
+        let controller = makeController(
+            metadata: unsupportedFilesystemMetadata(for: volumeURL),
+            diskUtilityOpener: diskUtilityOpener
+        )
+
+        controller.handleVolumeSelection(.success([volumeURL]))
+        controller.openDiskUtility()
+
+        #expect(diskUtilityOpener.didOpenDiskUtility)
+        #expect(controller.actionState == .unsupportedFilesystem(hasOpenedDiskUtility: true))
+        #expect(controller.bottomBarConfiguration.contextualActions.map(\.titleKey) == [
+            "sdSelection.openDiskUtility.button",
+            "sdSelection.chooseSDCard.button"
+        ])
+        #expect(controller.bottomBarConfiguration.defaultAction == .contextualAction(index: 1))
     }
 
     @Test func readySDCardMakesNextTheDefaultAction() {
@@ -60,11 +82,12 @@ struct SDSelectionControllerTests {
 
         controller.handleVolumeSelection(.success([volumeURL]))
 
+        #expect(controller.actionState == .ready)
         #expect(controller.readiness?.isReady == true)
         #expect(controller.bottomBarConfiguration.contextualActions.map(\.titleKey) == [
             "sdSelection.chooseSDCard.button"
         ])
-        #expect(isNextAction(controller.bottomBarConfiguration.defaultAction))
+        #expect(controller.bottomBarConfiguration.defaultAction == .next)
     }
 
     @Test func clearSelectionClearsReadinessDriveErrorAndDiskUtilityTracking() {
@@ -78,6 +101,7 @@ struct SDSelectionControllerTests {
         #expect(controller.selectedDrive == nil)
         #expect(controller.selectionErrorMessage == nil)
         #expect(!controller.hasOpenedDiskUtilityForCurrentSelection)
+        #expect(controller.actionState == .needsSelection)
         #expect(controller.bottomBarConfiguration.contextualActions.map(\.titleKey) == [
             "sdSelection.chooseSDCard.button"
         ])
@@ -93,14 +117,19 @@ struct SDSelectionControllerTests {
         #expect(controller.readiness == nil)
         #expect(controller.selectedDrive == nil)
         #expect(controller.selectionErrorMessage == nil)
+        #expect(controller.actionState == .needsSelection)
     }
 
-    private func makeController(metadata: DiskVolumeMetadata?) -> SDSelectionController {
+    private func makeController(
+        metadata: DiskVolumeMetadata?,
+        diskUtilityOpener: any DiskUtilityOpening = FakeDiskUtilityOpener()
+    ) -> SDSelectionController {
         SDSelectionController(
             scopedAccessManager: ScopedAccessManager(accessSessionFactory: FakeSecurityScopedAccessSessionFactory()),
             sdCardValidationService: SDCardValidationService(
                 metadataProvider: MutableDiskMetadataProvider(metadata: metadata)
-            )
+            ),
+            diskUtilityOpener: diskUtilityOpener
         )
     }
 
@@ -129,22 +158,6 @@ struct SDSelectionControllerTests {
             isInternal: false
         )
     }
-
-    private func isContextualAction(_ action: WorkflowBottomBarConfiguration.DefaultAction?, index: Int) -> Bool {
-        guard case .contextualAction(let actionIndex) = action else {
-            return false
-        }
-
-        return actionIndex == index
-    }
-
-    private func isNextAction(_ action: WorkflowBottomBarConfiguration.DefaultAction?) -> Bool {
-        guard case .next = action else {
-            return false
-        }
-
-        return true
-    }
 }
 
 private final class MutableDiskMetadataProvider: DiskMetadataProvider {
@@ -156,6 +169,14 @@ private final class MutableDiskMetadataProvider: DiskMetadataProvider {
 
     func metadata(for volumeURL: URL) -> DiskVolumeMetadata? {
         metadata
+    }
+}
+
+private final class FakeDiskUtilityOpener: DiskUtilityOpening {
+    private(set) var didOpenDiskUtility = false
+
+    func openDiskUtility() {
+        didOpenDiskUtility = true
     }
 }
 
