@@ -123,7 +123,7 @@ struct HomebrewDashboardControllerTests {
         #expect(controller.status(for: hackMiiOption) == .downloading(progress: 0.5))
     }
 
-    @Test func deselectingOptionClearsPreparationStatus() {
+    @Test func deselectingAndReselectingOptionResetsPreparationStatus() {
         let coordinator = WorkflowCoordinator()
         var preparationStateStore = HomebrewPreparationStateStore()
         preparationStateStore[InternalWorkflowKind.hackMii.id] = .downloading(progress: 0.5)
@@ -145,17 +145,23 @@ struct HomebrewDashboardControllerTests {
         #expect(controller.status(for: hackMiiOption) == .readyToDownload)
     }
 
-    @Test func noSelectedHomebrewHasNothingSelectedActionStateAndNoBottomBarAction() {
+    @Test func noSelectedHomebrewHasNothingSelectedActionState() {
         let coordinator = WorkflowCoordinator()
         let controller = HomebrewDashboardController(coordinator: coordinator)
 
         #expect(controller.actionState == .nothingSelected)
+    }
+
+    @Test func nothingSelectedActionStateHasNoBottomBarAction() {
+        let coordinator = WorkflowCoordinator()
+        let controller = HomebrewDashboardController(coordinator: coordinator)
+
         #expect(controller.bottomBarConfiguration.contextualActions.isEmpty)
         #expect(controller.bottomBarConfiguration.canGoForwardOverride == nil)
         #expect(controller.bottomBarConfiguration.defaultAction == nil)
     }
 
-    @Test func selectedWilbrandMakesSetUpWilbrandTheDefaultBottomBarAction() {
+    @Test func selectedWilbrandNeedsWilbrandSetup() {
         let coordinator = WorkflowCoordinator()
         let controller = HomebrewDashboardController(coordinator: coordinator)
         let wilbrandOption = controller.visibleOptions.first { option in
@@ -168,17 +174,24 @@ struct HomebrewDashboardControllerTests {
         controller.binding(for: wilbrandOption).wrappedValue = true
 
         #expect(controller.actionState == .needsWilbrandSetup)
-        #expect(controller.bottomBarConfiguration.contextualActions.map(\.titleKey) == [
-            HomebrewPreparationAction.setUpWilbrand.titleKey
-        ])
-        #expect(controller.bottomBarConfiguration.contextualActions.map(\.systemImageName) == [
-            HomebrewPreparationAction.setUpWilbrand.systemImageName
-        ])
-        #expect(controller.bottomBarConfiguration.canGoForwardOverride == false)
-        #expect(controller.bottomBarConfiguration.defaultAction == .contextualAction(index: 0))
     }
 
-    @Test func selectedHackMiiMakesDownloadTheDefaultBottomBarAction() {
+    @Test func needsWilbrandSetupBottomBarUsesSetUpWilbrandAction() {
+        let configuration = HomebrewDashboardActionState.needsWilbrandSetup.bottomBarConfiguration(
+            controller: HomebrewDashboardController(coordinator: WorkflowCoordinator())
+        )
+
+        #expect(configuration.contextualActions.map(\.titleKey) == [
+            HomebrewPreparationAction.setUpWilbrand.titleKey
+        ])
+        #expect(configuration.contextualActions.map(\.systemImageName) == [
+            HomebrewPreparationAction.setUpWilbrand.systemImageName
+        ])
+        #expect(configuration.canGoForwardOverride == false)
+        #expect(configuration.defaultAction == .contextualAction(index: 0))
+    }
+
+    @Test func selectedHackMiiIsReadyToDownload() {
         let coordinator = WorkflowCoordinator()
         let controller = HomebrewDashboardController(coordinator: coordinator)
         let hackMiiOption = controller.visibleOptions.first { option in
@@ -191,14 +204,36 @@ struct HomebrewDashboardControllerTests {
         controller.binding(for: hackMiiOption).wrappedValue = true
 
         #expect(controller.actionState == .readyToDownload)
-        #expect(controller.bottomBarConfiguration.contextualActions.map(\.titleKey) == [
+    }
+
+    @Test func readyToDownloadBottomBarUsesDownloadAction() {
+        let configuration = HomebrewDashboardActionState.readyToDownload.bottomBarConfiguration(
+            controller: HomebrewDashboardController(coordinator: WorkflowCoordinator())
+        )
+
+        #expect(configuration.contextualActions.map(\.titleKey) == [
             HomebrewPreparationAction.download.titleKey
         ])
-        #expect(controller.bottomBarConfiguration.contextualActions.map(\.systemImageName) == [
+        #expect(configuration.contextualActions.map(\.systemImageName) == [
             HomebrewPreparationAction.download.systemImageName
         ])
-        #expect(controller.bottomBarConfiguration.canGoForwardOverride == false)
-        #expect(controller.bottomBarConfiguration.defaultAction == .contextualAction(index: 0))
+        #expect(configuration.canGoForwardOverride == false)
+        #expect(configuration.defaultAction == .contextualAction(index: 0))
+    }
+
+    @Test func readyToSaveBottomBarUsesSaveAction() {
+        let configuration = HomebrewDashboardActionState.readyToSave.bottomBarConfiguration(
+            controller: HomebrewDashboardController(coordinator: WorkflowCoordinator())
+        )
+
+        #expect(configuration.contextualActions.map(\.titleKey) == [
+            HomebrewPreparationAction.save.titleKey
+        ])
+        #expect(configuration.contextualActions.map(\.systemImageName) == [
+            HomebrewPreparationAction.save.systemImageName
+        ])
+        #expect(configuration.canGoForwardOverride == false)
+        #expect(configuration.defaultAction == .contextualAction(index: 0))
     }
 
     @Test func wilbrandSetupTakesPriorityOverDownload() {
@@ -271,6 +306,15 @@ struct HomebrewDashboardControllerTests {
 
         #expect(controller.status(for: hackMiiOption) == .saved)
         #expect(controller.actionState == .complete)
-        #expect(controller.bottomBarConfiguration.contextualActions.isEmpty)
+    }
+
+    @Test func completeActionStateHasNoBottomBarAction() {
+        let configuration = HomebrewDashboardActionState.complete.bottomBarConfiguration(
+            controller: HomebrewDashboardController(coordinator: WorkflowCoordinator())
+        )
+
+        #expect(configuration.contextualActions.isEmpty)
+        #expect(configuration.canGoForwardOverride == nil)
+        #expect(configuration.defaultAction == nil)
     }
 }

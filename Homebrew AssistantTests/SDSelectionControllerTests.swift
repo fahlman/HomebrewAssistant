@@ -3,7 +3,7 @@
 //  Homebrew Assistant Tests
 //
 //  Purpose: Verifies SD card selection controller state and bottom-bar policy.
-//  Covers: Action-state mapping, default picker action, unsupported-filesystem Disk Utility action,
+//  Covers: Action-state mapping, bottom-bar mapping, default picker action, unsupported-filesystem Disk Utility action,
 //  ready-card Next default behavior, clear/reset state, and picker presentation.
 //  Does not cover: SwiftUI rendering, native security-scoped access, native disk
 //  metadata lookup, Disk Utility process behavior, downloads, staging, or writes.
@@ -15,17 +15,24 @@ import Testing
 
 @MainActor
 struct SDSelectionControllerTests {
-    @Test func defaultBottomBarActionChoosesSDCard() {
+    @Test func defaultActionStateNeedsSelection() {
         let controller = makeController(metadata: nil)
 
         #expect(controller.actionState == .needsSelection)
-        #expect(controller.bottomBarConfiguration.contextualActions.map(\.titleKey) == [
+    }
+
+    @Test func needsSelectionBottomBarUsesChooseSDCardAction() {
+        let configuration = SDSelectionActionState.needsSelection.bottomBarConfiguration(
+            controller: makeController(metadata: nil)
+        )
+
+        #expect(configuration.contextualActions.map(\.titleKey) == [
             "sdSelection.chooseSDCard.button"
         ])
-        #expect(controller.bottomBarConfiguration.contextualActions.map(\.systemImageName) == [
+        #expect(configuration.contextualActions.map(\.systemImageName) == [
             "sdcard"
         ])
-        #expect(controller.bottomBarConfiguration.defaultAction == .contextualAction(index: 0))
+        #expect(configuration.defaultAction == .contextualAction(index: 0))
     }
 
     @Test func chooseSDCardActionPresentsVolumeImporter() {
@@ -38,25 +45,32 @@ struct SDSelectionControllerTests {
         #expect(controller.isVolumeImporterPresented)
     }
 
-    @Test func unsupportedFilesystemOffersDiskUtilityBeforeChooseSDCard() {
+    @Test func unsupportedFilesystemSelectionHasUnsupportedFilesystemActionState() {
         let volumeURL = URL(fileURLWithPath: "/Volumes/TestSD")
         let controller = makeController(metadata: unsupportedFilesystemSecureDigitalMetadata(for: volumeURL))
 
         controller.handleVolumeSelection(.success([volumeURL]))
 
         #expect(controller.actionState == .unsupportedFilesystem(hasOpenedDiskUtility: false))
-        #expect(controller.bottomBarConfiguration.contextualActions.map(\.titleKey) == [
+    }
+
+    @Test func unsupportedFilesystemBottomBarOffersDiskUtilityBeforeChooseSDCard() {
+        let configuration = SDSelectionActionState.unsupportedFilesystem(
+            hasOpenedDiskUtility: false
+        ).bottomBarConfiguration(controller: makeController(metadata: nil))
+
+        #expect(configuration.contextualActions.map(\.titleKey) == [
             "sdSelection.openDiskUtility.button",
             "sdSelection.chooseSDCard.button"
         ])
-        #expect(controller.bottomBarConfiguration.contextualActions.map(\.systemImageName) == [
+        #expect(configuration.contextualActions.map(\.systemImageName) == [
             "externaldrive.badge.gearshape",
             "sdcard"
         ])
-        #expect(controller.bottomBarConfiguration.defaultAction == .contextualAction(index: 0))
+        #expect(configuration.defaultAction == .contextualAction(index: 0))
     }
 
-    @Test func openedDiskUtilityUnsupportedFilesystemDefaultsBackToChooseSDCard() {
+    @Test func openDiskUtilityTracksLaunchIntentForCurrentSelection() {
         let volumeURL = URL(fileURLWithPath: "/Volumes/TestSD")
         let diskUtilityOpener = FakeDiskUtilityOpener()
         let controller = makeController(
@@ -69,14 +83,21 @@ struct SDSelectionControllerTests {
 
         #expect(diskUtilityOpener.didOpenDiskUtility)
         #expect(controller.actionState == .unsupportedFilesystem(hasOpenedDiskUtility: true))
-        #expect(controller.bottomBarConfiguration.contextualActions.map(\.titleKey) == [
+    }
+
+    @Test func openedDiskUtilityUnsupportedFilesystemDefaultsToChooseSDCard() {
+        let configuration = SDSelectionActionState.unsupportedFilesystem(
+            hasOpenedDiskUtility: true
+        ).bottomBarConfiguration(controller: makeController(metadata: nil))
+
+        #expect(configuration.contextualActions.map(\.titleKey) == [
             "sdSelection.openDiskUtility.button",
             "sdSelection.chooseSDCard.button"
         ])
-        #expect(controller.bottomBarConfiguration.defaultAction == .contextualAction(index: 1))
+        #expect(configuration.defaultAction == .contextualAction(index: 1))
     }
 
-    @Test func readySDCardMakesNextTheDefaultAction() {
+    @Test func readySDCardSelectionHasReadyActionState() {
         let volumeURL = URL(fileURLWithPath: "/Volumes/TestSD")
         let controller = makeController(metadata: readySecureDigitalMetadata(for: volumeURL))
 
@@ -84,10 +105,17 @@ struct SDSelectionControllerTests {
 
         #expect(controller.actionState == .ready)
         #expect(controller.readiness?.isReady == true)
-        #expect(controller.bottomBarConfiguration.contextualActions.map(\.titleKey) == [
+    }
+
+    @Test func readyActionStateMakesNextTheDefaultAction() {
+        let configuration = SDSelectionActionState.ready.bottomBarConfiguration(
+            controller: makeController(metadata: nil)
+        )
+
+        #expect(configuration.contextualActions.map(\.titleKey) == [
             "sdSelection.chooseSDCard.button"
         ])
-        #expect(controller.bottomBarConfiguration.defaultAction == .next)
+        #expect(configuration.defaultAction == .next)
     }
 
     @Test func clearSelectionClearsReadinessDriveErrorAndDiskUtilityTracking() {
@@ -102,9 +130,6 @@ struct SDSelectionControllerTests {
         #expect(controller.selectionErrorMessage == nil)
         #expect(!controller.hasOpenedDiskUtilityForCurrentSelection)
         #expect(controller.actionState == .needsSelection)
-        #expect(controller.bottomBarConfiguration.contextualActions.map(\.titleKey) == [
-            "sdSelection.chooseSDCard.button"
-        ])
     }
 
     @Test func resetClearsSelectionAndDismissesVolumeImporter() {
