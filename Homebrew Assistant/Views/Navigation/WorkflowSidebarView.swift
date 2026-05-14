@@ -2,7 +2,7 @@
 //  WorkflowSidebarView.swift
 //  Homebrew Assistant
 //
-//  Purpose: Renders the generated workflow sidebar.
+//  Purpose: Renders the fixed workflow sidebar.
 //  Owns: Sidebar list and row presentation, step icons and labels, status title
 //  and symbol-variant mapping, selection affordances, locked-state presentation,
 //  and accessibility labels.
