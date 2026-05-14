@@ -8,14 +8,14 @@
 //  and source mapping.
 //  Does not own: Option selection state, filtering UI, sorting UI, recipe
 //  loading, downloads, internal workflow behavior, or workflow navigation.
-//  Uses: InternalWorkflowKind for internal workflow option construction.
+//  Uses: BuiltInHomebrewKind for built-in homebrew option construction.
 //
 
 import Foundation
 
 struct HomebrewOption: Identifiable {
     enum Source: Hashable {
-        case internalWorkflow(InternalWorkflowKind)
+        case internalWorkflow(BuiltInHomebrewKind)
         case publicRecipe(id: String)
     }
 
@@ -46,7 +46,7 @@ struct HomebrewOption: Identifiable {
         self.source = source
     }
 
-    init(kind: InternalWorkflowKind) {
+    init(kind: BuiltInHomebrewKind) {
         self.init(
             id: kind.id,
             name: String(localized: String.LocalizationValue(kind.titleKey)),

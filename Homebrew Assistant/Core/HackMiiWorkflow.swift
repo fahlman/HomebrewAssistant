@@ -2,23 +2,10 @@
 //  HackMiiWorkflow.swift
 //  Homebrew Assistant
 //
-//  Purpose: Defines app-owned HackMii bootstrap behavior and trust boundaries.
-//  Owns: Approved HackMii source metadata, expected files, checksum requirements
-//  when available, staging rules, and copy intent for the final manifest.
-//  Does not own: Public recipe metadata, Homebrew Assistant Recipes updates,
-//  generic download implementation, generic checksum calculation, SD card writes,
-//  or user-facing copy.
-//  Delegates to: ItemPreparationService and DiagnosticsLog.
+//  Purpose: Reserved for future HackMii-specific preparation behavior if needed.
+//  Owns: Nothing today; HackMii dashboard metadata is currently provided by
+//  InternalWorkflowKind and InternalWorkflowCatalog.
+//  Does not own: Dashboard option metadata, public recipe metadata, downloads,
+//  checksum calculation, staging, SD card writes, workflow navigation, or
+//  user-facing copy.
 //
-
-import Foundation
-
-struct HackMiiWorkflow: InternalWorkflowDefinition {
-    let kind: InternalWorkflowKind = .hackMii
-
-    var titleKey: String { kind.titleKey }
-    var summaryKey: String { kind.summaryKey }
-    var category: HomebrewCategory { kind.category }
-    var systemImageName: String { kind.systemImageName }
-    var sortOrder: Int { kind.sortOrder }
-}

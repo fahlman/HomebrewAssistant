@@ -33,7 +33,7 @@ struct HomebrewDashboardControllerTests {
     @Test func categoryFilterLimitsVisibleOptions() {
         let controller = HomebrewDashboardController()
 
-        controller.selectedCategoryFilter = .category(InternalWorkflowKind.wilbrand.category)
+        controller.selectedCategoryFilter = .category(BuiltInHomebrewKind.wilbrand.category)
 
         #expect(controller.visibleOptions.map(\.source) == [.internalWorkflow(.wilbrand)])
     }
@@ -97,7 +97,7 @@ struct HomebrewDashboardControllerTests {
 
     @Test func injectedPreparationStatusOverridesInitialStatusForSelectedOption() {
         var preparationStateStore = HomebrewPreparationStateStore()
-        preparationStateStore[InternalWorkflowKind.hackMii.id] = .downloading(progress: 0.5)
+        preparationStateStore[BuiltInHomebrewKind.hackMii.id] = .downloading(progress: 0.5)
         let controller = HomebrewDashboardController(
             preparationStateStore: preparationStateStore
         )
@@ -115,7 +115,7 @@ struct HomebrewDashboardControllerTests {
 
     @Test func deselectingAndReselectingOptionResetsPreparationStatus() {
         var preparationStateStore = HomebrewPreparationStateStore()
-        preparationStateStore[InternalWorkflowKind.hackMii.id] = .downloading(progress: 0.5)
+        preparationStateStore[BuiltInHomebrewKind.hackMii.id] = .downloading(progress: 0.5)
         let controller = HomebrewDashboardController(
             preparationStateStore: preparationStateStore
         )
@@ -200,7 +200,7 @@ struct HomebrewDashboardControllerTests {
         guard let hackMiiOption else { return }
 
         controller.binding(for: hackMiiOption).wrappedValue = true
-        controller.selectedCategoryFilter = .category(InternalWorkflowKind.wilbrand.category)
+        controller.selectedCategoryFilter = .category(BuiltInHomebrewKind.wilbrand.category)
 
         #expect(controller.visibleOptions.map(\.source) == [.internalWorkflow(.wilbrand)])
         #expect(controller.actionState == .readyToDownload)
@@ -297,7 +297,7 @@ struct HomebrewDashboardControllerTests {
         guard let hackMiiOption else { return }
 
         controller.binding(for: hackMiiOption).wrappedValue = true
-        controller.selectedCategoryFilter = .category(InternalWorkflowKind.wilbrand.category)
+        controller.selectedCategoryFilter = .category(BuiltInHomebrewKind.wilbrand.category)
         controller.perform(.download)
 
         #expect(controller.visibleOptions.map(\.source) == [.internalWorkflow(.wilbrand)])
@@ -333,7 +333,7 @@ struct HomebrewDashboardControllerTests {
 
         controller.binding(for: hackMiiOption).wrappedValue = true
         controller.perform(.download)
-        controller.selectedCategoryFilter = .category(InternalWorkflowKind.wilbrand.category)
+        controller.selectedCategoryFilter = .category(BuiltInHomebrewKind.wilbrand.category)
         controller.perform(.save)
 
         #expect(controller.visibleOptions.map(\.source) == [.internalWorkflow(.wilbrand)])
