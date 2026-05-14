@@ -2,16 +2,15 @@
 //  WorkflowCoordinator.swift
 //  Homebrew Assistant
 //
-//  Purpose: Coordinates the active workflow session and generated workflow items.
-//  Owns: Current workflow items, selected item, completed item IDs,
-//  sequential reachability rules, selected internal workflows, and workflow reset
-//  behavior.
+//  Purpose: Coordinates fixed workflow/sidebar navigation for the active session.
+//  Owns: Current fixed workflow items, selected item, completed item IDs,
+//  sequential reachability rules, selected built-in homebrew IDs used by the
+//  dashboard, and workflow reset behavior.
 //  Does not own: Scoped filesystem access, disk metadata resolution, recipe
-//  catalog loading, public recipe parsing, downloads, archive extraction,
-//  staging file management, SD card writes, verification execution, eject
-//  operations, or persistent preferences.
-//  Uses: StepStateStore for per-item status storage and accepts
-//  InternalWorkflowCatalog as an injected dependency.
+//  catalog loading, public recipe parsing, dashboard option metadata, downloads,
+//  archive extraction, staging file management, SD card writes, verification
+//  execution, eject operations, or persistent preferences.
+//  Uses: StepStateStore for fixed workflow item status storage.
 //
 
 import Foundation
@@ -24,17 +23,11 @@ final class WorkflowCoordinator: ObservableObject {
     @Published private(set) var selectedInternalWorkflows: Set<InternalWorkflowKind>
     @Published private(set) var completedWorkflowItemIDs: Set<WorkflowItem.ID>
 
-    private let internalWorkflowCatalog: InternalWorkflowCatalog
-
-    init(
-        internalWorkflowCatalog: InternalWorkflowCatalog = InternalWorkflowCatalog(),
-        stepStateStore: StepStateStore = StepStateStore()
-    ) {
-        self.internalWorkflowCatalog = internalWorkflowCatalog
+    init(stepStateStore: StepStateStore = StepStateStore()) {
         self.stepStateStore = stepStateStore
         self.selectedInternalWorkflows = []
         self.completedWorkflowItemIDs = []
-        self.workflowItems = Self.initialWorkflowItems()
+        self.workflowItems = Self.fixedItems()
         self.selectedItemID = workflowItems.first?.id
     }
 
@@ -113,7 +106,7 @@ final class WorkflowCoordinator: ObservableObject {
     func updateSelectedInternalWorkflows(_ selectedWorkflows: Set<InternalWorkflowKind>) {
         selectedInternalWorkflows = selectedWorkflows
         invalidateWorkflow(after: .fixed(.chooseItems))
-        regenerateWorkflowItems()
+        resetWorkflowItemsToFixedSet()
         setWorkflowItem(.fixed(.chooseItems), isCompleted: false)
     }
 
@@ -162,16 +155,16 @@ final class WorkflowCoordinator: ObservableObject {
         selectedInternalWorkflows.removeAll()
         completedWorkflowItemIDs.removeAll()
         stepStateStore.reset()
-        workflowItems = Self.initialWorkflowItems()
+        workflowItems = Self.fixedItems()
         setSelectedItemID(workflowItems.first?.id)
     }
 
-    private func regenerateWorkflowItems() {
+    private func resetWorkflowItemsToFixedSet() {
         let previousSelectedItemID = selectedItemID
-        let generatedItems = generatedWorkflowItems()
-        let allowedItemIDs = Set(generatedItems.map(\.id))
+        let fixedItems = Self.fixedItems()
+        let allowedItemIDs = Set(fixedItems.map(\.id))
 
-        workflowItems = generatedItems
+        workflowItems = fixedItems
         stepStateStore.removeStates(except: allowedItemIDs)
         completedWorkflowItemIDs = completedWorkflowItemIDs.intersection(allowedItemIDs)
 
@@ -214,19 +207,10 @@ final class WorkflowCoordinator: ObservableObject {
         return workflowItems[workflowItems.index(after: currentIndex)]
     }
 
-    private func generatedWorkflowItems() -> [WorkflowItem] {
-        Self.fixedItems()
-    }
-
-    private static func initialWorkflowItems() -> [WorkflowItem] {
-        fixedItems()
-    }
-
     private static func fixedItems() -> [WorkflowItem] {
         [
             .fixed(.sdCardSelection),
             .fixed(.chooseItems)
         ]
     }
-
 }

@@ -2,11 +2,11 @@
 //  WorkflowCoordinatorTests.swift
 //  Homebrew Assistant Tests
 //
-//  Purpose: Verifies generated workflow items, selection reachability, and
+//  Purpose: Verifies fixed workflow/sidebar items, selection reachability, and
 //  workflow reset behavior.
-//  Covers: Initial visible fixed workflow generation, locked-step behavior, completed
-//  item gating, selected internal workflow tracking, discarded generated-item
-//  state, and reset-to-starting workflow behavior.
+//  Covers: Initial fixed workflow items, locked-step behavior, completed item
+//  gating, selected built-in homebrew tracking for the dashboard, fixed-item
+//  state pruning, and reset-to-starting workflow behavior.
 //  Does not cover: UI rendering, SD card validation, scoped filesystem access,
 //  downloads, staging, SD writes, or physical device behavior.
 //
@@ -40,8 +40,6 @@ struct WorkflowCoordinatorTests {
         #expect(coordinator.canSelect(.fixed(.chooseItems)))
         #expect(coordinator.canGoForward)
     }
-
-
     @Test func selectingLockedFutureStepDoesNothing() {
         let coordinator = WorkflowCoordinator()
 
@@ -61,7 +59,7 @@ struct WorkflowCoordinatorTests {
         #expect(!coordinator.canSelect(.fixed(.chooseItems)))
     }
 
-    @Test func chooseHomebrewSelectionCompletesChooseHomebrewWithoutAddingForwardStep() {
+    @Test func completedChooseHomebrewDoesNotAddForwardStep() {
         let coordinator = WorkflowCoordinator()
 
         coordinator.setWorkflowItem(.fixed(.sdCardSelection), isCompleted: true)
@@ -78,7 +76,7 @@ struct WorkflowCoordinatorTests {
         #expect(!coordinator.canGoForward)
     }
 
-    @Test func selectedWilbrandIsTrackedButNotInsertedIntoGeneratedWorkflow() {
+    @Test func selectedWilbrandIsTrackedButNotInsertedIntoSidebarWorkflow() {
         let coordinator = WorkflowCoordinator()
 
         coordinator.updateSelectedInternalWorkflows([.wilbrand])
@@ -90,8 +88,7 @@ struct WorkflowCoordinatorTests {
         ])
     }
 
-
-    @Test func selectedInternalWorkflowsAreTrackedButNotInsertedIntoGeneratedWorkflow() {
+    @Test func selectedInternalWorkflowsAreTrackedButNotInsertedIntoSidebarWorkflow() {
         let coordinator = WorkflowCoordinator()
 
         coordinator.updateSelectedInternalWorkflows([.hackMii, .wilbrand])
@@ -103,7 +100,7 @@ struct WorkflowCoordinatorTests {
         ])
     }
 
-    @Test func removingSelectedInternalWorkflowUpdatesSelectionWithoutChangingGeneratedWorkflow() {
+    @Test func removingSelectedInternalWorkflowUpdatesSelectionWithoutChangingSidebarWorkflow() {
         let coordinator = WorkflowCoordinator()
 
         coordinator.updateSelectedInternalWorkflows([.wilbrand, .hackMii])
@@ -116,8 +113,7 @@ struct WorkflowCoordinatorTests {
         ])
     }
 
-
-    @Test func resetWorkflowReturnsToStartingFixedWorkflowAndClearsGeneratedItemState() {
+    @Test func resetWorkflowReturnsToStartingFixedWorkflowAndClearsFixedItemState() {
         let coordinator = WorkflowCoordinator()
         let sdCardItem = WorkflowItem.fixed(.sdCardSelection)
         let chooseItemsItem = WorkflowItem.fixed(.chooseItems)
