@@ -4,8 +4,7 @@
 //
 //  Purpose: Coordinates fixed workflow/sidebar navigation for the active session.
 //  Owns: Current fixed workflow items, selected item, completed item IDs,
-//  sequential reachability rules, selected built-in homebrew IDs used by the
-//  dashboard, and workflow reset behavior.
+//  sequential reachability rules, and workflow reset behavior.
 //  Does not own: Scoped filesystem access, disk metadata resolution, recipe
 //  catalog loading, public recipe parsing, dashboard option metadata, downloads,
 //  archive extraction, staging file management, SD card writes, verification
@@ -20,12 +19,10 @@ final class WorkflowCoordinator: ObservableObject {
     @Published private(set) var workflowItems: [WorkflowItem]
     @Published var selectedItemID: WorkflowItem.ID?
     @Published private(set) var stepStateStore: StepStateStore
-    @Published private(set) var selectedInternalWorkflows: Set<InternalWorkflowKind>
     @Published private(set) var completedWorkflowItemIDs: Set<WorkflowItem.ID>
 
     init(stepStateStore: StepStateStore = StepStateStore()) {
         self.stepStateStore = stepStateStore
-        self.selectedInternalWorkflows = []
         self.completedWorkflowItemIDs = []
         self.workflowItems = Self.fixedItems()
         self.selectedItemID = workflowItems.first?.id
@@ -103,13 +100,6 @@ final class WorkflowCoordinator: ObservableObject {
         selectedItemID = nextItem.id
     }
 
-    func updateSelectedInternalWorkflows(_ selectedWorkflows: Set<InternalWorkflowKind>) {
-        selectedInternalWorkflows = selectedWorkflows
-        invalidateWorkflow(after: .fixed(.chooseItems))
-        resetWorkflowItemsToFixedSet()
-        setWorkflowItem(.fixed(.chooseItems), isCompleted: false)
-    }
-
     func setWorkflowItem(_ item: WorkflowItem, isCompleted: Bool) {
         guard workflowItems.contains(item) else { return }
 
@@ -152,30 +142,10 @@ final class WorkflowCoordinator: ObservableObject {
     }
 
     func resetWorkflow() {
-        selectedInternalWorkflows.removeAll()
         completedWorkflowItemIDs.removeAll()
         stepStateStore.reset()
         workflowItems = Self.fixedItems()
         setSelectedItemID(workflowItems.first?.id)
-    }
-
-    private func resetWorkflowItemsToFixedSet() {
-        let previousSelectedItemID = selectedItemID
-        let fixedItems = Self.fixedItems()
-        let allowedItemIDs = Set(fixedItems.map(\.id))
-
-        workflowItems = fixedItems
-        stepStateStore.removeStates(except: allowedItemIDs)
-        completedWorkflowItemIDs = completedWorkflowItemIDs.intersection(allowedItemIDs)
-
-        if let previousSelectedItemID,
-           allowedItemIDs.contains(previousSelectedItemID),
-           let previousSelectedItem = workflowItems.first(where: { $0.id == previousSelectedItemID }),
-           canSelect(previousSelectedItem) {
-            setSelectedItemID(previousSelectedItemID)
-        } else {
-            setSelectedItemID(firstSelectableItem?.id)
-        }
     }
 
     private var firstSelectableItem: WorkflowItem? {

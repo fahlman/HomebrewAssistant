@@ -32,10 +32,9 @@ final class WorkflowSessionController: ObservableObject {
 
         self.coordinator = coordinator
         self.sdSelectionController = sdSelectionController
-        self.homebrewDashboardController = HomebrewDashboardController(coordinator: coordinator)
+        self.homebrewDashboardController = HomebrewDashboardController()
         bindSelectedStepDisplayChanges()
         bindSDSelectionReadinessToWorkflowCompletion()
-        bindHomebrewDashboardActionStateToWorkflowCompletion()
         configureDashboardCompletionHandler()
     }
 
@@ -45,10 +44,9 @@ final class WorkflowSessionController: ObservableObject {
     ) {
         self.coordinator = coordinator
         self.sdSelectionController = sdSelectionController
-        self.homebrewDashboardController = HomebrewDashboardController(coordinator: coordinator)
+        self.homebrewDashboardController = HomebrewDashboardController()
         bindSelectedStepDisplayChanges()
         bindSDSelectionReadinessToWorkflowCompletion()
-        bindHomebrewDashboardActionStateToWorkflowCompletion()
         configureDashboardCompletionHandler()
     }
 
@@ -69,12 +67,6 @@ final class WorkflowSessionController: ObservableObject {
                 self?.updateSDCardSelectionCompletion(for: readiness)
             }
             .store(in: &cancellables)
-    }
-
-    private func bindHomebrewDashboardActionStateToWorkflowCompletion() {
-        // Dashboard completion is synchronized through `onCompletionStateChanged`,
-        // not through `objectWillChange`, because `objectWillChange` is a UI
-        // invalidation signal and fires before mutation.
     }
 
     private func configureDashboardCompletionHandler() {

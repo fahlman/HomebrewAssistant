@@ -10,38 +10,33 @@
 //  Does not own: Homebrew option rendering, bottom-bar rendering, recipe
 //  loading, download execution, verification, archive extraction, staging,
 //  SD card writes, or workflow navigation.
-//  Uses: WorkflowCoordinator for selected built-in homebrew state,
+//  Uses: HomebrewOption IDs for dashboard-owned selection state,
 //  InternalWorkflowCatalog for built-in homebrew option metadata,
 //  HomebrewPreparationStateStore for per-option preparation state, and
 //  HomebrewPreparationAction for setup/download/save intents.
 //
 
-import Combine
 internal import SwiftUI
+import Combine
 
 final class HomebrewDashboardController: ObservableObject {
     @Published var selectedCategoryFilter: HomebrewCategoryFilter = .all
     @Published var selectedSortMode: HomebrewSortMode = .category
+    @Published private var selectedOptionIDs: Set<HomebrewOption.ID>
     @Published private var preparationStateStore: HomebrewPreparationStateStore
 
     var onCompletionStateChanged: ((Bool) -> Void)?
 
-    private let coordinator: WorkflowCoordinator
     private let internalWorkflowCatalog: InternalWorkflowCatalog
-    private var coordinatorCancellable: AnyCancellable?
 
     init(
-        coordinator: WorkflowCoordinator,
         internalWorkflowCatalog: InternalWorkflowCatalog = InternalWorkflowCatalog(),
-        preparationStateStore: HomebrewPreparationStateStore = HomebrewPreparationStateStore()
+        preparationStateStore: HomebrewPreparationStateStore = HomebrewPreparationStateStore(),
+        selectedOptionIDs: Set<HomebrewOption.ID> = []
     ) {
-        self.coordinator = coordinator
         self.internalWorkflowCatalog = internalWorkflowCatalog
         self.preparationStateStore = preparationStateStore
-        self.coordinatorCancellable = coordinator.objectWillChange
-            .sink { [weak self] _ in
-                self?.objectWillChange.send()
-            }
+        self.selectedOptionIDs = selectedOptionIDs
     }
 
     var visibleOptions: [HomebrewOption] {
@@ -144,33 +139,18 @@ final class HomebrewDashboardController: ObservableObject {
     }
 
     private func isSelected(_ option: HomebrewOption) -> Bool {
-        guard case .internalWorkflow(let kind) = option.source else {
-            return false
-        }
-
-        return coordinator.selectedInternalWorkflows.contains(kind)
+        selectedOptionIDs.contains(option.id)
     }
 
     private func setOption(_ option: HomebrewOption, isSelected: Bool) {
-        guard case .internalWorkflow(let kind) = option.source else {
-            return
-        }
-
-        var selectedWorkflows = coordinator.selectedInternalWorkflows
-
         if isSelected {
-            selectedWorkflows.insert(kind)
-        } else {
-            selectedWorkflows.remove(kind)
-        }
+            selectedOptionIDs.insert(option.id)
 
-        coordinator.updateSelectedInternalWorkflows(selectedWorkflows)
-
-        if isSelected {
             if preparationStateStore[option.id] == .notSelected {
                 preparationStateStore[option.id] = initialPreparationStatus(for: option)
             }
         } else {
+            selectedOptionIDs.remove(option.id)
             preparationStateStore.removeStatus(for: option.id)
         }
 

@@ -5,7 +5,7 @@
 //  Purpose: Verifies Homebrew dashboard controller option visibility, filtering,
 //  selection binding, and preparation status mapping.
 //  Covers: Default filter/sort state, category filtering, alphabetical sorting,
-//  internal workflow selection updates, initial Wilbrand/HackMii status mapping,
+//  dashboard option selection updates, initial Wilbrand/HackMii status mapping,
 //  injected preparation-state status mapping, dashboard action-state selection,
 //  bottom-bar configuration, and preparation action transitions.
 //  Does not cover: Dashboard SwiftUI rendering, public recipe catalog loading,
@@ -20,8 +20,7 @@ internal import SwiftUI
 @MainActor
 struct HomebrewDashboardControllerTests {
     @Test func defaultStateShowsInternalWorkflowOptionsInCategoryOrder() {
-        let coordinator = WorkflowCoordinator()
-        let controller = HomebrewDashboardController(coordinator: coordinator)
+        let controller = HomebrewDashboardController()
 
         #expect(controller.selectedCategoryFilter == .all)
         #expect(controller.selectedSortMode == .category)
@@ -32,8 +31,7 @@ struct HomebrewDashboardControllerTests {
     }
 
     @Test func categoryFilterLimitsVisibleOptions() {
-        let coordinator = WorkflowCoordinator()
-        let controller = HomebrewDashboardController(coordinator: coordinator)
+        let controller = HomebrewDashboardController()
 
         controller.selectedCategoryFilter = .category(InternalWorkflowKind.wilbrand.category)
 
@@ -41,8 +39,7 @@ struct HomebrewDashboardControllerTests {
     }
 
     @Test func alphabeticalSortOrdersVisibleOptionsByName() {
-        let coordinator = WorkflowCoordinator()
-        let controller = HomebrewDashboardController(coordinator: coordinator)
+        let controller = HomebrewDashboardController()
 
         controller.selectedSortMode = .alphabetical
 
@@ -52,9 +49,8 @@ struct HomebrewDashboardControllerTests {
         })
     }
 
-    @Test func bindingUpdatesSelectedInternalWorkflows() {
-        let coordinator = WorkflowCoordinator()
-        let controller = HomebrewDashboardController(coordinator: coordinator)
+    @Test func bindingUpdatesDashboardSelection() {
+        let controller = HomebrewDashboardController()
         let hackMiiOption = controller.visibleOptions.first { option in
             option.source == .internalWorkflow(.hackMii)
         }
@@ -63,17 +59,14 @@ struct HomebrewDashboardControllerTests {
         guard let hackMiiOption else { return }
 
         controller.binding(for: hackMiiOption).wrappedValue = true
-        #expect(coordinator.selectedInternalWorkflows == [.hackMii])
         #expect(controller.binding(for: hackMiiOption).wrappedValue)
 
         controller.binding(for: hackMiiOption).wrappedValue = false
-        #expect(coordinator.selectedInternalWorkflows.isEmpty)
         #expect(!controller.binding(for: hackMiiOption).wrappedValue)
     }
 
     @Test func wilbrandStatusReflectsSelection() {
-        let coordinator = WorkflowCoordinator()
-        let controller = HomebrewDashboardController(coordinator: coordinator)
+        let controller = HomebrewDashboardController()
         let wilbrandOption = controller.visibleOptions.first { option in
             option.source == .internalWorkflow(.wilbrand)
         }
@@ -88,8 +81,7 @@ struct HomebrewDashboardControllerTests {
     }
 
     @Test func hackMiiStatusReflectsSelection() {
-        let coordinator = WorkflowCoordinator()
-        let controller = HomebrewDashboardController(coordinator: coordinator)
+        let controller = HomebrewDashboardController()
         let hackMiiOption = controller.visibleOptions.first { option in
             option.source == .internalWorkflow(.hackMii)
         }
@@ -104,11 +96,9 @@ struct HomebrewDashboardControllerTests {
     }
 
     @Test func injectedPreparationStatusOverridesInitialStatusForSelectedOption() {
-        let coordinator = WorkflowCoordinator()
         var preparationStateStore = HomebrewPreparationStateStore()
         preparationStateStore[InternalWorkflowKind.hackMii.id] = .downloading(progress: 0.5)
         let controller = HomebrewDashboardController(
-            coordinator: coordinator,
             preparationStateStore: preparationStateStore
         )
         let hackMiiOption = controller.visibleOptions.first { option in
@@ -124,11 +114,9 @@ struct HomebrewDashboardControllerTests {
     }
 
     @Test func deselectingAndReselectingOptionResetsPreparationStatus() {
-        let coordinator = WorkflowCoordinator()
         var preparationStateStore = HomebrewPreparationStateStore()
         preparationStateStore[InternalWorkflowKind.hackMii.id] = .downloading(progress: 0.5)
         let controller = HomebrewDashboardController(
-            coordinator: coordinator,
             preparationStateStore: preparationStateStore
         )
         let hackMiiOption = controller.visibleOptions.first { option in
@@ -146,15 +134,13 @@ struct HomebrewDashboardControllerTests {
     }
 
     @Test func noSelectedHomebrewHasNothingSelectedActionState() {
-        let coordinator = WorkflowCoordinator()
-        let controller = HomebrewDashboardController(coordinator: coordinator)
+        let controller = HomebrewDashboardController()
 
         #expect(controller.actionState == .nothingSelected)
     }
 
     @Test func nothingSelectedActionStateHasNoBottomBarAction() {
-        let coordinator = WorkflowCoordinator()
-        let controller = HomebrewDashboardController(coordinator: coordinator)
+        let controller = HomebrewDashboardController()
 
         #expect(controller.bottomBarConfiguration.contextualActions.isEmpty)
         #expect(controller.bottomBarConfiguration.canGoForwardOverride == nil)
@@ -162,8 +148,7 @@ struct HomebrewDashboardControllerTests {
     }
 
     @Test func selectedWilbrandNeedsWilbrandSetup() {
-        let coordinator = WorkflowCoordinator()
-        let controller = HomebrewDashboardController(coordinator: coordinator)
+        let controller = HomebrewDashboardController()
         let wilbrandOption = controller.visibleOptions.first { option in
             option.source == .internalWorkflow(.wilbrand)
         }
@@ -178,7 +163,7 @@ struct HomebrewDashboardControllerTests {
 
     @Test func needsWilbrandSetupBottomBarUsesSetUpWilbrandAction() {
         let configuration = HomebrewDashboardActionState.needsWilbrandSetup.bottomBarConfiguration(
-            controller: HomebrewDashboardController(coordinator: WorkflowCoordinator())
+            controller: HomebrewDashboardController()
         )
 
         #expect(configuration.contextualActions.map(\.titleKey) == [
@@ -192,8 +177,7 @@ struct HomebrewDashboardControllerTests {
     }
 
     @Test func selectedHackMiiIsReadyToDownload() {
-        let coordinator = WorkflowCoordinator()
-        let controller = HomebrewDashboardController(coordinator: coordinator)
+        let controller = HomebrewDashboardController()
         let hackMiiOption = controller.visibleOptions.first { option in
             option.source == .internalWorkflow(.hackMii)
         }
@@ -208,7 +192,7 @@ struct HomebrewDashboardControllerTests {
 
     @Test func readyToDownloadBottomBarUsesDownloadAction() {
         let configuration = HomebrewDashboardActionState.readyToDownload.bottomBarConfiguration(
-            controller: HomebrewDashboardController(coordinator: WorkflowCoordinator())
+            controller: HomebrewDashboardController()
         )
 
         #expect(configuration.contextualActions.map(\.titleKey) == [
@@ -223,7 +207,7 @@ struct HomebrewDashboardControllerTests {
 
     @Test func readyToSaveBottomBarUsesSaveAction() {
         let configuration = HomebrewDashboardActionState.readyToSave.bottomBarConfiguration(
-            controller: HomebrewDashboardController(coordinator: WorkflowCoordinator())
+            controller: HomebrewDashboardController()
         )
 
         #expect(configuration.contextualActions.map(\.titleKey) == [
@@ -237,8 +221,7 @@ struct HomebrewDashboardControllerTests {
     }
 
     @Test func wilbrandSetupTakesPriorityOverDownload() {
-        let coordinator = WorkflowCoordinator()
-        let controller = HomebrewDashboardController(coordinator: coordinator)
+        let controller = HomebrewDashboardController()
         let wilbrandOption = controller.visibleOptions.first { option in
             option.source == .internalWorkflow(.wilbrand)
         }
@@ -257,8 +240,7 @@ struct HomebrewDashboardControllerTests {
     }
 
     @Test func performSetUpWilbrandMovesWilbrandToReadyToSave() {
-        let coordinator = WorkflowCoordinator()
-        let controller = HomebrewDashboardController(coordinator: coordinator)
+        let controller = HomebrewDashboardController()
         let wilbrandOption = controller.visibleOptions.first { option in
             option.source == .internalWorkflow(.wilbrand)
         }
@@ -274,8 +256,7 @@ struct HomebrewDashboardControllerTests {
     }
 
     @Test func performDownloadMovesReadyToDownloadOptionsToReadyToSave() {
-        let coordinator = WorkflowCoordinator()
-        let controller = HomebrewDashboardController(coordinator: coordinator)
+        let controller = HomebrewDashboardController()
         let hackMiiOption = controller.visibleOptions.first { option in
             option.source == .internalWorkflow(.hackMii)
         }
@@ -291,8 +272,7 @@ struct HomebrewDashboardControllerTests {
     }
 
     @Test func performSaveMovesReadyToSaveOptionsToSaved() {
-        let coordinator = WorkflowCoordinator()
-        let controller = HomebrewDashboardController(coordinator: coordinator)
+        let controller = HomebrewDashboardController()
         let hackMiiOption = controller.visibleOptions.first { option in
             option.source == .internalWorkflow(.hackMii)
         }
@@ -310,7 +290,7 @@ struct HomebrewDashboardControllerTests {
 
     @Test func completeActionStateHasNoBottomBarAction() {
         let configuration = HomebrewDashboardActionState.complete.bottomBarConfiguration(
-            controller: HomebrewDashboardController(coordinator: WorkflowCoordinator())
+            controller: HomebrewDashboardController()
         )
 
         #expect(configuration.contextualActions.isEmpty)
