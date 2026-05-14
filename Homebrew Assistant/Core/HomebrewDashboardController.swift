@@ -4,8 +4,9 @@
 //
 //  Purpose: Coordinates the Choose Homebrew dashboard's options, selection,
 //  preparation state, and bottom-bar action policy.
-//  Owns: Dashboard filter state, sort state, visible option ordering, option
-//  selection updates, preparation status storage/mapping, dashboard action state,
+//  Owns: Dashboard filter state, sort state, visible option ordering,
+//  selection updates, selected option derivation, preparation status storage/mapping,
+//  dashboard action state,
 //  completion-state notifications, and Choose Homebrew bottom-bar configuration.
 //  Does not own: Homebrew option rendering, bottom-bar rendering, recipe
 //  loading, download execution, verification, archive extraction, staging,
@@ -67,7 +68,7 @@ final class HomebrewDashboardController: ObservableObject {
     }
 
     var actionState: HomebrewDashboardActionState {
-        let selectedOptions = visibleOptions.filter(isSelected)
+        let selectedOptions = selectedOptions
 
         guard !selectedOptions.isEmpty else {
             return .nothingSelected
@@ -123,15 +124,19 @@ final class HomebrewDashboardController: ObservableObject {
     }
 
     private func markReadyToDownloadOptionsPrepared() {
-        for option in visibleOptions where isSelected(option) && status(for: option) == .readyToDownload {
+        for option in selectedOptions where status(for: option) == .readyToDownload {
             preparationStateStore[option.id] = .readyToSave
         }
     }
 
     private func markReadyToSaveOptionsSaved() {
-        for option in visibleOptions where isSelected(option) && status(for: option) == .readyToSave {
+        for option in selectedOptions where status(for: option) == .readyToSave {
             preparationStateStore[option.id] = .saved
         }
+    }
+
+    private var selectedOptions: [HomebrewOption] {
+        availableOptions.filter(isSelected)
     }
 
     private var availableOptions: [HomebrewOption] {

@@ -6,7 +6,7 @@
 //  selection binding, and preparation status mapping.
 //  Covers: Default filter/sort state, category filtering, alphabetical sorting,
 //  dashboard option selection updates, initial Wilbrand/HackMii status mapping,
-//  injected preparation-state status mapping, dashboard action-state selection,
+//  injected preparation-state status mapping, filter-independent action-state selection,
 //  bottom-bar configuration, and preparation action transitions.
 //  Does not cover: Dashboard SwiftUI rendering, public recipe catalog loading,
 //  downloads, staging, SD card writes, verification, or workflow navigation.
@@ -190,6 +190,22 @@ struct HomebrewDashboardControllerTests {
         #expect(controller.actionState == .readyToDownload)
     }
 
+    @Test func hiddenSelectedOptionStillDeterminesActionState() {
+        let controller = HomebrewDashboardController()
+        let hackMiiOption = controller.visibleOptions.first { option in
+            option.source == .internalWorkflow(.hackMii)
+        }
+
+        #expect(hackMiiOption != nil)
+        guard let hackMiiOption else { return }
+
+        controller.binding(for: hackMiiOption).wrappedValue = true
+        controller.selectedCategoryFilter = .category(InternalWorkflowKind.wilbrand.category)
+
+        #expect(controller.visibleOptions.map(\.source) == [.internalWorkflow(.wilbrand)])
+        #expect(controller.actionState == .readyToDownload)
+    }
+
     @Test func readyToDownloadBottomBarUsesDownloadAction() {
         let configuration = HomebrewDashboardActionState.readyToDownload.bottomBarConfiguration(
             controller: HomebrewDashboardController()
@@ -271,6 +287,24 @@ struct HomebrewDashboardControllerTests {
         #expect(controller.actionState == .readyToSave)
     }
 
+    @Test func performDownloadUpdatesHiddenSelectedOptions() {
+        let controller = HomebrewDashboardController()
+        let hackMiiOption = controller.visibleOptions.first { option in
+            option.source == .internalWorkflow(.hackMii)
+        }
+
+        #expect(hackMiiOption != nil)
+        guard let hackMiiOption else { return }
+
+        controller.binding(for: hackMiiOption).wrappedValue = true
+        controller.selectedCategoryFilter = .category(InternalWorkflowKind.wilbrand.category)
+        controller.perform(.download)
+
+        #expect(controller.visibleOptions.map(\.source) == [.internalWorkflow(.wilbrand)])
+        #expect(controller.status(for: hackMiiOption) == .readyToSave)
+        #expect(controller.actionState == .readyToSave)
+    }
+
     @Test func performSaveMovesReadyToSaveOptionsToSaved() {
         let controller = HomebrewDashboardController()
         let hackMiiOption = controller.visibleOptions.first { option in
@@ -284,6 +318,25 @@ struct HomebrewDashboardControllerTests {
         controller.perform(.download)
         controller.perform(.save)
 
+        #expect(controller.status(for: hackMiiOption) == .saved)
+        #expect(controller.actionState == .complete)
+    }
+
+    @Test func performSaveUpdatesHiddenSelectedOptions() {
+        let controller = HomebrewDashboardController()
+        let hackMiiOption = controller.visibleOptions.first { option in
+            option.source == .internalWorkflow(.hackMii)
+        }
+
+        #expect(hackMiiOption != nil)
+        guard let hackMiiOption else { return }
+
+        controller.binding(for: hackMiiOption).wrappedValue = true
+        controller.perform(.download)
+        controller.selectedCategoryFilter = .category(InternalWorkflowKind.wilbrand.category)
+        controller.perform(.save)
+
+        #expect(controller.visibleOptions.map(\.source) == [.internalWorkflow(.wilbrand)])
         #expect(controller.status(for: hackMiiOption) == .saved)
         #expect(controller.actionState == .complete)
     }
