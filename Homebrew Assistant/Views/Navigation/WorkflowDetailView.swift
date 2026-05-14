@@ -12,7 +12,7 @@
 //  HomebrewDashboardView.
 //
 
-import SwiftUI
+internal import SwiftUI
 
 struct WorkflowDetailView: View {
     @ObservedObject var coordinator: WorkflowCoordinator

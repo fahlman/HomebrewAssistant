@@ -9,7 +9,7 @@
 //  Uses: ContentView as the main window content.
 //
 
-import SwiftUI
+internal import SwiftUI
 
 @main
 struct HomebrewAssistantApp: App {

@@ -16,7 +16,7 @@
 //
 
 import AppKit
-import SwiftUI
+internal import SwiftUI
 import UniformTypeIdentifiers
 
 struct DiskAccessView: View {

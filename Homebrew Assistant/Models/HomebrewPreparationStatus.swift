@@ -11,7 +11,7 @@
 //  for shared status foreground colors.
 //
 
-import SwiftUI
+internal import SwiftUI
 
 enum HomebrewPreparationStatus: Equatable {
     case notSelected

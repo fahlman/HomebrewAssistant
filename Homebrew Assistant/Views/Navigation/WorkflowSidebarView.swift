@@ -13,7 +13,7 @@
 //  sidebar row metadata.
 //
 
-import SwiftUI
+internal import SwiftUI
 
 struct WorkflowSidebarView: View {
     @ObservedObject var coordinator: WorkflowCoordinator

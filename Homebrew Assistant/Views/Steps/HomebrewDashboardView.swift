@@ -12,7 +12,7 @@
 //  selection bindings, and preparation status mapping.
 //
 
-import SwiftUI
+internal import SwiftUI
 
 struct HomebrewDashboardView: View {
     @ObservedObject var controller: HomebrewDashboardController

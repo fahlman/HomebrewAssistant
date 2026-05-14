@@ -14,7 +14,7 @@
 //  supplied by the selected step controller.
 //
 
-import SwiftUI
+internal import SwiftUI
 
 struct ContentView: View {
     @StateObject private var sessionController = WorkflowSessionController()

@@ -13,7 +13,7 @@
 //  for contextual action metadata and execution.
 //
 
-import SwiftUI
+internal import SwiftUI
 
 struct BottomNavigationView: View {
     @ObservedObject var coordinator: WorkflowCoordinator

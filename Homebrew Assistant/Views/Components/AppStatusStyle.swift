@@ -9,7 +9,7 @@
 //  Used by: Views and status models that need shared semantic foreground colors.
 //
 
-import SwiftUI
+internal import SwiftUI
 
 enum AppStatusStyle {
     static let successForeground = Color.green
