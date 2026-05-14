@@ -77,7 +77,7 @@ final class HomebrewDashboardController: ObservableObject {
         }
 
         if selectedOptions.contains(where: { option in
-            option.source == .internalWorkflow(.wilbrand)
+            option.source == .builtIn(.wilbrand)
                 && status(for: option) == .setupRequired
         }) {
             return .needsWilbrandSetup
@@ -117,7 +117,7 @@ final class HomebrewDashboardController: ObservableObject {
 
     private func markWilbrandSetupHandled() {
         guard let wilbrandOption = availableOptions.first(where: { option in
-            option.source == .internalWorkflow(.wilbrand)
+            option.source == .builtIn(.wilbrand)
         }), isSelected(wilbrandOption) else {
             return
         }
@@ -175,9 +175,9 @@ final class HomebrewDashboardController: ObservableObject {
 
     private func initialPreparationStatus(for option: HomebrewOption) -> HomebrewPreparationStatus {
         switch option.source {
-        case .internalWorkflow(.wilbrand):
+        case .builtIn(.wilbrand):
             .setupRequired
-        case .internalWorkflow(.hackMii):
+        case .builtIn(.hackMii):
             .readyToDownload
         case .publicRecipe:
             .readyToDownload

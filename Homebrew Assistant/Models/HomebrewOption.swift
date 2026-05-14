@@ -5,17 +5,17 @@
 //  Purpose: Defines the shared selectable homebrew option model used by the
 //  Choose Homebrew step.
 //  Owns: Option identity, localized name, summary key, category, icon reference,
-//  and source mapping.
+//  and definition source mapping.
 //  Does not own: Option selection state, filtering UI, sorting UI, recipe
-//  loading, downloads, internal workflow behavior, or workflow navigation.
-//  Uses: BuiltInHomebrewKind for built-in homebrew option construction.
+//  loading, downloads, preparation behavior, or workflow navigation.
+//  Uses: HomebrewDefinition for homebrew option construction.
 //
 
 import Foundation
 
 struct HomebrewOption: Identifiable {
     enum Source: Hashable {
-        case internalWorkflow(BuiltInHomebrewKind)
+        case builtIn(BuiltInHomebrewKind)
         case publicRecipe(id: String)
     }
 
@@ -46,6 +46,25 @@ struct HomebrewOption: Identifiable {
         self.source = source
     }
 
+    init(definition: HomebrewDefinition) {
+        let source: Source
+        switch definition.source {
+        case .builtIn(let kind):
+            source = .builtIn(kind)
+        case .publicRecipe(let id):
+            source = .publicRecipe(id: id)
+        }
+
+        self.init(
+            id: definition.id,
+            name: definition.name,
+            summaryKey: definition.summaryKey,
+            category: definition.category,
+            systemImageName: definition.systemImageName,
+            source: source
+        )
+    }
+
     init(kind: BuiltInHomebrewKind) {
         self.init(
             id: kind.id,
@@ -53,7 +72,7 @@ struct HomebrewOption: Identifiable {
             summaryKey: kind.summaryKey,
             category: kind.category,
             systemImageName: kind.systemImageName,
-            source: .internalWorkflow(kind)
+            source: .builtIn(kind)
         )
     }
 }

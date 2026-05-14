@@ -27,8 +27,8 @@ struct WorkflowSessionControllerTests {
         ])
         #expect(sessionController.sdSelectionController.readiness == nil)
         #expect(sessionController.homebrewDashboardController.visibleOptions.map(\.source) == [
-            .internalWorkflow(.wilbrand),
-            .internalWorkflow(.hackMii)
+            .builtIn(.wilbrand),
+            .builtIn(.hackMii)
         ])
     }
 
@@ -70,7 +70,7 @@ struct WorkflowSessionControllerTests {
     @Test func selectingHomebrewDoesNotCompleteChooseHomebrewStep() {
         let sessionController = WorkflowSessionController()
         let hackMiiOption = sessionController.homebrewDashboardController.visibleOptions.first { option in
-            option.source == .internalWorkflow(.hackMii)
+            option.source == .builtIn(.hackMii)
         }
 
         #expect(hackMiiOption != nil)
@@ -84,7 +84,7 @@ struct WorkflowSessionControllerTests {
     @Test func completingSelectedHomebrewCompletesChooseHomebrewStep() {
         let sessionController = WorkflowSessionController()
         let hackMiiOption = sessionController.homebrewDashboardController.visibleOptions.first { option in
-            option.source == .internalWorkflow(.hackMii)
+            option.source == .builtIn(.hackMii)
         }
 
         #expect(hackMiiOption != nil)
@@ -101,10 +101,10 @@ struct WorkflowSessionControllerTests {
     @Test func changingCompletedHomebrewSelectionInvalidatesChooseHomebrewStep() {
         let sessionController = WorkflowSessionController()
         let hackMiiOption = sessionController.homebrewDashboardController.visibleOptions.first { option in
-            option.source == .internalWorkflow(.hackMii)
+            option.source == .builtIn(.hackMii)
         }
         let wilbrandOption = sessionController.homebrewDashboardController.visibleOptions.first { option in
-            option.source == .internalWorkflow(.wilbrand)
+            option.source == .builtIn(.wilbrand)
         }
 
         #expect(hackMiiOption != nil)

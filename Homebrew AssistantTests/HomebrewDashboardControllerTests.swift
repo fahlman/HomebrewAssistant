@@ -25,8 +25,8 @@ struct HomebrewDashboardControllerTests {
         #expect(controller.selectedCategoryFilter == .all)
         #expect(controller.selectedSortMode == .category)
         #expect(controller.visibleOptions.map(\.source) == [
-            .internalWorkflow(.wilbrand),
-            .internalWorkflow(.hackMii)
+            .builtIn(.wilbrand),
+            .builtIn(.hackMii)
         ])
     }
 
@@ -35,7 +35,7 @@ struct HomebrewDashboardControllerTests {
 
         controller.selectedCategoryFilter = .category(BuiltInHomebrewKind.wilbrand.category)
 
-        #expect(controller.visibleOptions.map(\.source) == [.internalWorkflow(.wilbrand)])
+        #expect(controller.visibleOptions.map(\.source) == [.builtIn(.wilbrand)])
     }
 
     @Test func alphabeticalSortOrdersVisibleOptionsByName() {
@@ -52,7 +52,7 @@ struct HomebrewDashboardControllerTests {
     @Test func bindingUpdatesDashboardSelection() {
         let controller = HomebrewDashboardController()
         let hackMiiOption = controller.visibleOptions.first { option in
-            option.source == .internalWorkflow(.hackMii)
+            option.source == .builtIn(.hackMii)
         }
 
         #expect(hackMiiOption != nil)
@@ -68,7 +68,7 @@ struct HomebrewDashboardControllerTests {
     @Test func wilbrandStatusReflectsSelection() {
         let controller = HomebrewDashboardController()
         let wilbrandOption = controller.visibleOptions.first { option in
-            option.source == .internalWorkflow(.wilbrand)
+            option.source == .builtIn(.wilbrand)
         }
 
         #expect(wilbrandOption != nil)
@@ -83,7 +83,7 @@ struct HomebrewDashboardControllerTests {
     @Test func hackMiiStatusReflectsSelection() {
         let controller = HomebrewDashboardController()
         let hackMiiOption = controller.visibleOptions.first { option in
-            option.source == .internalWorkflow(.hackMii)
+            option.source == .builtIn(.hackMii)
         }
 
         #expect(hackMiiOption != nil)
@@ -102,7 +102,7 @@ struct HomebrewDashboardControllerTests {
             preparationStateStore: preparationStateStore
         )
         let hackMiiOption = controller.visibleOptions.first { option in
-            option.source == .internalWorkflow(.hackMii)
+            option.source == .builtIn(.hackMii)
         }
 
         #expect(hackMiiOption != nil)
@@ -120,7 +120,7 @@ struct HomebrewDashboardControllerTests {
             preparationStateStore: preparationStateStore
         )
         let hackMiiOption = controller.visibleOptions.first { option in
-            option.source == .internalWorkflow(.hackMii)
+            option.source == .builtIn(.hackMii)
         }
 
         #expect(hackMiiOption != nil)
@@ -150,7 +150,7 @@ struct HomebrewDashboardControllerTests {
     @Test func selectedWilbrandNeedsWilbrandSetup() {
         let controller = HomebrewDashboardController()
         let wilbrandOption = controller.visibleOptions.first { option in
-            option.source == .internalWorkflow(.wilbrand)
+            option.source == .builtIn(.wilbrand)
         }
 
         #expect(wilbrandOption != nil)
@@ -179,7 +179,7 @@ struct HomebrewDashboardControllerTests {
     @Test func selectedHackMiiIsReadyToDownload() {
         let controller = HomebrewDashboardController()
         let hackMiiOption = controller.visibleOptions.first { option in
-            option.source == .internalWorkflow(.hackMii)
+            option.source == .builtIn(.hackMii)
         }
 
         #expect(hackMiiOption != nil)
@@ -193,7 +193,7 @@ struct HomebrewDashboardControllerTests {
     @Test func hiddenSelectedOptionStillDeterminesActionState() {
         let controller = HomebrewDashboardController()
         let hackMiiOption = controller.visibleOptions.first { option in
-            option.source == .internalWorkflow(.hackMii)
+            option.source == .builtIn(.hackMii)
         }
 
         #expect(hackMiiOption != nil)
@@ -202,7 +202,7 @@ struct HomebrewDashboardControllerTests {
         controller.binding(for: hackMiiOption).wrappedValue = true
         controller.selectedCategoryFilter = .category(BuiltInHomebrewKind.wilbrand.category)
 
-        #expect(controller.visibleOptions.map(\.source) == [.internalWorkflow(.wilbrand)])
+        #expect(controller.visibleOptions.map(\.source) == [.builtIn(.wilbrand)])
         #expect(controller.actionState == .readyToDownload)
     }
 
@@ -239,10 +239,10 @@ struct HomebrewDashboardControllerTests {
     @Test func wilbrandSetupTakesPriorityOverDownload() {
         let controller = HomebrewDashboardController()
         let wilbrandOption = controller.visibleOptions.first { option in
-            option.source == .internalWorkflow(.wilbrand)
+            option.source == .builtIn(.wilbrand)
         }
         let hackMiiOption = controller.visibleOptions.first { option in
-            option.source == .internalWorkflow(.hackMii)
+            option.source == .builtIn(.hackMii)
         }
 
         #expect(wilbrandOption != nil)
@@ -258,7 +258,7 @@ struct HomebrewDashboardControllerTests {
     @Test func performSetUpWilbrandMovesWilbrandToReadyToSave() {
         let controller = HomebrewDashboardController()
         let wilbrandOption = controller.visibleOptions.first { option in
-            option.source == .internalWorkflow(.wilbrand)
+            option.source == .builtIn(.wilbrand)
         }
 
         #expect(wilbrandOption != nil)
@@ -274,7 +274,7 @@ struct HomebrewDashboardControllerTests {
     @Test func performDownloadMovesReadyToDownloadOptionsToReadyToSave() {
         let controller = HomebrewDashboardController()
         let hackMiiOption = controller.visibleOptions.first { option in
-            option.source == .internalWorkflow(.hackMii)
+            option.source == .builtIn(.hackMii)
         }
 
         #expect(hackMiiOption != nil)
@@ -290,7 +290,7 @@ struct HomebrewDashboardControllerTests {
     @Test func performDownloadUpdatesHiddenSelectedOptions() {
         let controller = HomebrewDashboardController()
         let hackMiiOption = controller.visibleOptions.first { option in
-            option.source == .internalWorkflow(.hackMii)
+            option.source == .builtIn(.hackMii)
         }
 
         #expect(hackMiiOption != nil)
@@ -300,7 +300,7 @@ struct HomebrewDashboardControllerTests {
         controller.selectedCategoryFilter = .category(BuiltInHomebrewKind.wilbrand.category)
         controller.perform(.download)
 
-        #expect(controller.visibleOptions.map(\.source) == [.internalWorkflow(.wilbrand)])
+        #expect(controller.visibleOptions.map(\.source) == [.builtIn(.wilbrand)])
         #expect(controller.status(for: hackMiiOption) == .readyToSave)
         #expect(controller.actionState == .readyToSave)
     }
@@ -308,7 +308,7 @@ struct HomebrewDashboardControllerTests {
     @Test func performSaveMovesReadyToSaveOptionsToSaved() {
         let controller = HomebrewDashboardController()
         let hackMiiOption = controller.visibleOptions.first { option in
-            option.source == .internalWorkflow(.hackMii)
+            option.source == .builtIn(.hackMii)
         }
 
         #expect(hackMiiOption != nil)
@@ -325,7 +325,7 @@ struct HomebrewDashboardControllerTests {
     @Test func performSaveUpdatesHiddenSelectedOptions() {
         let controller = HomebrewDashboardController()
         let hackMiiOption = controller.visibleOptions.first { option in
-            option.source == .internalWorkflow(.hackMii)
+            option.source == .builtIn(.hackMii)
         }
 
         #expect(hackMiiOption != nil)
@@ -336,7 +336,7 @@ struct HomebrewDashboardControllerTests {
         controller.selectedCategoryFilter = .category(BuiltInHomebrewKind.wilbrand.category)
         controller.perform(.save)
 
-        #expect(controller.visibleOptions.map(\.source) == [.internalWorkflow(.wilbrand)])
+        #expect(controller.visibleOptions.map(\.source) == [.builtIn(.wilbrand)])
         #expect(controller.status(for: hackMiiOption) == .saved)
         #expect(controller.actionState == .complete)
     }

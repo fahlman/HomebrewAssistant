@@ -3,7 +3,7 @@
 //  Homebrew Assistant Tests
 //
 //  Purpose: Verifies the built-in homebrew catalog metadata.
-//  Covers: Wilbrand and HackMii catalog entries, catalog ordering, and generated
+//  Covers: Wilbrand and HackMii definitions, catalog ordering, and generated
 //  dashboard homebrew options.
 //  Does not cover: Preparation behavior, downloads, archive extraction, staging,
 //  SD card writes, workflow navigation, or view rendering.
@@ -17,18 +17,21 @@ struct BuiltInHomebrewCatalogTests {
     @Test func catalogContainsWilbrandAndHackMiiInSortOrder() {
         let catalog = BuiltInHomebrewCatalog()
 
-        let sortedKinds = catalog.homebrewKinds
+        let sortedDefinitions = catalog.definitions
             .sorted { $0.sortOrder < $1.sortOrder }
 
-        #expect(sortedKinds == [.wilbrand, .hackMii])
+        #expect(sortedDefinitions.map(\.source) == [
+            .builtIn(.wilbrand),
+            .builtIn(.hackMii)
+        ])
     }
 
-    @Test func homebrewOptionsAreGeneratedFromBuiltInHomebrewKinds() {
+    @Test func homebrewOptionsAreGeneratedFromBuiltInHomebrewDefinitions() {
         let catalog = BuiltInHomebrewCatalog()
 
         #expect(catalog.homebrewOptions.map(\.source) == [
-            .internalWorkflow(.wilbrand),
-            .internalWorkflow(.hackMii)
+            .builtIn(.wilbrand),
+            .builtIn(.hackMii)
         ])
         #expect(catalog.homebrewOptions.map(\.id) == [
             BuiltInHomebrewKind.wilbrand.id,
