@@ -7,7 +7,7 @@
 //  Owns: Dashboard filter state, sort state, visible option ordering,
 //  selection updates, selected option derivation, preparation status storage/mapping,
 //  dashboard action state,
-//  completion-state notifications, and Choose Homebrew bottom-bar configuration.
+//  explicit completion state, and Choose Homebrew bottom-bar configuration.
 //  Does not own: Homebrew option rendering, bottom-bar rendering, recipe
 //  loading, download execution, verification, archive extraction, staging,
 //  SD card writes, or workflow navigation.
@@ -26,7 +26,7 @@ final class HomebrewDashboardController: ObservableObject {
     @Published private var selectedOptionIDs: Set<HomebrewOption.ID>
     @Published private var preparationStateStore: HomebrewPreparationStateStore
 
-    var onCompletionStateChanged: ((Bool) -> Void)?
+    @Published private(set) var isComplete: Bool
 
     private let internalWorkflowCatalog: InternalWorkflowCatalog
 
@@ -38,6 +38,8 @@ final class HomebrewDashboardController: ObservableObject {
         self.internalWorkflowCatalog = internalWorkflowCatalog
         self.preparationStateStore = preparationStateStore
         self.selectedOptionIDs = selectedOptionIDs
+        self.isComplete = false
+        synchronizeCompletionState()
     }
 
     var visibleOptions: [HomebrewOption] {
@@ -110,7 +112,7 @@ final class HomebrewDashboardController: ObservableObject {
             markReadyToSaveOptionsSaved()
         }
 
-        notifyCompletionStateChanged()
+        synchronizeCompletionState()
     }
 
     private func markWilbrandSetupHandled() {
@@ -159,11 +161,16 @@ final class HomebrewDashboardController: ObservableObject {
             preparationStateStore.removeStatus(for: option.id)
         }
 
-        notifyCompletionStateChanged()
+        synchronizeCompletionState()
     }
 
-    private func notifyCompletionStateChanged() {
-        onCompletionStateChanged?(actionState == .complete)
+    private func synchronizeCompletionState() {
+        let isComplete = actionState == .complete
+        guard self.isComplete != isComplete else {
+            return
+        }
+
+        self.isComplete = isComplete
     }
 
     private func initialPreparationStatus(for option: HomebrewOption) -> HomebrewPreparationStatus {

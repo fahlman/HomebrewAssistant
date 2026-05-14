@@ -35,7 +35,7 @@ final class WorkflowSessionController: ObservableObject {
         self.homebrewDashboardController = HomebrewDashboardController()
         bindSelectedStepDisplayChanges()
         bindSDSelectionReadinessToWorkflowCompletion()
-        configureDashboardCompletionHandler()
+        bindHomebrewDashboardCompletionToWorkflowCompletion()
     }
 
     init(
@@ -47,7 +47,7 @@ final class WorkflowSessionController: ObservableObject {
         self.homebrewDashboardController = HomebrewDashboardController()
         bindSelectedStepDisplayChanges()
         bindSDSelectionReadinessToWorkflowCompletion()
-        configureDashboardCompletionHandler()
+        bindHomebrewDashboardCompletionToWorkflowCompletion()
     }
 
     private func bindSelectedStepDisplayChanges() {
@@ -69,11 +69,14 @@ final class WorkflowSessionController: ObservableObject {
             .store(in: &cancellables)
     }
 
-    private func configureDashboardCompletionHandler() {
-        homebrewDashboardController.onCompletionStateChanged = { [weak self] isCompleted in
-            self?.objectWillChange.send()
-            self?.updateChooseHomebrewCompletion(isCompleted: isCompleted)
-        }
+    private func bindHomebrewDashboardCompletionToWorkflowCompletion() {
+        homebrewDashboardController.$isComplete
+            .dropFirst()
+            .sink { [weak self] isCompleted in
+                self?.objectWillChange.send()
+                self?.updateChooseHomebrewCompletion(isCompleted: isCompleted)
+            }
+            .store(in: &cancellables)
     }
 
     private func updateSDCardSelectionCompletion(for readiness: SDCardReadiness?) {
