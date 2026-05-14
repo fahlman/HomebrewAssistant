@@ -3,13 +3,13 @@
 //  Homebrew Assistant
 //
 //  Purpose: Classifies SD card readiness from mounted-volume metadata.
-//  Owns: Secure Digital protocol validation, internal-disk rejection, FAT32
-//  filesystem validation, writable-volume validation, and SD card readiness
-//  classification.
+//  Owns: Secure Digital protocol validation, FAT32 filesystem validation,
+//  writable-volume validation, and SD card readiness classification.
 //  Does not own: Disk metadata lookup, mounted-volume metadata modeling, scoped
 //  filesystem access lifecycle, UI presentation, file copying, staging, recipe
 //  preparation, workflow navigation, or workflow state transitions.
-//  Uses: DiskMetadataProvider, DiskVolumeMetadata, and SDCardReadiness.
+//  Uses: DiskMetadataProvider for mounted-volume metadata and SDCardReadiness
+//  for readiness results.
 //
 
 import Foundation
@@ -30,11 +30,8 @@ struct SDCardValidationService {
             return .unavailable(reason: .notSecureDigital, metadata: metadata)
         }
 
-        guard metadata.isInternal != true else {
-            return .unavailable(reason: .internalDisk, metadata: metadata)
-        }
 
-        guard metadata.isFAT32 else {
+        guard hasSupportedFileSystem(metadata.fileSystemType) else {
             return .unavailable(reason: .unsupportedFileSystem, metadata: metadata)
         }
 
@@ -43,5 +40,17 @@ struct SDCardValidationService {
         }
 
         return .ready(metadata)
+    }
+}
+
+private extension SDCardValidationService {
+    func hasSupportedFileSystem(_ fileSystemType: String?) -> Bool {
+        guard let fileSystemType else {
+            return false
+        }
+
+        return fileSystemType.localizedCaseInsensitiveCompare("msdos") == .orderedSame
+            || fileSystemType.localizedCaseInsensitiveCompare("fat32") == .orderedSame
+            || fileSystemType.localizedCaseInsensitiveCompare("ms-dos fat32") == .orderedSame
     }
 }

@@ -30,7 +30,6 @@ struct DiskArbitrationMetadataProvider: DiskMetadataProvider {
         }
 
         let localizedName = description[kDADiskDescriptionVolumeNameKey as String] as? String
-        let displayName = localizedName ?? volumeURL.lastPathComponent
         let protocolName = description[kDADiskDescriptionDeviceProtocolKey as String] as? String
         let fileSystemType = description[kDADiskDescriptionVolumeKindKey as String] as? String
         let volumeResourceValues = try? volumeURL.resourceValues(forKeys: [
@@ -47,7 +46,6 @@ struct DiskArbitrationMetadataProvider: DiskMetadataProvider {
         return DiskVolumeMetadata(
             volumeURL: volumeURL,
             localizedName: localizedName,
-            displayName: displayName,
             protocolName: protocolName,
             fileSystemType: fileSystemType,
             totalCapacityBytes: totalCapacityBytes,

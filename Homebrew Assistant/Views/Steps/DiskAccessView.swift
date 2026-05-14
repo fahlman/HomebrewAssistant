@@ -174,8 +174,6 @@ private struct DriveSelectionPresentation {
             return String(localized: "sdSelection.readiness.ready.recovery")
         case .unavailable(reason: .notSecureDigital, metadata: _):
             return String(localized: "sdSelection.readiness.notSecureDigital.recovery")
-        case .unavailable(reason: .internalDisk, metadata: _):
-            return String(localized: "sdSelection.readiness.internalDisk.recovery")
         case .unavailable(reason: .unsupportedFileSystem, metadata: _):
             return String(localized: "sdSelection.readiness.unsupportedFileSystem.recovery")
         case .unavailable:
@@ -301,8 +299,6 @@ private extension SDCardReadinessFailureReason {
             String(localized: "sdSelection.readiness.metadataUnavailable")
         case .notSecureDigital:
             String(localized: "sdSelection.readiness.notSecureDigital")
-        case .internalDisk:
-            String(localized: "sdSelection.readiness.internalDisk")
         case .unsupportedFileSystem:
             String(localized: "sdSelection.readiness.unsupportedFileSystem.short")
         case .notWritable:

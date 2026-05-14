@@ -3,8 +3,7 @@
 //  Homebrew Assistant
 //
 //  Purpose: Models native metadata for a mounted disk volume.
-//  Owns: Mounted-volume metadata values, display-name fallback, and FAT32
-//  filesystem detection used by SD card validation.
+//  Owns: Mounted-volume metadata values and display-name fallback.
 //  Does not own: Disk Arbitration lookup, scoped filesystem access, readiness
 //  classification, UI presentation, workflow navigation, file writes, or
 //  preparation state.
@@ -54,14 +53,3 @@ nonisolated struct DiskVolumeMetadata: Equatable, Sendable {
     }
 }
 
-extension DiskVolumeMetadata {
-    var isFAT32: Bool {
-        guard let fileSystemType else {
-            return false
-        }
-
-        return fileSystemType.localizedCaseInsensitiveCompare("msdos") == .orderedSame
-            || fileSystemType.localizedCaseInsensitiveCompare("fat32") == .orderedSame
-            || fileSystemType.localizedCaseInsensitiveCompare("ms-dos fat32") == .orderedSame
-    }
-}
