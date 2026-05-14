@@ -1,5 +1,5 @@
 //
-//  InternalWorkflowCatalogTests.swift
+//  BuiltInHomebrewCatalogTests.swift
 //  Homebrew Assistant Tests
 //
 //  Purpose: Verifies the built-in homebrew catalog metadata.
@@ -13,18 +13,18 @@ import Testing
 @testable import Homebrew_Assistant
 
 @MainActor
-struct InternalWorkflowCatalogTests {
+struct BuiltInHomebrewCatalogTests {
     @Test func catalogContainsWilbrandAndHackMiiInSortOrder() {
-        let catalog = InternalWorkflowCatalog()
+        let catalog = BuiltInHomebrewCatalog()
 
-        let sortedKinds = catalog.workflows
+        let sortedKinds = catalog.homebrewKinds
             .sorted { $0.sortOrder < $1.sortOrder }
 
         #expect(sortedKinds == [.wilbrand, .hackMii])
     }
 
     @Test func homebrewOptionsAreGeneratedFromBuiltInHomebrewKinds() {
-        let catalog = InternalWorkflowCatalog()
+        let catalog = BuiltInHomebrewCatalog()
 
         #expect(catalog.homebrewOptions.map(\.source) == [
             .internalWorkflow(.wilbrand),

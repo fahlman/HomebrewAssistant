@@ -12,7 +12,7 @@
 //  loading, download execution, verification, archive extraction, staging,
 //  SD card writes, or workflow navigation.
 //  Uses: HomebrewOption IDs for dashboard-owned selection state,
-//  InternalWorkflowCatalog for built-in homebrew option metadata,
+//  BuiltInHomebrewCatalog for built-in homebrew option metadata,
 //  HomebrewPreparationStateStore for per-option preparation state, and
 //  HomebrewPreparationAction for setup/download/save intents.
 //
@@ -28,14 +28,14 @@ final class HomebrewDashboardController: ObservableObject {
 
     @Published private(set) var isComplete: Bool
 
-    private let internalWorkflowCatalog: InternalWorkflowCatalog
+    private let builtInHomebrewCatalog: BuiltInHomebrewCatalog
 
     init(
-        internalWorkflowCatalog: InternalWorkflowCatalog = InternalWorkflowCatalog(),
+        builtInHomebrewCatalog: BuiltInHomebrewCatalog = BuiltInHomebrewCatalog(),
         preparationStateStore: HomebrewPreparationStateStore = HomebrewPreparationStateStore(),
         selectedOptionIDs: Set<HomebrewOption.ID> = []
     ) {
-        self.internalWorkflowCatalog = internalWorkflowCatalog
+        self.builtInHomebrewCatalog = builtInHomebrewCatalog
         self.preparationStateStore = preparationStateStore
         self.selectedOptionIDs = selectedOptionIDs
         self.isComplete = false
@@ -142,7 +142,7 @@ final class HomebrewDashboardController: ObservableObject {
     }
 
     private var availableOptions: [HomebrewOption] {
-        internalWorkflowCatalog.homebrewOptions
+        builtInHomebrewCatalog.homebrewOptions
     }
 
     private func isSelected(_ option: HomebrewOption) -> Bool {

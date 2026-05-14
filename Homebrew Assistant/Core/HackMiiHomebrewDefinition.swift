@@ -1,0 +1,4 @@
+//
+//  HackMiiHomebrewDefinition.swift
+//  Homebrew Assistant
+//
