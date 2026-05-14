@@ -2,12 +2,13 @@
 //  StepStateStore.swift
 //  Homebrew Assistant
 //
-//  Purpose: Stores per-workflow-item session state for the active workflow.
-//  Owns: Step status, progress values, selected option IDs, diagnostic messages,
-//  recoverable error messages, and session-only step state.
-//  Does not own: Workflow navigation rules, scoped filesystem access, disk operations,
-//  downloads, writes, diagnostics recording, or persistent workflow restoration.
-//  Consumed by: WorkflowCoordinator and views/controllers that need step state.
+//  Purpose: Stores session-only state for fixed workflow/sidebar items.
+//  Owns: Workflow step status and optional progress values keyed by workflow
+//  item ID.
+//  Does not own: Workflow navigation rules, homebrew preparation state, selected
+//  homebrew option IDs, diagnostics, recoverable errors, scoped filesystem access,
+//  disk operations, downloads, writes, or persistent workflow restoration.
+//  Consumed by: WorkflowCoordinator and views/controllers that need fixed-step state.
 //
 
 import Foundation
@@ -46,22 +47,13 @@ struct StepStateStore {
 struct StepState: Equatable {
     var status: StepStatus
     var progress: Double?
-    var selectedOptionIDs: Set<String>
-    var diagnosticMessages: [String]
-    var recoverableErrorMessage: String?
 
     init(
         status: StepStatus,
-        progress: Double? = nil,
-        selectedOptionIDs: Set<String> = [],
-        diagnosticMessages: [String] = [],
-        recoverableErrorMessage: String? = nil
+        progress: Double? = nil
     ) {
         self.status = status
         self.progress = progress
-        self.selectedOptionIDs = selectedOptionIDs
-        self.diagnosticMessages = diagnosticMessages
-        self.recoverableErrorMessage = recoverableErrorMessage
     }
 
     static let unavailable = StepState(status: .unavailable)
@@ -72,8 +64,6 @@ enum StepStatus: String, CaseIterable, Hashable {
     case unavailable
     case notStarted
     case inProgress
-    case preparing
-    case prepared
     case completed
     case failed
 }

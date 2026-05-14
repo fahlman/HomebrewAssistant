@@ -40,7 +40,7 @@ struct SDSelectionControllerTests {
 
     @Test func unsupportedFilesystemOffersDiskUtilityBeforeChooseSDCard() {
         let volumeURL = URL(fileURLWithPath: "/Volumes/TestSD")
-        let controller = makeController(metadata: unsupportedFilesystemMetadata(for: volumeURL))
+        let controller = makeController(metadata: unsupportedFilesystemSecureDigitalMetadata(for: volumeURL))
 
         controller.handleVolumeSelection(.success([volumeURL]))
 
@@ -60,7 +60,7 @@ struct SDSelectionControllerTests {
         let volumeURL = URL(fileURLWithPath: "/Volumes/TestSD")
         let diskUtilityOpener = FakeDiskUtilityOpener()
         let controller = makeController(
-            metadata: unsupportedFilesystemMetadata(for: volumeURL),
+            metadata: unsupportedFilesystemSecureDigitalMetadata(for: volumeURL),
             diskUtilityOpener: diskUtilityOpener
         )
 
@@ -78,7 +78,7 @@ struct SDSelectionControllerTests {
 
     @Test func readySDCardMakesNextTheDefaultAction() {
         let volumeURL = URL(fileURLWithPath: "/Volumes/TestSD")
-        let controller = makeController(metadata: readyMetadata(for: volumeURL))
+        let controller = makeController(metadata: readySecureDigitalMetadata(for: volumeURL))
 
         controller.handleVolumeSelection(.success([volumeURL]))
 
@@ -92,7 +92,7 @@ struct SDSelectionControllerTests {
 
     @Test func clearSelectionClearsReadinessDriveErrorAndDiskUtilityTracking() {
         let volumeURL = URL(fileURLWithPath: "/Volumes/TestSD")
-        let controller = makeController(metadata: unsupportedFilesystemMetadata(for: volumeURL))
+        let controller = makeController(metadata: unsupportedFilesystemSecureDigitalMetadata(for: volumeURL))
 
         controller.handleVolumeSelection(.success([volumeURL]))
         controller.clearSelection()
@@ -133,29 +133,4 @@ struct SDSelectionControllerTests {
         )
     }
 
-    private func readyMetadata(for volumeURL: URL) -> DiskVolumeMetadata {
-        DiskVolumeMetadata(
-            volumeURL: volumeURL,
-            localizedName: "Test SD",
-            protocolName: "Secure Digital",
-            fileSystemType: "msdos",
-            isWritable: true,
-            isRemovable: true,
-            isEjectable: true,
-            isInternal: false
-        )
-    }
-
-    private func unsupportedFilesystemMetadata(for volumeURL: URL) -> DiskVolumeMetadata {
-        DiskVolumeMetadata(
-            volumeURL: volumeURL,
-            localizedName: "Test SD",
-            protocolName: "Secure Digital",
-            fileSystemType: "apfs",
-            isWritable: true,
-            isRemovable: true,
-            isEjectable: true,
-            isInternal: false
-        )
-    }
 }

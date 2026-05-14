@@ -6,7 +6,7 @@
 //  preparation state, and bottom-bar action policy.
 //  Owns: Dashboard filter state, sort state, visible option ordering, option
 //  selection updates, preparation status storage/mapping, dashboard action state,
-//  and Choose Homebrew bottom-bar configuration.
+//  completion-state notifications, and Choose Homebrew bottom-bar configuration.
 //  Does not own: Homebrew option rendering, bottom-bar rendering, recipe
 //  loading, download execution, verification, archive extraction, staging,
 //  SD card writes, or workflow navigation.
@@ -23,6 +23,8 @@ final class HomebrewDashboardController: ObservableObject {
     @Published var selectedCategoryFilter: HomebrewCategoryFilter = .all
     @Published var selectedSortMode: HomebrewSortMode = .category
     @Published private var preparationStateStore: HomebrewPreparationStateStore
+
+    var onCompletionStateChanged: ((Bool) -> Void)?
 
     private let coordinator: WorkflowCoordinator
     private let internalWorkflowCatalog: InternalWorkflowCatalog
@@ -111,6 +113,8 @@ final class HomebrewDashboardController: ObservableObject {
         case .save:
             markReadyToSaveOptionsSaved()
         }
+
+        notifyCompletionStateChanged()
     }
 
     private func markWilbrandSetupHandled() {
@@ -169,6 +173,12 @@ final class HomebrewDashboardController: ObservableObject {
         } else {
             preparationStateStore.removeStatus(for: option.id)
         }
+
+        notifyCompletionStateChanged()
+    }
+
+    private func notifyCompletionStateChanged() {
+        onCompletionStateChanged?(actionState == .complete)
     }
 
     private func initialPreparationStatus(for option: HomebrewOption) -> HomebrewPreparationStatus {

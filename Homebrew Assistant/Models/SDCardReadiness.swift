@@ -3,8 +3,9 @@
 //  Homebrew Assistant
 //
 //  Purpose: Represents readiness validation results for a selected SD card volume.
-//  Owns: Ready/unavailable validation state, readiness convenience, failure reasons, and optional
-//  disk metadata for invalid but readable selected volumes.
+//  Owns: Ready/unavailable validation state, readiness convenience, failure
+//  reasons including internal-disk rejection, and optional disk metadata for
+//  invalid but readable selected volumes.
 //  Does not own: Disk metadata queries, scoped access, UI copy, workflow
 //  navigation, file writes, or preflight write/read/delete verification.
 //  Consumed by: SDCardValidationService, SDSelectionController, and views that
@@ -29,6 +30,7 @@ nonisolated enum SDCardReadiness: Equatable {
 nonisolated enum SDCardReadinessFailureReason: Equatable {
     case metadataUnavailable
     case notSecureDigital
+    case internalDisk
     case unsupportedFileSystem
     case notWritable
 }

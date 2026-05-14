@@ -114,7 +114,7 @@ final class WorkflowCoordinator: ObservableObject {
         selectedInternalWorkflows = selectedWorkflows
         invalidateWorkflow(after: .fixed(.chooseItems))
         regenerateWorkflowItems()
-        updateChooseHomebrewCompletion()
+        setWorkflowItem(.fixed(.chooseItems), isCompleted: false)
     }
 
     func setWorkflowItem(_ item: WorkflowItem, isCompleted: Bool) {
@@ -147,13 +147,6 @@ final class WorkflowCoordinator: ObservableObject {
             setSelectedItemID(firstSelectableItem?.id)
             return
         }
-    }
-
-    private func updateChooseHomebrewCompletion() {
-        setWorkflowItem(
-            .fixed(.chooseItems),
-            isCompleted: !selectedInternalWorkflows.isEmpty
-        )
     }
 
     func mark(_ item: WorkflowItem, as state: StepState) {

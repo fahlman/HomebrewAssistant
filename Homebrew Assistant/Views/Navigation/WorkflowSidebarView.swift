@@ -95,10 +95,6 @@ private extension StepStatus {
             "workflow.stepStatus.notStarted"
         case .inProgress:
             "workflow.stepStatus.inProgress"
-        case .preparing:
-            "workflow.stepStatus.preparing"
-        case .prepared:
-            "workflow.stepStatus.prepared"
         case .completed:
             "workflow.stepStatus.completed"
         case .failed:
@@ -108,7 +104,7 @@ private extension StepStatus {
 
     var symbolVariant: SymbolVariants {
         switch self {
-        case .completed, .prepared:
+        case .completed:
             .fill
         default:
             .none

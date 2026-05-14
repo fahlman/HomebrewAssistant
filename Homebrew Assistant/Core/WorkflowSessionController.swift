@@ -5,8 +5,9 @@
 //  Purpose: Coordinates the active workflow session and cross-controller state
 //  synchronization.
 //  Owns: WorkflowCoordinator, SDSelectionController, HomebrewDashboardController,
-//  session display-change forwarding, and synchronization from SD card readiness
-//  into fixed workflow-step completion state.
+//  selected-step display-change signaling, synchronization from SD card readiness
+//  into fixed workflow-step completion state, and synchronization from dashboard
+//  completion into fixed workflow-step completion state.
 //  Does not own: App launch, SwiftUI layout, sidebar rendering, detail-view
 //  routing, bottom button rendering, SD card validation policy, scoped filesystem
 //  access implementation, recipe loading, downloads, staging, or file writes.
@@ -32,8 +33,10 @@ final class WorkflowSessionController: ObservableObject {
         self.coordinator = coordinator
         self.sdSelectionController = sdSelectionController
         self.homebrewDashboardController = HomebrewDashboardController(coordinator: coordinator)
-        bindSessionDisplayChanges()
+        bindSelectedStepDisplayChanges()
         bindSDSelectionReadinessToWorkflowCompletion()
+        bindHomebrewDashboardActionStateToWorkflowCompletion()
+        configureDashboardCompletionHandler()
     }
 
     init(
@@ -43,24 +46,15 @@ final class WorkflowSessionController: ObservableObject {
         self.coordinator = coordinator
         self.sdSelectionController = sdSelectionController
         self.homebrewDashboardController = HomebrewDashboardController(coordinator: coordinator)
-        bindSessionDisplayChanges()
+        bindSelectedStepDisplayChanges()
         bindSDSelectionReadinessToWorkflowCompletion()
+        bindHomebrewDashboardActionStateToWorkflowCompletion()
+        configureDashboardCompletionHandler()
     }
 
-    private func bindSessionDisplayChanges() {
-        coordinator.objectWillChange
-            .sink { [weak self] _ in
-                self?.objectWillChange.send()
-            }
-            .store(in: &cancellables)
-
-        sdSelectionController.objectWillChange
-            .sink { [weak self] _ in
-                self?.objectWillChange.send()
-            }
-            .store(in: &cancellables)
-
-        homebrewDashboardController.objectWillChange
+    private func bindSelectedStepDisplayChanges() {
+        coordinator.$selectedItemID
+            .dropFirst()
             .sink { [weak self] _ in
                 self?.objectWillChange.send()
             }
@@ -71,16 +65,46 @@ final class WorkflowSessionController: ObservableObject {
         sdSelectionController.$readiness
             .dropFirst()
             .sink { [weak self] readiness in
+                self?.objectWillChange.send()
                 self?.updateSDCardSelectionCompletion(for: readiness)
             }
             .store(in: &cancellables)
     }
 
+    private func bindHomebrewDashboardActionStateToWorkflowCompletion() {
+        // Dashboard completion is synchronized through `onCompletionStateChanged`,
+        // not through `objectWillChange`, because `objectWillChange` is a UI
+        // invalidation signal and fires before mutation.
+    }
+
+    private func configureDashboardCompletionHandler() {
+        homebrewDashboardController.onCompletionStateChanged = { [weak self] isCompleted in
+            self?.objectWillChange.send()
+            self?.updateChooseHomebrewCompletion(isCompleted: isCompleted)
+        }
+    }
+
     private func updateSDCardSelectionCompletion(for readiness: SDCardReadiness?) {
+        let isCompleted = readiness?.isReady == true
+        guard coordinator.isCompleted(.fixed(.sdCardSelection)) != isCompleted else {
+            return
+        }
+
         coordinator.invalidateWorkflow(after: .fixed(.sdCardSelection))
         coordinator.setWorkflowItem(
             .fixed(.sdCardSelection),
-            isCompleted: readiness?.isReady == true
+            isCompleted: isCompleted
+        )
+    }
+
+    private func updateChooseHomebrewCompletion(isCompleted: Bool) {
+        guard coordinator.isCompleted(.fixed(.chooseItems)) != isCompleted else {
+            return
+        }
+
+        coordinator.setWorkflowItem(
+            .fixed(.chooseItems),
+            isCompleted: isCompleted
         )
     }
 }

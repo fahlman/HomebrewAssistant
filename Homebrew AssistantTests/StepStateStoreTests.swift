@@ -2,12 +2,11 @@
 //  StepStateStoreTests.swift
 //  Homebrew Assistant Tests
 //
-//  Purpose: Verifies per-workflow-item session state storage behavior.
-//  Covers: Default missing-item state, storing and retrieving state, reset,
-//  single-item removal, pruning to allowed item IDs, and preservation of stored
-//  progress, selected option IDs, diagnostics, and recoverable error messages.
-//  Does not cover: Workflow navigation, diagnostics recording, persistence,
-//  scoped filesystem access, disk operations, downloads, or writes.
+//  Purpose: Verifies fixed workflow/sidebar item session state storage behavior.
+//  Covers: Default missing-item state, storing and retrieving status/progress,
+//  reset, single-item removal, and pruning to allowed item IDs.
+//  Does not cover: Workflow navigation, homebrew preparation state, diagnostics,
+//  persistence, scoped filesystem access, disk operations, downloads, or writes.
 //
 
 import Testing
@@ -21,15 +20,12 @@ struct StepStateStoreTests {
         #expect(store[WorkflowItem.fixed(.sdCardSelection).id] == .notStarted)
     }
 
-    @Test func subscriptStoresAndReturnsFullStepState() {
+    @Test func subscriptStoresAndReturnsStepStatusAndProgress() {
         var store = StepStateStore()
         let itemID = WorkflowItem.fixed(.chooseItems).id
         let state = StepState(
             status: .inProgress,
-            progress: 0.5,
-            selectedOptionIDs: ["wilbrand", "hackMii"],
-            diagnosticMessages: ["Started", "Halfway"],
-            recoverableErrorMessage: "Try again"
+            progress: 0.5
         )
 
         store[itemID] = state
@@ -37,9 +33,6 @@ struct StepStateStoreTests {
         #expect(store[itemID] == state)
         #expect(store[itemID].status == .inProgress)
         #expect(store[itemID].progress == 0.5)
-        #expect(store[itemID].selectedOptionIDs == ["wilbrand", "hackMii"])
-        #expect(store[itemID].diagnosticMessages == ["Started", "Halfway"])
-        #expect(store[itemID].recoverableErrorMessage == "Try again")
     }
 
     @Test func resetClearsStoredState() {
@@ -58,11 +51,11 @@ struct StepStateStoreTests {
         let chooseItemsItemID = WorkflowItem.fixed(.chooseItems).id
 
         store[sdCardItemID] = StepState(status: .completed)
-        store[chooseItemsItemID] = StepState(status: .prepared)
+        store[chooseItemsItemID] = StepState(status: .inProgress)
         store.removeState(for: sdCardItemID)
 
         #expect(store[sdCardItemID] == .notStarted)
-        #expect(store[chooseItemsItemID].status == .prepared)
+        #expect(store[chooseItemsItemID].status == .inProgress)
     }
 
     @Test func removeStatesExceptAllowedItemIDsPrunesDiscardedItems() {
@@ -73,12 +66,12 @@ struct StepStateStoreTests {
 
         store[sdCardItemID] = StepState(status: .completed)
         store[chooseItemsItemID] = StepState(status: .completed)
-        store[discardedItemID] = StepState(status: .prepared)
+        store[discardedItemID] = StepState(status: .inProgress)
 
         store.removeStates(except: [sdCardItemID, discardedItemID])
 
         #expect(store[sdCardItemID].status == .completed)
         #expect(store[chooseItemsItemID] == .notStarted)
-        #expect(store[discardedItemID].status == .prepared)
+        #expect(store[discardedItemID].status == .inProgress)
     }
 }

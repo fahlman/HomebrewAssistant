@@ -490,6 +490,28 @@
         }
       }
     },
+    "sdSelection.readiness.internalDisk" : {
+      "comment" : "Readiness message shown when the selected Secure Digital volume appears to be an internal disk.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The selected SD card appears to be an internal disk."
+          }
+        }
+      }
+    },
+    "sdSelection.readiness.internalDisk.recovery" : {
+      "comment" : "Recovery message shown below the selected-drive card when the selected Secure Digital volume appears to be an internal disk.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Click Choose SD Card… and select an external SD card."
+          }
+        }
+      }
+    },
     "sdSelection.readiness.notSecureDigital" : {
       "comment" : "Readiness message shown when the selected volume is not reported as Secure Digital media.",
       "localizations" : {

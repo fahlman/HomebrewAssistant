@@ -3,14 +3,16 @@
 //  Homebrew Assistant Tests
 //
 //  Purpose: Verifies active workflow session controller wiring.
-//  Covers: Session controller construction and synchronization from SD card
-//  readiness into fixed workflow-step completion state.
+//  Covers: Session controller construction, synchronization from SD card
+//  readiness into fixed workflow-step completion state, and synchronization from
+//  Choose Homebrew dashboard completion into fixed workflow-step completion state.
 //  Does not cover: SwiftUI layout, sidebar rendering, bottom button rendering,
 //  native scoped access, native disk metadata lookup, downloads, staging, or
 //  file writes.
 //
 
 import Foundation
+internal import SwiftUI
 import Testing
 @testable import Homebrew_Assistant
 
@@ -32,7 +34,7 @@ struct WorkflowSessionControllerTests {
 
     @Test func readySDCardSelectionCompletesFixedSDCardStep() {
         let volumeURL = URL(fileURLWithPath: "/Volumes/TestSD")
-        let sessionController = makeSessionController(metadata: readyMetadata(for: volumeURL))
+        let sessionController = makeSessionController(metadata: readySecureDigitalMetadata(for: volumeURL))
 
         sessionController.sdSelectionController.handleVolumeSelection(.success([volumeURL]))
 
@@ -42,7 +44,7 @@ struct WorkflowSessionControllerTests {
 
     @Test func unavailableSDCardSelectionDoesNotCompleteFixedSDCardStep() {
         let volumeURL = URL(fileURLWithPath: "/Volumes/TestSD")
-        let sessionController = makeSessionController(metadata: unsupportedFilesystemMetadata(for: volumeURL))
+        let sessionController = makeSessionController(metadata: unsupportedFilesystemSecureDigitalMetadata(for: volumeURL))
 
         sessionController.sdSelectionController.handleVolumeSelection(.success([volumeURL]))
 
@@ -52,17 +54,72 @@ struct WorkflowSessionControllerTests {
 
     @Test func changingFromReadyToUnavailableInvalidatesFixedSDCardStep() {
         let volumeURL = URL(fileURLWithPath: "/Volumes/TestSD")
-        let metadataProvider = MutableDiskMetadataProvider(metadata: readyMetadata(for: volumeURL))
+        let metadataProvider = MutableDiskMetadataProvider(metadata: readySecureDigitalMetadata(for: volumeURL))
         let sessionController = makeSessionController(metadataProvider: metadataProvider)
 
         sessionController.sdSelectionController.handleVolumeSelection(.success([volumeURL]))
         #expect(sessionController.coordinator.isCompleted(.fixed(.sdCardSelection)))
 
-        metadataProvider.metadata = unsupportedFilesystemMetadata(for: volumeURL)
+        metadataProvider.metadata = unsupportedFilesystemSecureDigitalMetadata(for: volumeURL)
         sessionController.sdSelectionController.handleVolumeSelection(.success([volumeURL]))
 
         #expect(!sessionController.coordinator.isCompleted(.fixed(.sdCardSelection)))
         #expect(sessionController.coordinator.selectedItemID == WorkflowItem.fixed(.sdCardSelection).id)
+    }
+
+    @Test func selectingHomebrewDoesNotCompleteChooseHomebrewStep() {
+        let sessionController = WorkflowSessionController()
+        let hackMiiOption = sessionController.homebrewDashboardController.visibleOptions.first { option in
+            option.source == .internalWorkflow(.hackMii)
+        }
+
+        #expect(hackMiiOption != nil)
+        guard let hackMiiOption else { return }
+
+        sessionController.homebrewDashboardController.binding(for: hackMiiOption).wrappedValue = true
+
+        #expect(!sessionController.coordinator.isCompleted(.fixed(.chooseItems)))
+    }
+
+    @Test func completingSelectedHomebrewCompletesChooseHomebrewStep() {
+        let sessionController = WorkflowSessionController()
+        let hackMiiOption = sessionController.homebrewDashboardController.visibleOptions.first { option in
+            option.source == .internalWorkflow(.hackMii)
+        }
+
+        #expect(hackMiiOption != nil)
+        guard let hackMiiOption else { return }
+
+        sessionController.homebrewDashboardController.binding(for: hackMiiOption).wrappedValue = true
+        sessionController.homebrewDashboardController.perform(.download)
+        sessionController.homebrewDashboardController.perform(.save)
+
+        #expect(sessionController.homebrewDashboardController.actionState == .complete)
+        #expect(sessionController.coordinator.isCompleted(.fixed(.chooseItems)))
+    }
+
+    @Test func changingCompletedHomebrewSelectionInvalidatesChooseHomebrewStep() {
+        let sessionController = WorkflowSessionController()
+        let hackMiiOption = sessionController.homebrewDashboardController.visibleOptions.first { option in
+            option.source == .internalWorkflow(.hackMii)
+        }
+        let wilbrandOption = sessionController.homebrewDashboardController.visibleOptions.first { option in
+            option.source == .internalWorkflow(.wilbrand)
+        }
+
+        #expect(hackMiiOption != nil)
+        #expect(wilbrandOption != nil)
+        guard let hackMiiOption, let wilbrandOption else { return }
+
+        sessionController.homebrewDashboardController.binding(for: hackMiiOption).wrappedValue = true
+        sessionController.homebrewDashboardController.perform(.download)
+        sessionController.homebrewDashboardController.perform(.save)
+        #expect(sessionController.coordinator.isCompleted(.fixed(.chooseItems)))
+
+        sessionController.homebrewDashboardController.binding(for: wilbrandOption).wrappedValue = true
+
+        #expect(sessionController.homebrewDashboardController.actionState == .needsWilbrandSetup)
+        #expect(!sessionController.coordinator.isCompleted(.fixed(.chooseItems)))
     }
 
     private func makeSessionController(metadata: DiskVolumeMetadata?) -> WorkflowSessionController {
@@ -83,30 +140,4 @@ struct WorkflowSessionControllerTests {
         )
     }
 
-    private func readyMetadata(for volumeURL: URL) -> DiskVolumeMetadata {
-        DiskVolumeMetadata(
-            volumeURL: volumeURL,
-            localizedName: "Test SD",
-            protocolName: "Secure Digital",
-            fileSystemType: "msdos",
-            isWritable: true,
-            isRemovable: true,
-            isEjectable: true,
-            isInternal: false
-        )
-    }
-
-    private func unsupportedFilesystemMetadata(for volumeURL: URL) -> DiskVolumeMetadata {
-        DiskVolumeMetadata(
-            volumeURL: volumeURL,
-            localizedName: "Test SD",
-            protocolName: "Secure Digital",
-            fileSystemType: "apfs",
-            isWritable: true,
-            isRemovable: true,
-            isEjectable: true,
-            isInternal: false
-        )
-    }
 }
-

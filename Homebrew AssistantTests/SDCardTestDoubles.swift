@@ -2,9 +2,10 @@
 //  SDCardTestDoubles.swift
 //  Homebrew Assistant Tests
 //
-//  Purpose: Provides shared SD-card-related test doubles for controller tests.
+//  Purpose: Provides shared SD-card-related test doubles and metadata factories.
 //  Owns: Mutable disk metadata provider, fake Disk Utility opener, and fake
-//  security-scoped access session/factory implementations.
+//  security-scoped access session/factory implementations, and common SD card
+//  metadata fixtures.
 //  Does not own: Production disk metadata lookup, AppKit launching, scoped
 //  access behavior, SD card validation policy, or test assertions.
 //
@@ -49,4 +50,30 @@ final class FakeSecurityScopedAccessSession: SecurityScopedAccessSession {
     func stop() {
         didStop = true
     }
+}
+
+func readySecureDigitalMetadata(for volumeURL: URL) -> DiskVolumeMetadata {
+    DiskVolumeMetadata(
+        volumeURL: volumeURL,
+        localizedName: "Test SD",
+        protocolName: "Secure Digital",
+        fileSystemType: "msdos",
+        isWritable: true,
+        isRemovable: true,
+        isEjectable: true,
+        isInternal: false
+    )
+}
+
+func unsupportedFilesystemSecureDigitalMetadata(for volumeURL: URL) -> DiskVolumeMetadata {
+    DiskVolumeMetadata(
+        volumeURL: volumeURL,
+        localizedName: "Test SD",
+        protocolName: "Secure Digital",
+        fileSystemType: "apfs",
+        isWritable: true,
+        isRemovable: true,
+        isEjectable: true,
+        isInternal: false
+    )
 }
