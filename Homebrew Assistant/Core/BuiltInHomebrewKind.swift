@@ -12,9 +12,9 @@
 
 import Foundation
 
-enum BuiltInHomebrewKind: String, CaseIterable, Identifiable, Hashable {
+enum BuiltInHomebrewKind: String, CaseIterable, Identifiable, Hashable, Sendable {
     case wilbrand
     case hackMii
 
-    var id: String { rawValue }
+    nonisolated var id: String { rawValue }
 }

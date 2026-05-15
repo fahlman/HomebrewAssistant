@@ -4,7 +4,7 @@
 //
 //  Purpose: Defines common dashboard metadata for built-in and recipe-provided
 //  homebrew.
-//  Owns: Homebrew definition identity, display metadata, sort order, preparation
+//  Owns: Source-qualified homebrew definition identity, display metadata, sort order, preparation
 //  kind, and definition source.
 //  Does not own: Dashboard selection state, preparation state transitions, download behavior,
 //  validation rules, staging, SD card writes, workflow navigation, or view
@@ -16,7 +16,7 @@
 import Foundation
 
 struct HomebrewDefinition: Identifiable, Equatable {
-    let id: String
+    let id: HomebrewOptionID
     let name: String
     let summaryKey: String
     let category: HomebrewCategory

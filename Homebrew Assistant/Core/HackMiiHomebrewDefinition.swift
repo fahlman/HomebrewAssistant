@@ -14,13 +14,13 @@ import Foundation
 
 enum HackMiiHomebrewDefinition {
     static let definition = HomebrewDefinition(
-        id: BuiltInHomebrewKind.hackMii.id,
+        id: HomebrewOptionID.builtIn(.hackMii),
         name: String(localized: "workflow.internal.hackMii.title"),
         summaryKey: "chooseHomebrew.hackMii.description",
-        category: .installers,
+        category: HomebrewCategory.installers,
         systemImageName: "hammer",
         sortOrder: 101,
-        preparationKind: .downloadable,
-        source: .builtIn(.hackMii)
+        preparationKind: HomebrewPreparationKind.downloadable,
+        source: HomebrewDefinitionSource.builtIn(.hackMii)
     )
 }

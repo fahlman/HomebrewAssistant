@@ -63,13 +63,21 @@ struct WorkflowSessionControllerTests {
         #expect(!sessionController.coordinator.canSelect(.fixed(.chooseItems)))
     }
 
-    @Test func unavailableSDCardSelectionKeepsChooseSDCardAsDefaultBottomBarAction() {
+    @Test func unavailableSDCardSelectionOffersDiskUtilityBeforeChooseSDCard() {
         let volumeURL = URL(fileURLWithPath: "/Volumes/TestSD")
         let sessionController = makeSessionController(metadata: unsupportedFilesystemSecureDigitalMetadata(for: volumeURL))
 
         sessionController.sdSelectionController.handleVolumeSelection(.success([volumeURL]))
 
         #expect(!sessionController.bottomBarState.canGoForward)
+        #expect(sessionController.bottomBarState.configuration.contextualActions.map(\.titleKey) == [
+            "sdSelection.openDiskUtility.button",
+            "sdSelection.chooseSDCard.button"
+        ])
+        #expect(sessionController.bottomBarState.configuration.contextualActions.map(\.systemImageName) == [
+            "externaldrive.badge.gearshape",
+            "sdcard"
+        ])
         #expect(sessionController.bottomBarState.configuration.defaultAction == .contextualAction(index: 0))
     }
 

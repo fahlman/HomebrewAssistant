@@ -12,6 +12,7 @@
 		941D21EB2FAE4EE60013D2BC /* ROADMAP.md in Resources */ = {isa = PBXBuildFile; fileRef = 941D21AA2FAE4EE60013D2BC /* ROADMAP.md */; };
 		941D21EC2FAE4EE60013D2BC /* SECURITY.md in Resources */ = {isa = PBXBuildFile; fileRef = 941D21AB2FAE4EE60013D2BC /* SECURITY.md */; };
 		941D22182FAEAFE10013D2BC /* README.md in Resources */ = {isa = PBXBuildFile; fileRef = 941D22172FAEAFE10013D2BC /* README.md */; };
+		947CFAB32FB5D81600C0112D /* .gitignore in Resources */ = {isa = PBXBuildFile; fileRef = 947CFAAB2FB5D81600C0112D /* .gitignore */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -37,6 +38,7 @@
 		941D21AA2FAE4EE60013D2BC /* ROADMAP.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = ROADMAP.md; sourceTree = "<group>"; };
 		941D21AB2FAE4EE60013D2BC /* SECURITY.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = SECURITY.md; sourceTree = "<group>"; };
 		941D22172FAEAFE10013D2BC /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
+		947CFAAB2FB5D81600C0112D /* .gitignore */ = {isa = PBXFileReference; lastKnownFileType = text; path = .gitignore; sourceTree = "<group>"; };
 		94CC8BFD2FA70A3900F1B7D6 /* Homebrew Assistant.xctestplan */ = {isa = PBXFileReference; lastKnownFileType = text; path = "Homebrew Assistant.xctestplan"; sourceTree = "<group>"; };
 		94E96C972FA449B1004218AD /* Homebrew Assistant.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Homebrew Assistant.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		94E96CA42FA449B2004218AD /* Homebrew AssistantTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "Homebrew AssistantTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -99,6 +101,7 @@
 				941D22172FAEAFE10013D2BC /* README.md */,
 				941D21AA2FAE4EE60013D2BC /* ROADMAP.md */,
 				941D21AB2FAE4EE60013D2BC /* SECURITY.md */,
+				947CFAAB2FB5D81600C0112D /* .gitignore */,
 			);
 			sourceTree = "<group>";
 		};
@@ -237,6 +240,7 @@
 				941D21E92FAE4EE60013D2BC /* LICENSE in Resources */,
 				941D21EB2FAE4EE60013D2BC /* ROADMAP.md in Resources */,
 				941D21EC2FAE4EE60013D2BC /* SECURITY.md in Resources */,
+				947CFAB32FB5D81600C0112D /* .gitignore in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

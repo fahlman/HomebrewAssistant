@@ -3,15 +3,15 @@
 //  Homebrew Assistant
 //
 //  Purpose: Defines the shared preparation lifecycle state for selected homebrew.
-//  Owns: Preparation status cases, localized status title lookup, status color
-//  mapping, optional progress values, and optional failure-message extraction.
+//  Owns: Preparation status cases, localized status title lookup, optional
+//  progress values, and optional failure-message extraction.
 //  Does not own: Homebrew selection, setup validation, downloads, checksum
-//  verification, SD card writes, failure recovery, or workflow navigation.
-//  Uses: Localizable strings for user-facing status titles and AppStatusStyle
-//  for shared status foreground colors.
+//  verification, SD card writes, failure recovery, workflow navigation, SwiftUI
+//  styling, or status color mapping.
+//  Uses: Localizable strings for user-facing status titles.
 //
 
-internal import SwiftUI
+import Foundation
 
 enum HomebrewPreparationStatus: Equatable {
     case notSelected
@@ -44,16 +44,6 @@ enum HomebrewPreparationStatus: Equatable {
         }
     }
 
-    var style: Color {
-        switch self {
-        case .notSelected, .setupRequired, .readyToDownload, .downloading, .readyToSave, .saving:
-            AppStatusStyle.neutralForeground
-        case .saved:
-            AppStatusStyle.successForeground
-        case .failed:
-            AppStatusStyle.failureForeground
-        }
-    }
 
     var progressValue: Double? {
         switch self {

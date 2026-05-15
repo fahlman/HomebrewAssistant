@@ -4,7 +4,7 @@
 //
 //  Purpose: Defines the shared selectable homebrew option model used by the
 //  Choose Homebrew step.
-//  Owns: Option identity, localized name, summary key, category, icon reference,
+//  Owns: Source-qualified option identity, localized name, summary key, category, icon reference,
 //  preparation kind, and definition source mapping.
 //  Does not own: Option selection state, filtering UI, sorting UI, recipe
 //  loading, downloads, preparation execution, or workflow navigation.
@@ -19,7 +19,7 @@ struct HomebrewOption: Identifiable {
         case publicRecipe(id: String)
     }
 
-    let id: String
+    let id: HomebrewOptionID
     let name: String
     let summaryKey: String
     let category: HomebrewCategory
@@ -32,7 +32,7 @@ struct HomebrewOption: Identifiable {
     }
 
     init(
-        id: String,
+        id: HomebrewOptionID,
         name: String,
         summaryKey: String,
         category: HomebrewCategory,

@@ -20,6 +20,7 @@
 internal import SwiftUI
 import Combine
 
+@MainActor
 final class HomebrewDashboardController: ObservableObject {
     @Published var selectedCategoryFilter: HomebrewCategoryFilter = .all
     @Published var selectedSortMode: HomebrewSortMode = .category
@@ -32,13 +33,13 @@ final class HomebrewDashboardController: ObservableObject {
     private let builtInHomebrewCatalog: BuiltInHomebrewCatalog
 
     init(
-        builtInHomebrewCatalog: BuiltInHomebrewCatalog = BuiltInHomebrewCatalog(),
-        preparationStateStore: HomebrewPreparationStateStore = HomebrewPreparationStateStore(),
-        selectedOptionIDs: Set<HomebrewOption.ID> = []
+        builtInHomebrewCatalog: BuiltInHomebrewCatalog? = nil,
+        preparationStateStore: HomebrewPreparationStateStore? = nil,
+        selectedOptionIDs: Set<HomebrewOption.ID>? = nil
     ) {
-        self.builtInHomebrewCatalog = builtInHomebrewCatalog
-        self.preparationStateStore = preparationStateStore
-        self.selectedOptionIDs = selectedOptionIDs
+        self.builtInHomebrewCatalog = builtInHomebrewCatalog ?? BuiltInHomebrewCatalog()
+        self.preparationStateStore = preparationStateStore ?? HomebrewPreparationStateStore()
+        self.selectedOptionIDs = selectedOptionIDs ?? []
         self.actionState = .nothingSelected
         self.isComplete = false
         synchronizeActionState()

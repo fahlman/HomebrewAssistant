@@ -14,7 +14,7 @@ import Foundation
 
 enum WilbrandHomebrewDefinition {
     static let definition = HomebrewDefinition(
-        id: BuiltInHomebrewKind.wilbrand.id,
+        id: .builtIn(.wilbrand),
         name: String(localized: "workflow.internal.wilbrand.title"),
         summaryKey: "chooseHomebrew.wilbrand.description",
         category: .exploits,

@@ -34,8 +34,8 @@ struct BuiltInHomebrewCatalogTests {
             .builtIn(.hackMii)
         ])
         #expect(catalog.homebrewOptions.map(\.id) == [
-            BuiltInHomebrewKind.wilbrand.id,
-            BuiltInHomebrewKind.hackMii.id
+            HomebrewOptionID.builtIn(.wilbrand),
+            HomebrewOptionID.builtIn(.hackMii)
         ])
         #expect(catalog.homebrewOptions.map(\.name) == [
             "Wilbrand",

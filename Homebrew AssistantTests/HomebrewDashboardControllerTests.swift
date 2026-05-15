@@ -97,7 +97,7 @@ struct HomebrewDashboardControllerTests {
 
     @Test func injectedPreparationStatusOverridesInitialStatusForSelectedOption() {
         var preparationStateStore = HomebrewPreparationStateStore()
-        preparationStateStore[BuiltInHomebrewKind.hackMii.id] = .downloading(progress: 0.5)
+        preparationStateStore[HomebrewOptionID.builtIn(.hackMii)] = .downloading(progress: 0.5)
         let controller = HomebrewDashboardController(
             preparationStateStore: preparationStateStore
         )
@@ -115,7 +115,7 @@ struct HomebrewDashboardControllerTests {
 
     @Test func deselectingAndReselectingOptionResetsPreparationStatus() {
         var preparationStateStore = HomebrewPreparationStateStore()
-        preparationStateStore[BuiltInHomebrewKind.hackMii.id] = .downloading(progress: 0.5)
+        preparationStateStore[HomebrewOptionID.builtIn(.hackMii)] = .downloading(progress: 0.5)
         let controller = HomebrewDashboardController(
             preparationStateStore: preparationStateStore
         )
@@ -263,7 +263,7 @@ struct HomebrewDashboardControllerTests {
         let controller = HomebrewDashboardController(
             builtInHomebrewCatalog: BuiltInHomebrewCatalog(definitions: [
                 HomebrewDefinition(
-                    id: "setup-one",
+                    id: HomebrewOptionID.publicRecipe("setup-one"),
                     name: "Setup One",
                     summaryKey: "chooseHomebrew.wilbrand.description",
                     category: .exploits,
@@ -273,7 +273,7 @@ struct HomebrewDashboardControllerTests {
                     source: .publicRecipe(id: "setup-one")
                 ),
                 HomebrewDefinition(
-                    id: "setup-two",
+                    id: HomebrewOptionID.publicRecipe("setup-two"),
                     name: "Setup Two",
                     summaryKey: "chooseHomebrew.hackMii.description",
                     category: .utilities,
