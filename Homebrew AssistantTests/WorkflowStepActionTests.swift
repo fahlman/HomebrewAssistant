@@ -23,6 +23,7 @@ struct WorkflowStepActionTests {
         )
 
         #expect(action.titleKey == "test.action.title")
+        #expect(action.titleArguments.isEmpty)
         #expect(action.systemImageName == "gearshape")
         #expect(action.isEnabled)
 
@@ -38,8 +39,20 @@ struct WorkflowStepActionTests {
         )
 
         #expect(action.titleKey == "test.default.title")
+        #expect(action.titleArguments.isEmpty)
         #expect(action.systemImageName == nil)
         #expect(action.isEnabled)
+    }
+
+    @Test func actionStoresTitleArguments() {
+        let action = WorkflowStepAction(
+            titleKey: "test.named.title",
+            titleArguments: ["Wilbrand"],
+            perform: {}
+        )
+
+        #expect(action.titleKey == "test.named.title")
+        #expect(action.titleArguments == ["Wilbrand"])
     }
 
     @Test func disabledActionStoresDisabledState() {

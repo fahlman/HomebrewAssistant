@@ -144,14 +144,26 @@
         }
       }
     },
-    "chooseHomebrew.setupWilbrand.button" : {
-      "comment" : "Button title for opening the Wilbrand setup step.",
+    "chooseHomebrew.setupNamed.button" : {
+      "comment" : "Button title for setting up one selected homebrew item. The placeholder is the homebrew name.",
       "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Set Up Wilbrand"
+            "value" : "Set Up %@"
+          }
+        }
+      }
+    },
+    "chooseHomebrew.setupSelected.button" : {
+      "comment" : "Button title for setting up multiple selected homebrew items.",
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Set Up Selected Homebrew"
           }
         }
       }

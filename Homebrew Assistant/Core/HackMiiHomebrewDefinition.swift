@@ -20,6 +20,7 @@ enum HackMiiHomebrewDefinition {
         category: .installers,
         systemImageName: "hammer",
         sortOrder: 101,
+        preparationKind: .downloadable,
         source: .builtIn(.hackMii)
     )
 }

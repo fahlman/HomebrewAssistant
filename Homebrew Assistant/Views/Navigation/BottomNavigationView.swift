@@ -8,30 +8,23 @@
 //  and disabled/enabled button presentation.
 //  Does not own: Action availability decisions, workflow transition policy,
 //  workflow reset policy, selected-step state, or risky operation execution.
-//  Uses: Explicit navigation availability/actions from the session,
-//  WorkflowBottomBarConfiguration for bottom-bar behavior, and WorkflowStepAction
-//  for contextual action metadata and execution.
+//  Uses: WorkflowBottomBarState from the session and WorkflowStepAction
 //
 
+import Foundation
 internal import SwiftUI
 
 struct BottomNavigationView: View {
-    let canGoBack: Bool
-    let canGoForward: Bool
-    let configuration: WorkflowBottomBarConfiguration
+    let state: WorkflowBottomBarState
     let goBack: () -> Void
     let goForward: () -> Void
 
     init(
-        canGoBack: Bool,
-        canGoForward: Bool,
-        configuration: WorkflowBottomBarConfiguration = .automatic,
+        state: WorkflowBottomBarState,
         goBack: @escaping () -> Void,
         goForward: @escaping () -> Void
     ) {
-        self.canGoBack = canGoBack
-        self.canGoForward = canGoForward
-        self.configuration = configuration
+        self.state = state
         self.goBack = goBack
         self.goForward = goForward
     }
@@ -50,7 +43,7 @@ struct BottomNavigationView: View {
 
     @ViewBuilder
     private var leftAction: some View {
-        if canGoBack {
+        if state.canGoBack {
             Button(String(localized: "navigation.back")) {
                 goBack()
             }
@@ -65,7 +58,7 @@ struct BottomNavigationView: View {
     @ViewBuilder
     private var rightActions: some View {
         HStack {
-            ForEach(Array(configuration.contextualActions.enumerated()), id: \.offset) { index, contextualAction in
+            ForEach(Array(state.configuration.contextualActions.enumerated()), id: \.offset) { index, contextualAction in
                 contextualActionButton(contextualAction, isDefaultCandidate: index == defaultContextualActionIndex)
             }
 
@@ -73,27 +66,56 @@ struct BottomNavigationView: View {
         }
     }
 
+    @ViewBuilder
     private var nextButton: some View {
-        Button(String(localized: "navigation.next")) {
-            goForward()
+        if isNextDefault {
+            Button(String(localized: "navigation.next")) {
+                goForward()
+            }
+            .disabled(!resolvedCanGoForward)
+            .keyboardShortcut(.defaultAction)
+        } else {
+            Button(String(localized: "navigation.next")) {
+                goForward()
+            }
+            .disabled(!resolvedCanGoForward)
         }
-        .disabled(!resolvedCanGoForward)
-        .keyboardShortcut(isNextDefault ? .defaultAction : nil)
     }
 
+    @ViewBuilder
     private func contextualActionButton(
         _ action: WorkflowStepAction,
         isDefaultCandidate: Bool
     ) -> some View {
-        Button(String(localized: String.LocalizationValue(action.titleKey))) {
-            action.perform()
+        if isContextualActionDefault && isDefaultCandidate && action.isEnabled {
+            Button(title(for: action)) {
+                action.perform()
+            }
+            .disabled(!action.isEnabled)
+            .keyboardShortcut(.defaultAction)
+        } else {
+            Button(title(for: action)) {
+                action.perform()
+            }
+            .disabled(!action.isEnabled)
         }
-        .disabled(!action.isEnabled)
-        .keyboardShortcut(isContextualActionDefault && isDefaultCandidate && action.isEnabled ? .defaultAction : nil)
+    }
+
+    private func title(for action: WorkflowStepAction) -> String {
+        let localizedFormat = String(localized: String.LocalizationValue(action.titleKey))
+        guard !action.titleArguments.isEmpty else {
+            return localizedFormat
+        }
+
+        return String(
+            format: localizedFormat,
+            locale: Locale.current,
+            arguments: action.titleArguments.map { $0 as CVarArg }
+        )
     }
 
     private var resolvedCanGoForward: Bool {
-        configuration.canGoForwardOverride ?? canGoForward
+        state.configuration.canGoForwardOverride ?? state.canGoForward
     }
 
     private var isContextualActionDefault: Bool {
@@ -101,9 +123,9 @@ struct BottomNavigationView: View {
     }
 
     private var defaultContextualActionIndex: Int? {
-        guard case .contextualAction(let index) = configuration.defaultAction,
-              configuration.contextualActions.indices.contains(index),
-              configuration.contextualActions[index].isEnabled else {
+        guard case .contextualAction(let index) = state.configuration.defaultAction,
+              state.configuration.contextualActions.indices.contains(index),
+              state.configuration.contextualActions[index].isEnabled else {
             return nil
         }
 
@@ -111,7 +133,7 @@ struct BottomNavigationView: View {
     }
 
     private var isNextDefault: Bool {
-        switch configuration.defaultAction {
+        switch state.configuration.defaultAction {
         case .next:
             resolvedCanGoForward
         case .contextualAction:

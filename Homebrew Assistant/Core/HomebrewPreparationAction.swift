@@ -14,14 +14,14 @@
 import Foundation
 
 enum HomebrewPreparationAction: Equatable {
-    case setUpWilbrand
+    case setUp(optionName: String?)
     case download
     case save
 
     var titleKey: String {
         switch self {
-        case .setUpWilbrand:
-            "chooseHomebrew.setupWilbrand.button"
+        case .setUp(let optionName):
+            optionName == nil ? "chooseHomebrew.setupSelected.button" : "chooseHomebrew.setupNamed.button"
         case .download:
             "chooseHomebrew.download.button"
         case .save:
@@ -29,9 +29,18 @@ enum HomebrewPreparationAction: Equatable {
         }
     }
 
+    var titleArguments: [String] {
+        switch self {
+        case .setUp(let optionName):
+            optionName.map { [$0] } ?? []
+        case .download, .save:
+            []
+        }
+    }
+
     var systemImageName: String {
         switch self {
-        case .setUpWilbrand:
+        case .setUp:
             "safari"
         case .download:
             "arrow.down.circle"

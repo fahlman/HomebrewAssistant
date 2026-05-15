@@ -5,7 +5,7 @@
 //  Purpose: Coordinates the active workflow session and cross-controller state
 //  synchronization.
 //  Owns: WorkflowCoordinator, SDSelectionController, HomebrewDashboardController,
-//  selected-step bottom-bar presentation state, navigation intent forwarding,
+//  selected-step bottom-bar state snapshots, navigation intent forwarding,
 //  synchronization from SD card readiness into fixed workflow-step completion
 //  state, and synchronization from dashboard completion into fixed workflow-step
 //  completion state.
@@ -25,7 +25,7 @@ final class WorkflowSessionController: ObservableObject {
     let sdSelectionController: SDSelectionController
     let homebrewDashboardController: HomebrewDashboardController
 
-    @Published private(set) var bottomBarConfiguration: WorkflowBottomBarConfiguration
+    @Published private(set) var bottomBarState: WorkflowBottomBarState
 
     private var cancellables: Set<AnyCancellable> = []
 
@@ -36,8 +36,8 @@ final class WorkflowSessionController: ObservableObject {
         self.coordinator = coordinator
         self.sdSelectionController = sdSelectionController
         self.homebrewDashboardController = HomebrewDashboardController()
-        self.bottomBarConfiguration = .automatic
-        synchronizeBottomBarConfiguration()
+        self.bottomBarState = .initial
+        synchronizeBottomBarState()
         bindSelectedStepDisplayChanges()
         bindHomebrewDashboardActionBottomBarChanges()
         bindSDSelectionReadinessToWorkflowCompletion()
@@ -51,37 +51,29 @@ final class WorkflowSessionController: ObservableObject {
         self.coordinator = coordinator
         self.sdSelectionController = sdSelectionController
         self.homebrewDashboardController = HomebrewDashboardController()
-        self.bottomBarConfiguration = .automatic
-        synchronizeBottomBarConfiguration()
+        self.bottomBarState = .initial
+        synchronizeBottomBarState()
         bindSelectedStepDisplayChanges()
         bindHomebrewDashboardActionBottomBarChanges()
         bindSDSelectionReadinessToWorkflowCompletion()
         bindHomebrewDashboardCompletionToWorkflowCompletion()
     }
 
-    var canGoBack: Bool {
-        coordinator.canGoBack
-    }
-
-    var canGoForward: Bool {
-        coordinator.canGoForward
-    }
-
     func goBack() {
         coordinator.goBack()
-        synchronizeBottomBarConfiguration()
+        synchronizeBottomBarState()
     }
 
     func goForward() {
         coordinator.goForward()
-        synchronizeBottomBarConfiguration()
+        synchronizeBottomBarState()
     }
 
     private func bindSelectedStepDisplayChanges() {
         coordinator.$selectedItemID
             .dropFirst()
             .sink { [weak self] _ in
-                self?.synchronizeBottomBarConfiguration()
+                self?.synchronizeBottomBarState()
             }
             .store(in: &cancellables)
     }
@@ -89,8 +81,8 @@ final class WorkflowSessionController: ObservableObject {
     private func bindHomebrewDashboardActionBottomBarChanges() {
         homebrewDashboardController.$actionState
             .dropFirst()
-            .sink { [weak self] _ in
-                self?.synchronizeBottomBarConfiguration()
+            .sink { [weak self] actionState in
+                self?.synchronizeBottomBarState(dashboardActionState: actionState)
             }
             .store(in: &cancellables)
     }
@@ -99,8 +91,8 @@ final class WorkflowSessionController: ObservableObject {
         sdSelectionController.$readiness
             .dropFirst()
             .sink { [weak self] readiness in
-                self?.synchronizeBottomBarConfiguration()
                 self?.updateSDCardSelectionCompletion(for: readiness)
+                self?.synchronizeBottomBarState(sdReadiness: readiness)
             }
             .store(in: &cancellables)
     }
@@ -110,23 +102,44 @@ final class WorkflowSessionController: ObservableObject {
             .dropFirst()
             .sink { [weak self] isCompleted in
                 self?.updateChooseHomebrewCompletion(isCompleted: isCompleted)
-                self?.synchronizeBottomBarConfiguration()
+                self?.synchronizeBottomBarState()
             }
             .store(in: &cancellables)
     }
 
-    private func synchronizeBottomBarConfiguration() {
-        bottomBarConfiguration = selectedStepBottomBarConfiguration
+    private func synchronizeBottomBarState(
+        sdReadiness: SDCardReadiness? = nil,
+        dashboardActionState: HomebrewDashboardActionState? = nil
+    ) {
+        bottomBarState = WorkflowBottomBarState(
+            canGoBack: coordinator.canGoBack,
+            canGoForward: coordinator.canGoForward,
+            configuration: selectedStepBottomBarConfiguration(
+                sdReadiness: sdReadiness,
+                dashboardActionState: dashboardActionState
+            )
+        )
     }
 
-    private var selectedStepBottomBarConfiguration: WorkflowBottomBarConfiguration {
+    private func selectedStepBottomBarConfiguration(
+        sdReadiness: SDCardReadiness? = nil,
+        dashboardActionState: HomebrewDashboardActionState? = nil
+    ) -> WorkflowBottomBarConfiguration {
         switch coordinator.selectedItem {
         case .fixed(.sdCardSelection):
-            sdSelectionController.bottomBarConfiguration
+            if let sdReadiness {
+                return sdSelectionController.bottomBarConfiguration(for: sdReadiness)
+            }
+
+            return sdSelectionController.bottomBarConfiguration
         case .fixed(.chooseItems):
-            homebrewDashboardController.bottomBarConfiguration
+            if let dashboardActionState {
+                return homebrewDashboardController.bottomBarConfiguration(for: dashboardActionState)
+            }
+
+            return homebrewDashboardController.bottomBarConfiguration
         case nil:
-            .automatic
+            return .automatic
         }
     }
 

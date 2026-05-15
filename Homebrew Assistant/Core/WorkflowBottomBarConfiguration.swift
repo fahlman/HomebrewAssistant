@@ -2,9 +2,10 @@
 //  WorkflowBottomBarConfiguration.swift
 //  Homebrew Assistant
 //
-//  Purpose: Describes bottom-bar behavior for the selected workflow item.
-//  Owns: Contextual action list, forward-button enabled override, and
-//  default-action selection.
+//  Purpose: Describes bottom-bar behavior and session-level bottom-bar state.
+//  Owns: Contextual action list, forward-button enabled override,
+//  default-action selection, and the session snapshot consumed by the bottom-bar
+//  view.
 //  Does not own: Contextual action execution details, workflow navigation
 //  execution, button rendering, step UI presentation, file pickers, downloads,
 //  writes, or validation policy.
@@ -34,4 +35,22 @@ struct WorkflowBottomBarConfiguration {
     }
 
     static let automatic = WorkflowBottomBarConfiguration()
+}
+
+struct WorkflowBottomBarState {
+    let canGoBack: Bool
+    let canGoForward: Bool
+    let configuration: WorkflowBottomBarConfiguration
+
+    init(
+        canGoBack: Bool = false,
+        canGoForward: Bool = false,
+        configuration: WorkflowBottomBarConfiguration = .automatic
+    ) {
+        self.canGoBack = canGoBack
+        self.canGoForward = canGoForward
+        self.configuration = configuration
+    }
+
+    static let initial = WorkflowBottomBarState()
 }

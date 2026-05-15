@@ -147,7 +147,7 @@ struct HomebrewDashboardControllerTests {
         #expect(controller.bottomBarConfiguration.defaultAction == nil)
     }
 
-    @Test func selectedWilbrandNeedsWilbrandSetup() {
+    @Test func selectedSetupRequiredHomebrewNeedsNamedSetup() {
         let controller = HomebrewDashboardController()
         let wilbrandOption = controller.visibleOptions.first { option in
             option.source == .builtIn(.wilbrand)
@@ -158,19 +158,23 @@ struct HomebrewDashboardControllerTests {
 
         controller.binding(for: wilbrandOption).wrappedValue = true
 
-        #expect(controller.actionState == .needsWilbrandSetup)
+        #expect(controller.actionState == .needsSetup(optionName: "Wilbrand"))
     }
 
-    @Test func needsWilbrandSetupBottomBarUsesSetUpWilbrandAction() {
-        let configuration = HomebrewDashboardActionState.needsWilbrandSetup.bottomBarConfiguration(
+    @Test func namedSetupBottomBarUsesSetupNameAction() {
+        let action = HomebrewPreparationAction.setUp(optionName: "Wilbrand")
+        let configuration = HomebrewDashboardActionState.needsSetup(optionName: "Wilbrand").bottomBarConfiguration(
             controller: HomebrewDashboardController()
         )
 
         #expect(configuration.contextualActions.map(\.titleKey) == [
-            HomebrewPreparationAction.setUpWilbrand.titleKey
+            action.titleKey
+        ])
+        #expect(configuration.contextualActions.map(\.titleArguments) == [
+            action.titleArguments
         ])
         #expect(configuration.contextualActions.map(\.systemImageName) == [
-            HomebrewPreparationAction.setUpWilbrand.systemImageName
+            action.systemImageName
         ])
         #expect(configuration.canGoForwardOverride == false)
         #expect(configuration.defaultAction == .contextualAction(index: 0))
@@ -252,10 +256,49 @@ struct HomebrewDashboardControllerTests {
         controller.binding(for: wilbrandOption).wrappedValue = true
         controller.binding(for: hackMiiOption).wrappedValue = true
 
-        #expect(controller.actionState == .needsWilbrandSetup)
+        #expect(controller.actionState == .needsSetup(optionName: "Wilbrand"))
     }
 
-    @Test func performSetUpWilbrandMovesWilbrandToReadyToSave() {
+    @Test func multipleSetupRequiredHomebrewNeedsGenericSetup() {
+        let controller = HomebrewDashboardController(
+            builtInHomebrewCatalog: BuiltInHomebrewCatalog(definitions: [
+                HomebrewDefinition(
+                    id: "setup-one",
+                    name: "Setup One",
+                    summaryKey: "chooseHomebrew.wilbrand.description",
+                    category: .exploits,
+                    systemImageName: "ladybug",
+                    sortOrder: 100,
+                    preparationKind: .setupRequired,
+                    source: .publicRecipe(id: "setup-one")
+                ),
+                HomebrewDefinition(
+                    id: "setup-two",
+                    name: "Setup Two",
+                    summaryKey: "chooseHomebrew.hackMii.description",
+                    category: .utilities,
+                    systemImageName: "wrench",
+                    sortOrder: 101,
+                    preparationKind: .setupRequired,
+                    source: .publicRecipe(id: "setup-two")
+                )
+            ])
+        )
+
+        for option in controller.visibleOptions {
+            controller.binding(for: option).wrappedValue = true
+        }
+
+        let configuration = controller.bottomBarConfiguration
+
+        #expect(controller.actionState == .needsSetup(optionName: nil))
+        #expect(configuration.contextualActions.map(\.titleKey) == [
+            HomebrewPreparationAction.setUp(optionName: nil).titleKey
+        ])
+        #expect(configuration.contextualActions.map(\.titleArguments) == [[]])
+    }
+
+    @Test func performSetUpMovesSetupRequiredHomebrewToReadyToSave() {
         let controller = HomebrewDashboardController()
         let wilbrandOption = controller.visibleOptions.first { option in
             option.source == .builtIn(.wilbrand)
@@ -265,7 +308,7 @@ struct HomebrewDashboardControllerTests {
         guard let wilbrandOption else { return }
 
         controller.binding(for: wilbrandOption).wrappedValue = true
-        controller.perform(.setUpWilbrand)
+        controller.perform(.setUp(optionName: "Wilbrand"))
 
         #expect(controller.status(for: wilbrandOption) == .readyToSave)
         #expect(controller.actionState == .readyToSave)

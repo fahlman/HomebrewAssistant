@@ -15,15 +15,15 @@ import Foundation
 
 enum HomebrewDashboardActionState: Equatable {
     case nothingSelected
-    case needsWilbrandSetup
+    case needsSetup(optionName: String?)
     case readyToDownload
     case readyToSave
     case complete
 
     var preparationAction: HomebrewPreparationAction? {
         switch self {
-        case .needsWilbrandSetup:
-            .setUpWilbrand
+        case .needsSetup(let optionName):
+            .setUp(optionName: optionName)
         case .readyToDownload:
             .download
         case .readyToSave:
@@ -49,6 +49,7 @@ enum HomebrewDashboardActionState: Equatable {
         return [
             WorkflowStepAction(
                 titleKey: preparationAction.titleKey,
+                titleArguments: preparationAction.titleArguments,
                 systemImageName: preparationAction.systemImageName
             ) { [weak controller] in
                 controller?.perform(preparationAction)

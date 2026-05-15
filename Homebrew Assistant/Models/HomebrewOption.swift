@@ -5,9 +5,9 @@
 //  Purpose: Defines the shared selectable homebrew option model used by the
 //  Choose Homebrew step.
 //  Owns: Option identity, localized name, summary key, category, icon reference,
-//  and definition source mapping.
+//  preparation kind, and definition source mapping.
 //  Does not own: Option selection state, filtering UI, sorting UI, recipe
-//  loading, downloads, preparation behavior, or workflow navigation.
+//  loading, downloads, preparation execution, or workflow navigation.
 //  Uses: HomebrewDefinition for homebrew option construction.
 //
 
@@ -24,6 +24,7 @@ struct HomebrewOption: Identifiable {
     let summaryKey: String
     let category: HomebrewCategory
     let systemImageName: String
+    let preparationKind: HomebrewPreparationKind
     let source: Source
 
     var summary: String {
@@ -36,6 +37,7 @@ struct HomebrewOption: Identifiable {
         summaryKey: String,
         category: HomebrewCategory,
         systemImageName: String,
+        preparationKind: HomebrewPreparationKind,
         source: Source
     ) {
         self.id = id
@@ -43,6 +45,7 @@ struct HomebrewOption: Identifiable {
         self.summaryKey = summaryKey
         self.category = category
         self.systemImageName = systemImageName
+        self.preparationKind = preparationKind
         self.source = source
     }
 
@@ -61,6 +64,7 @@ struct HomebrewOption: Identifiable {
             summaryKey: definition.summaryKey,
             category: definition.category,
             systemImageName: definition.systemImageName,
+            preparationKind: definition.preparationKind,
             source: source
         )
     }

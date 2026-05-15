@@ -3,10 +3,11 @@
 //  Homebrew Assistant Tests
 //
 //  Purpose: Verifies active workflow session controller wiring.
-//  Covers: Session controller construction, synchronization from SD card
-//  readiness into fixed workflow-step completion state, and synchronization from
-//  Choose Homebrew dashboard completion into fixed workflow-step completion state.
-//  Does not cover: SwiftUI layout, sidebar rendering, bottom button rendering,
+//  Covers: Session controller construction, selected-step bottom-bar state
+//  snapshots, synchronization from SD card readiness into fixed workflow-step
+//  completion state, and synchronization from Choose Homebrew dashboard
+//  completion into fixed workflow-step completion state.
+//  Does not cover: SwiftUI layout, sidebar rendering, native button rendering,
 //  native scoped access, native disk metadata lookup, downloads, staging, or
 //  file writes.
 //
@@ -42,6 +43,16 @@ struct WorkflowSessionControllerTests {
         #expect(sessionController.coordinator.canSelect(.fixed(.chooseItems)))
     }
 
+    @Test func readySDCardSelectionMakesNextTheDefaultBottomBarAction() {
+        let volumeURL = URL(fileURLWithPath: "/Volumes/TestSD")
+        let sessionController = makeSessionController(metadata: readySecureDigitalMetadata(for: volumeURL))
+
+        sessionController.sdSelectionController.handleVolumeSelection(.success([volumeURL]))
+
+        #expect(sessionController.bottomBarState.canGoForward)
+        #expect(sessionController.bottomBarState.configuration.defaultAction == .next)
+    }
+
     @Test func unavailableSDCardSelectionDoesNotCompleteFixedSDCardStep() {
         let volumeURL = URL(fileURLWithPath: "/Volumes/TestSD")
         let sessionController = makeSessionController(metadata: unsupportedFilesystemSecureDigitalMetadata(for: volumeURL))
@@ -50,6 +61,16 @@ struct WorkflowSessionControllerTests {
 
         #expect(!sessionController.coordinator.isCompleted(.fixed(.sdCardSelection)))
         #expect(!sessionController.coordinator.canSelect(.fixed(.chooseItems)))
+    }
+
+    @Test func unavailableSDCardSelectionKeepsChooseSDCardAsDefaultBottomBarAction() {
+        let volumeURL = URL(fileURLWithPath: "/Volumes/TestSD")
+        let sessionController = makeSessionController(metadata: unsupportedFilesystemSecureDigitalMetadata(for: volumeURL))
+
+        sessionController.sdSelectionController.handleVolumeSelection(.success([volumeURL]))
+
+        #expect(!sessionController.bottomBarState.canGoForward)
+        #expect(sessionController.bottomBarState.configuration.defaultAction == .contextualAction(index: 0))
     }
 
     @Test func changingFromReadyToUnavailableInvalidatesFixedSDCardStep() {
@@ -67,6 +88,20 @@ struct WorkflowSessionControllerTests {
         #expect(sessionController.coordinator.selectedItemID == WorkflowItem.fixed(.sdCardSelection).id)
     }
 
+    @Test func movingToChooseHomebrewRefreshesBottomBarState() {
+        let volumeURL = URL(fileURLWithPath: "/Volumes/TestSD")
+        let sessionController = makeSessionController(metadata: readySecureDigitalMetadata(for: volumeURL))
+
+        sessionController.sdSelectionController.handleVolumeSelection(.success([volumeURL]))
+        sessionController.goForward()
+
+        #expect(sessionController.coordinator.selectedItem == .fixed(.chooseItems))
+        #expect(sessionController.bottomBarState.canGoBack)
+        #expect(!sessionController.bottomBarState.canGoForward)
+        #expect(sessionController.bottomBarState.configuration.contextualActions.isEmpty)
+        #expect(sessionController.bottomBarState.configuration.defaultAction == nil)
+    }
+
     @Test func selectingHomebrewDoesNotCompleteChooseHomebrewStep() {
         let sessionController = WorkflowSessionController()
         let hackMiiOption = sessionController.homebrewDashboardController.visibleOptions.first { option in
@@ -79,6 +114,31 @@ struct WorkflowSessionControllerTests {
         sessionController.homebrewDashboardController.binding(for: hackMiiOption).wrappedValue = true
 
         #expect(!sessionController.coordinator.isCompleted(.fixed(.chooseItems)))
+    }
+
+    @Test func selectingSetupRequiredHomebrewMakesNamedSetupTheDefaultBottomBarAction() {
+        let volumeURL = URL(fileURLWithPath: "/Volumes/TestSD")
+        let sessionController = makeSessionController(metadata: readySecureDigitalMetadata(for: volumeURL))
+        let wilbrandOption = sessionController.homebrewDashboardController.visibleOptions.first { option in
+            option.source == .builtIn(.wilbrand)
+        }
+
+        #expect(wilbrandOption != nil)
+        guard let wilbrandOption else { return }
+
+        sessionController.sdSelectionController.handleVolumeSelection(.success([volumeURL]))
+        sessionController.goForward()
+        sessionController.homebrewDashboardController.binding(for: wilbrandOption).wrappedValue = true
+
+        #expect(sessionController.bottomBarState.canGoBack)
+        #expect(!sessionController.bottomBarState.canGoForward)
+        #expect(sessionController.bottomBarState.configuration.contextualActions.map(\.titleKey) == [
+            HomebrewPreparationAction.setUp(optionName: "Wilbrand").titleKey
+        ])
+        #expect(sessionController.bottomBarState.configuration.contextualActions.map(\.titleArguments) == [
+            HomebrewPreparationAction.setUp(optionName: "Wilbrand").titleArguments
+        ])
+        #expect(sessionController.bottomBarState.configuration.defaultAction == .contextualAction(index: 0))
     }
 
     @Test func completingSelectedHomebrewCompletesChooseHomebrewStep() {
@@ -96,6 +156,27 @@ struct WorkflowSessionControllerTests {
 
         #expect(sessionController.homebrewDashboardController.actionState == .complete)
         #expect(sessionController.coordinator.isCompleted(.fixed(.chooseItems)))
+    }
+
+    @Test func completedSelectedHomebrewClearsDashboardBottomBarActions() {
+        let volumeURL = URL(fileURLWithPath: "/Volumes/TestSD")
+        let sessionController = makeSessionController(metadata: readySecureDigitalMetadata(for: volumeURL))
+        let hackMiiOption = sessionController.homebrewDashboardController.visibleOptions.first { option in
+            option.source == .builtIn(.hackMii)
+        }
+
+        #expect(hackMiiOption != nil)
+        guard let hackMiiOption else { return }
+
+        sessionController.sdSelectionController.handleVolumeSelection(.success([volumeURL]))
+        sessionController.goForward()
+        sessionController.homebrewDashboardController.binding(for: hackMiiOption).wrappedValue = true
+        sessionController.homebrewDashboardController.perform(.download)
+        sessionController.homebrewDashboardController.perform(.save)
+
+        #expect(!sessionController.bottomBarState.canGoForward)
+        #expect(sessionController.bottomBarState.configuration.contextualActions.isEmpty)
+        #expect(sessionController.bottomBarState.configuration.defaultAction == nil)
     }
 
     @Test func changingCompletedHomebrewSelectionInvalidatesChooseHomebrewStep() {
@@ -118,7 +199,7 @@ struct WorkflowSessionControllerTests {
 
         sessionController.homebrewDashboardController.binding(for: wilbrandOption).wrappedValue = true
 
-        #expect(sessionController.homebrewDashboardController.actionState == .needsWilbrandSetup)
+        #expect(sessionController.homebrewDashboardController.actionState == .needsSetup(optionName: "Wilbrand"))
         #expect(!sessionController.coordinator.isCompleted(.fixed(.chooseItems)))
     }
 
@@ -139,5 +220,4 @@ struct WorkflowSessionControllerTests {
             sdSelectionController: sdSelectionController
         )
     }
-
 }

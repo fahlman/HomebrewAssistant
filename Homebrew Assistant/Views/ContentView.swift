@@ -29,9 +29,7 @@ struct ContentView: View {
                     homebrewDashboardController: sessionController.homebrewDashboardController
                 )
                 BottomNavigationView(
-                    canGoBack: sessionController.canGoBack,
-                    canGoForward: sessionController.canGoForward,
-                    configuration: sessionController.bottomBarConfiguration,
+                    state: sessionController.bottomBarState,
                     goBack: sessionController.goBack,
                     goForward: sessionController.goForward
                 )

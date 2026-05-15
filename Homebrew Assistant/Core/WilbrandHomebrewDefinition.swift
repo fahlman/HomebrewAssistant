@@ -20,6 +20,7 @@ enum WilbrandHomebrewDefinition {
         category: .exploits,
         systemImageName: "ladybug",
         sortOrder: 100,
+        preparationKind: .setupRequired,
         source: .builtIn(.wilbrand)
     )
 }

@@ -3,8 +3,8 @@
 //  Homebrew Assistant
 //
 //  Purpose: Describes one optional contextual workflow-step action.
-//  Owns: Action title key, optional action icon reference, enabled state, and
-//  action execution closure.
+//  Owns: Action title key, optional title interpolation arguments, optional
+//  action icon reference, enabled state, and action execution closure.
 //  Does not own: Bottom-bar configuration, workflow navigation execution, step
 //  UI presentation, file pickers, downloads, writes, validation policy, or button
 //  rendering.
@@ -16,17 +16,20 @@ import Foundation
 
 struct WorkflowStepAction {
     let titleKey: String
+    let titleArguments: [String]
     let systemImageName: String?
     let isEnabled: Bool
     let perform: () -> Void
 
     init(
         titleKey: String,
+        titleArguments: [String] = [],
         systemImageName: String? = nil,
         isEnabled: Bool = true,
         perform: @escaping () -> Void
     ) {
         self.titleKey = titleKey
+        self.titleArguments = titleArguments
         self.systemImageName = systemImageName
         self.isEnabled = isEnabled
         self.perform = perform

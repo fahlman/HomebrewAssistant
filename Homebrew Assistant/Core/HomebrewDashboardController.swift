@@ -78,11 +78,14 @@ final class HomebrewDashboardController: ObservableObject {
             return .nothingSelected
         }
 
-        if selectedOptions.contains(where: { option in
-            option.source == .builtIn(.wilbrand)
-                && status(for: option) == .setupRequired
-        }) {
-            return .needsWilbrandSetup
+        let setupRequiredOptions = selectedOptions.filter { option in
+            status(for: option) == .setupRequired
+        }
+        if setupRequiredOptions.count == 1 {
+            return .needsSetup(optionName: setupRequiredOptions[0].name)
+        }
+        if setupRequiredOptions.count > 1 {
+            return .needsSetup(optionName: nil)
         }
 
         if selectedOptions.contains(where: { option in
@@ -104,10 +107,14 @@ final class HomebrewDashboardController: ObservableObject {
         actionState.bottomBarConfiguration(controller: self)
     }
 
+    func bottomBarConfiguration(for actionState: HomebrewDashboardActionState) -> WorkflowBottomBarConfiguration {
+        actionState.bottomBarConfiguration(controller: self)
+    }
+
     func perform(_ action: HomebrewPreparationAction) {
         switch action {
-        case .setUpWilbrand:
-            markWilbrandSetupHandled()
+        case .setUp:
+            markSetupRequiredOptionsHandled()
         case .download:
             markReadyToDownloadOptionsPrepared()
         case .save:
@@ -117,14 +124,10 @@ final class HomebrewDashboardController: ObservableObject {
         synchronizeActionState()
     }
 
-    private func markWilbrandSetupHandled() {
-        guard let wilbrandOption = availableOptions.first(where: { option in
-            option.source == .builtIn(.wilbrand)
-        }), isSelected(wilbrandOption) else {
-            return
+    private func markSetupRequiredOptionsHandled() {
+        for option in selectedOptions where status(for: option) == .setupRequired {
+            preparationStateStore[option.id] = .readyToSave
         }
-
-        preparationStateStore[wilbrandOption.id] = .readyToSave
     }
 
     private func markReadyToDownloadOptionsPrepared() {
@@ -180,12 +183,10 @@ final class HomebrewDashboardController: ObservableObject {
     }
 
     private func initialPreparationStatus(for option: HomebrewOption) -> HomebrewPreparationStatus {
-        switch option.source {
-        case .builtIn(.wilbrand):
+        switch option.preparationKind {
+        case .setupRequired:
             .setupRequired
-        case .builtIn(.hackMii):
-            .readyToDownload
-        case .publicRecipe:
+        case .downloadable:
             .readyToDownload
         }
     }

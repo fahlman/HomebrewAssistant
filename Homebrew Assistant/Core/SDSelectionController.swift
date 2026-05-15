@@ -7,7 +7,8 @@
 //  Owns: SD card picker presentation state, selected-volume scoped access,
 //  selected drive display state, selected-volume readiness, selection error
 //  state, SD card selection reset, Disk Utility launch intent tracking, SD card
-//  selection action state, and SD card selection bottom-bar configuration.
+//  selection action state, deterministic action-state derivation, and SD card
+//  selection bottom-bar configuration.
 //  Does not own: SD card selection UI layout, bottom-bar rendering, native
 //  volume metadata lookup policy, file writes, staging, recipe preparation, or
 //  workflow navigation.
@@ -64,6 +65,18 @@ final class SDSelectionController: ObservableObject {
     }
 
     var actionState: SDSelectionActionState {
+        actionState(for: readiness)
+    }
+
+    var bottomBarConfiguration: WorkflowBottomBarConfiguration {
+        actionState.bottomBarConfiguration(controller: self)
+    }
+
+    func bottomBarConfiguration(for readiness: SDCardReadiness?) -> WorkflowBottomBarConfiguration {
+        actionState(for: readiness).bottomBarConfiguration(controller: self)
+    }
+
+    private func actionState(for readiness: SDCardReadiness?) -> SDSelectionActionState {
         if readiness?.isReady == true {
             return .ready
         }
@@ -73,10 +86,6 @@ final class SDSelectionController: ObservableObject {
         }
 
         return .needsSelection
-    }
-
-    var bottomBarConfiguration: WorkflowBottomBarConfiguration {
-        actionState.bottomBarConfiguration(controller: self)
     }
 
     func openDiskUtility() {
