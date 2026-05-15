@@ -15,11 +15,11 @@ import Foundation
 enum WilbrandHomebrewDefinition {
     static let definition = HomebrewDefinition(
         id: BuiltInHomebrewKind.wilbrand.id,
-        name: String(localized: String.LocalizationValue(BuiltInHomebrewKind.wilbrand.titleKey)),
-        summaryKey: BuiltInHomebrewKind.wilbrand.summaryKey,
-        category: BuiltInHomebrewKind.wilbrand.category,
-        systemImageName: BuiltInHomebrewKind.wilbrand.systemImageName,
-        sortOrder: BuiltInHomebrewKind.wilbrand.sortOrder,
+        name: String(localized: "workflow.internal.wilbrand.title"),
+        summaryKey: "chooseHomebrew.wilbrand.description",
+        category: .exploits,
+        systemImageName: "ladybug",
+        sortOrder: 100,
         source: .builtIn(.wilbrand)
     )
 }

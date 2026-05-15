@@ -19,7 +19,7 @@ internal import SwiftUI
 
 @MainActor
 struct HomebrewDashboardControllerTests {
-    @Test func defaultStateShowsInternalWorkflowOptionsInCategoryOrder() {
+    @Test func defaultStateShowsBuiltInHomebrewOptionsInCategoryOrder() {
         let controller = HomebrewDashboardController()
 
         #expect(controller.selectedCategoryFilter == .all)
@@ -33,7 +33,7 @@ struct HomebrewDashboardControllerTests {
     @Test func categoryFilterLimitsVisibleOptions() {
         let controller = HomebrewDashboardController()
 
-        controller.selectedCategoryFilter = .category(BuiltInHomebrewKind.wilbrand.category)
+        controller.selectedCategoryFilter = .category(.exploits)
 
         #expect(controller.visibleOptions.map(\.source) == [.builtIn(.wilbrand)])
     }
@@ -200,7 +200,7 @@ struct HomebrewDashboardControllerTests {
         guard let hackMiiOption else { return }
 
         controller.binding(for: hackMiiOption).wrappedValue = true
-        controller.selectedCategoryFilter = .category(BuiltInHomebrewKind.wilbrand.category)
+        controller.selectedCategoryFilter = .category(.exploits)
 
         #expect(controller.visibleOptions.map(\.source) == [.builtIn(.wilbrand)])
         #expect(controller.actionState == .readyToDownload)
@@ -297,7 +297,7 @@ struct HomebrewDashboardControllerTests {
         guard let hackMiiOption else { return }
 
         controller.binding(for: hackMiiOption).wrappedValue = true
-        controller.selectedCategoryFilter = .category(BuiltInHomebrewKind.wilbrand.category)
+        controller.selectedCategoryFilter = .category(.exploits)
         controller.perform(.download)
 
         #expect(controller.visibleOptions.map(\.source) == [.builtIn(.wilbrand)])
@@ -333,7 +333,7 @@ struct HomebrewDashboardControllerTests {
 
         controller.binding(for: hackMiiOption).wrappedValue = true
         controller.perform(.download)
-        controller.selectedCategoryFilter = .category(BuiltInHomebrewKind.wilbrand.category)
+        controller.selectedCategoryFilter = .category(.exploits)
         controller.perform(.save)
 
         #expect(controller.visibleOptions.map(\.source) == [.builtIn(.wilbrand)])

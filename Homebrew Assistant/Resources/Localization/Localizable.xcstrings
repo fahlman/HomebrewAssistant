@@ -660,7 +660,6 @@
     },
     "workflow.internal.hackMii.title" : {
       "comment" : "Title for the app-owned HackMii internal workflow.",
-      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -672,7 +671,6 @@
     },
     "workflow.internal.wilbrand.title" : {
       "comment" : "Title for the app-owned Wilbrand internal workflow.",
-      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {

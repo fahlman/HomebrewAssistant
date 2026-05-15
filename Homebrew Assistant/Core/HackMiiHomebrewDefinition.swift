@@ -15,11 +15,11 @@ import Foundation
 enum HackMiiHomebrewDefinition {
     static let definition = HomebrewDefinition(
         id: BuiltInHomebrewKind.hackMii.id,
-        name: String(localized: String.LocalizationValue(BuiltInHomebrewKind.hackMii.titleKey)),
-        summaryKey: BuiltInHomebrewKind.hackMii.summaryKey,
-        category: BuiltInHomebrewKind.hackMii.category,
-        systemImageName: BuiltInHomebrewKind.hackMii.systemImageName,
-        sortOrder: BuiltInHomebrewKind.hackMii.sortOrder,
+        name: String(localized: "workflow.internal.hackMii.title"),
+        summaryKey: "chooseHomebrew.hackMii.description",
+        category: .installers,
+        systemImageName: "hammer",
+        sortOrder: 101,
         source: .builtIn(.hackMii)
     )
 }

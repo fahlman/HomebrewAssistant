@@ -4,14 +4,13 @@
 //
 //  Purpose: Hosts the app's top-level sidebar/detail window layout.
 //  Owns: NavigationSplitView composition, sidebar/detail/bottom navigation
-//  placement, and selected-step bottom-bar configuration dispatch.
+//  placement, and session-provided bottom-bar state/action display.
 //  Does not own: Workflow session orchestration, SD card validation policy,
 //  scoped filesystem access lifecycle, recipe catalog loading,
 //  public recipe parsing, downloads, staging, file writes, workflow item rendering,
 //  sidebar row rendering, detail-view routing, or bottom button rendering.
 //  Uses: WorkflowSessionController for session state, WorkflowSidebarView,
-//  WorkflowDetailView, BottomNavigationView, and WorkflowBottomBarConfiguration
-//  supplied by the selected step controller.
+//  WorkflowDetailView and BottomNavigationView.
 //
 
 internal import SwiftUI
@@ -30,23 +29,15 @@ struct ContentView: View {
                     homebrewDashboardController: sessionController.homebrewDashboardController
                 )
                 BottomNavigationView(
-                    coordinator: sessionController.coordinator,
-                    configuration: bottomBarConfiguration
+                    canGoBack: sessionController.canGoBack,
+                    canGoForward: sessionController.canGoForward,
+                    configuration: sessionController.bottomBarConfiguration,
+                    goBack: sessionController.goBack,
+                    goForward: sessionController.goForward
                 )
             }
         }
         .frame(minWidth: 720, minHeight: 520)
-    }
-
-    private var bottomBarConfiguration: WorkflowBottomBarConfiguration {
-        switch sessionController.coordinator.selectedItem {
-        case .fixed(.sdCardSelection):
-            return sessionController.sdSelectionController.bottomBarConfiguration
-        case .fixed(.chooseItems):
-            return sessionController.homebrewDashboardController.bottomBarConfiguration
-        case nil:
-            return .automatic
-        }
     }
 }
 

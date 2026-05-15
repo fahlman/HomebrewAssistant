@@ -6,8 +6,8 @@
 //  preparation state, and bottom-bar action policy.
 //  Owns: Dashboard filter state, sort state, visible option ordering,
 //  selection updates, selected option derivation, preparation status storage/mapping,
-//  dashboard action state,
-//  explicit completion state, and Choose Homebrew bottom-bar configuration.
+//  explicit dashboard action state, explicit completion state, and Choose
+//  Homebrew bottom-bar configuration.
 //  Does not own: Homebrew option rendering, bottom-bar rendering, recipe
 //  loading, download execution, verification, archive extraction, staging,
 //  SD card writes, or workflow navigation.
@@ -25,6 +25,7 @@ final class HomebrewDashboardController: ObservableObject {
     @Published var selectedSortMode: HomebrewSortMode = .category
     @Published private var selectedOptionIDs: Set<HomebrewOption.ID>
     @Published private var preparationStateStore: HomebrewPreparationStateStore
+    @Published private(set) var actionState: HomebrewDashboardActionState
 
     @Published private(set) var isComplete: Bool
 
@@ -38,8 +39,9 @@ final class HomebrewDashboardController: ObservableObject {
         self.builtInHomebrewCatalog = builtInHomebrewCatalog
         self.preparationStateStore = preparationStateStore
         self.selectedOptionIDs = selectedOptionIDs
+        self.actionState = .nothingSelected
         self.isComplete = false
-        synchronizeCompletionState()
+        synchronizeActionState()
     }
 
     var visibleOptions: [HomebrewOption] {
@@ -69,7 +71,7 @@ final class HomebrewDashboardController: ObservableObject {
         return initialPreparationStatus(for: option)
     }
 
-    var actionState: HomebrewDashboardActionState {
+    private var derivedActionState: HomebrewDashboardActionState {
         let selectedOptions = selectedOptions
 
         guard !selectedOptions.isEmpty else {
@@ -112,7 +114,7 @@ final class HomebrewDashboardController: ObservableObject {
             markReadyToSaveOptionsSaved()
         }
 
-        synchronizeCompletionState()
+        synchronizeActionState()
     }
 
     private func markWilbrandSetupHandled() {
@@ -161,16 +163,20 @@ final class HomebrewDashboardController: ObservableObject {
             preparationStateStore.removeStatus(for: option.id)
         }
 
-        synchronizeCompletionState()
+        synchronizeActionState()
     }
 
-    private func synchronizeCompletionState() {
+    private func synchronizeActionState() {
+        let actionState = derivedActionState
         let isComplete = actionState == .complete
-        guard self.isComplete != isComplete else {
-            return
+
+        if self.actionState != actionState {
+            self.actionState = actionState
         }
 
-        self.isComplete = isComplete
+        if self.isComplete != isComplete {
+            self.isComplete = isComplete
+        }
     }
 
     private func initialPreparationStatus(for option: HomebrewOption) -> HomebrewPreparationStatus {

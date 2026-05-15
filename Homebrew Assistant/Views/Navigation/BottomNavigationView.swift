@@ -6,9 +6,9 @@
 //  Owns: Lower-left Quit/Back placement, lower-right action placement,
 //  contextual action rendering, Next button rendering, default-button assignment,
 //  and disabled/enabled button presentation.
-//  Does not own: Action availability decisions, workflow transitions, workflow
-//  reset policy, or risky operation execution.
-//  Uses: WorkflowCoordinator for navigation state and user-intent handling,
+//  Does not own: Action availability decisions, workflow transition policy,
+//  workflow reset policy, selected-step state, or risky operation execution.
+//  Uses: Explicit navigation availability/actions from the session,
 //  WorkflowBottomBarConfiguration for bottom-bar behavior, and WorkflowStepAction
 //  for contextual action metadata and execution.
 //
@@ -16,15 +16,24 @@
 internal import SwiftUI
 
 struct BottomNavigationView: View {
-    @ObservedObject var coordinator: WorkflowCoordinator
+    let canGoBack: Bool
+    let canGoForward: Bool
     let configuration: WorkflowBottomBarConfiguration
+    let goBack: () -> Void
+    let goForward: () -> Void
 
     init(
-        coordinator: WorkflowCoordinator,
-        configuration: WorkflowBottomBarConfiguration = .automatic
+        canGoBack: Bool,
+        canGoForward: Bool,
+        configuration: WorkflowBottomBarConfiguration = .automatic,
+        goBack: @escaping () -> Void,
+        goForward: @escaping () -> Void
     ) {
-        self.coordinator = coordinator
+        self.canGoBack = canGoBack
+        self.canGoForward = canGoForward
         self.configuration = configuration
+        self.goBack = goBack
+        self.goForward = goForward
     }
 
     var body: some View {
@@ -41,9 +50,9 @@ struct BottomNavigationView: View {
 
     @ViewBuilder
     private var leftAction: some View {
-        if coordinator.canGoBack {
+        if canGoBack {
             Button(String(localized: "navigation.back")) {
-                coordinator.goBack()
+                goBack()
             }
             .keyboardShortcut(.leftArrow, modifiers: [.command])
         } else {
@@ -66,9 +75,9 @@ struct BottomNavigationView: View {
 
     private var nextButton: some View {
         Button(String(localized: "navigation.next")) {
-            coordinator.goForward()
+            goForward()
         }
-        .disabled(!canGoForward)
+        .disabled(!resolvedCanGoForward)
         .keyboardShortcut(isNextDefault ? .defaultAction : nil)
     }
 
@@ -83,8 +92,8 @@ struct BottomNavigationView: View {
         .keyboardShortcut(isContextualActionDefault && isDefaultCandidate && action.isEnabled ? .defaultAction : nil)
     }
 
-    private var canGoForward: Bool {
-        configuration.canGoForwardOverride ?? coordinator.canGoForward
+    private var resolvedCanGoForward: Bool {
+        configuration.canGoForwardOverride ?? canGoForward
     }
 
     private var isContextualActionDefault: Bool {
@@ -104,11 +113,11 @@ struct BottomNavigationView: View {
     private var isNextDefault: Bool {
         switch configuration.defaultAction {
         case .next:
-            canGoForward
+            resolvedCanGoForward
         case .contextualAction:
             false
         case nil:
-            canGoForward
+            resolvedCanGoForward
         }
     }
 }

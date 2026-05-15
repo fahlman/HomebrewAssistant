@@ -65,14 +65,4 @@ struct HomebrewOption: Identifiable {
         )
     }
 
-    init(kind: BuiltInHomebrewKind) {
-        self.init(
-            id: kind.id,
-            name: String(localized: String.LocalizationValue(kind.titleKey)),
-            summaryKey: kind.summaryKey,
-            category: kind.category,
-            systemImageName: kind.systemImageName,
-            source: .builtIn(kind)
-        )
-    }
 }
