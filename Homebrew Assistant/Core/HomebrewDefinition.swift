@@ -15,7 +15,7 @@
 
 import Foundation
 
-struct HomebrewDefinition: Identifiable, Equatable {
+nonisolated struct HomebrewDefinition: Identifiable, Equatable, Sendable {
     let id: HomebrewOptionID
     let name: String
     let summaryKey: String
@@ -26,12 +26,12 @@ struct HomebrewDefinition: Identifiable, Equatable {
     let source: HomebrewDefinitionSource
 }
 
-enum HomebrewPreparationKind: Equatable {
+nonisolated enum HomebrewPreparationKind: Equatable, Sendable {
     case setupRequired
     case downloadable
 }
 
-enum HomebrewDefinitionSource: Equatable {
+nonisolated enum HomebrewDefinitionSource: Equatable, Sendable {
     case builtIn(BuiltInHomebrewKind)
     case publicRecipe(id: String)
 }

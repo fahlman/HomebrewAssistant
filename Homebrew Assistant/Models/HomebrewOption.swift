@@ -13,8 +13,8 @@
 
 import Foundation
 
-struct HomebrewOption: Identifiable {
-    enum Source: Hashable {
+nonisolated struct HomebrewOption: Identifiable, Sendable {
+    nonisolated enum Source: Hashable, Sendable {
         case builtIn(BuiltInHomebrewKind)
         case publicRecipe(id: String)
     }

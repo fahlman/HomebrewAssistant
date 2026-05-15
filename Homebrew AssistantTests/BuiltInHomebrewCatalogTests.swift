@@ -12,7 +12,6 @@
 import Testing
 @testable import Homebrew_Assistant
 
-@MainActor
 struct BuiltInHomebrewCatalogTests {
     @Test func catalogContainsWilbrandAndHackMiiInSortOrder() {
         let catalog = BuiltInHomebrewCatalog()
