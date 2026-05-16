@@ -14,8 +14,8 @@
 
 import Foundation
 import Testing
-internal import SwiftUI
 @testable import Homebrew_Assistant
+internal import SwiftUI
 
 @MainActor
 struct HomebrewDashboardControllerTests {
@@ -49,86 +49,63 @@ struct HomebrewDashboardControllerTests {
         })
     }
 
-    @Test func bindingUpdatesDashboardSelection() {
+    @Test func bindingUpdatesDashboardSelection() throws {
         let controller = HomebrewDashboardController()
-        let hackMiiOption = controller.visibleOptions.first { option in
-            option.source == .builtIn(.hackMii)
-        }
+        let hackMiiOption = try requireBuiltInOption(.hackMii, in: controller)
 
-        #expect(hackMiiOption != nil)
-        guard let hackMiiOption else { return }
-
-        controller.binding(for: hackMiiOption).wrappedValue = true
+        select(hackMiiOption, in: controller)
         #expect(controller.binding(for: hackMiiOption).wrappedValue)
 
-        controller.binding(for: hackMiiOption).wrappedValue = false
+        deselect(hackMiiOption, in: controller)
         #expect(!controller.binding(for: hackMiiOption).wrappedValue)
     }
 
-    @Test func wilbrandStatusReflectsSelection() {
+    @Test func wilbrandStatusReflectsSelection() throws {
         let controller = HomebrewDashboardController()
-        let wilbrandOption = controller.visibleOptions.first { option in
-            option.source == .builtIn(.wilbrand)
-        }
-
-        #expect(wilbrandOption != nil)
-        guard let wilbrandOption else { return }
+        let wilbrandOption = try requireBuiltInOption(.wilbrand, in: controller)
 
         #expect(controller.status(for: wilbrandOption) == .notSelected)
 
-        controller.binding(for: wilbrandOption).wrappedValue = true
+        select(wilbrandOption, in: controller)
         #expect(controller.status(for: wilbrandOption) == .setupRequired)
     }
 
-    @Test func hackMiiStatusReflectsSelection() {
+    @Test func hackMiiStatusReflectsSelection() throws {
         let controller = HomebrewDashboardController()
-        let hackMiiOption = controller.visibleOptions.first { option in
-            option.source == .builtIn(.hackMii)
-        }
-
-        #expect(hackMiiOption != nil)
-        guard let hackMiiOption else { return }
+        let hackMiiOption = try requireBuiltInOption(.hackMii, in: controller)
 
         #expect(controller.status(for: hackMiiOption) == .notSelected)
 
-        controller.binding(for: hackMiiOption).wrappedValue = true
+        select(hackMiiOption, in: controller)
         #expect(controller.status(for: hackMiiOption) == .readyToDownload)
     }
 
-    @Test func injectedPreparationStatusOverridesInitialStatusForSelectedOption() {
-        var preparationStateStore = HomebrewPreparationStateStore()
-        preparationStateStore[HomebrewOptionID.builtIn(.hackMii)] = .downloading(progress: 0.5)
+    @Test func injectedPreparationStatusOverridesInitialStatusForSelectedOption() throws {
         let controller = HomebrewDashboardController(
-            preparationStateStore: preparationStateStore
+            preparationStateStore: preparationStateStore(
+                optionID: HomebrewOptionID.builtIn(.hackMii),
+                status: .downloading(progress: 0.5)
+            )
         )
-        let hackMiiOption = controller.visibleOptions.first { option in
-            option.source == .builtIn(.hackMii)
-        }
+        let hackMiiOption = try requireBuiltInOption(.hackMii, in: controller)
 
-        #expect(hackMiiOption != nil)
-        guard let hackMiiOption else { return }
-
-        controller.binding(for: hackMiiOption).wrappedValue = true
+        select(hackMiiOption, in: controller)
 
         #expect(controller.status(for: hackMiiOption) == .downloading(progress: 0.5))
     }
 
-    @Test func deselectingAndReselectingOptionResetsPreparationStatus() {
-        var preparationStateStore = HomebrewPreparationStateStore()
-        preparationStateStore[HomebrewOptionID.builtIn(.hackMii)] = .downloading(progress: 0.5)
+    @Test func deselectingAndReselectingOptionResetsPreparationStatus() throws {
         let controller = HomebrewDashboardController(
-            preparationStateStore: preparationStateStore
+            preparationStateStore: preparationStateStore(
+                optionID: HomebrewOptionID.builtIn(.hackMii),
+                status: .downloading(progress: 0.5)
+            )
         )
-        let hackMiiOption = controller.visibleOptions.first { option in
-            option.source == .builtIn(.hackMii)
-        }
+        let hackMiiOption = try requireBuiltInOption(.hackMii, in: controller)
 
-        #expect(hackMiiOption != nil)
-        guard let hackMiiOption else { return }
-
-        controller.binding(for: hackMiiOption).wrappedValue = true
-        controller.binding(for: hackMiiOption).wrappedValue = false
-        controller.binding(for: hackMiiOption).wrappedValue = true
+        select(hackMiiOption, in: controller)
+        deselect(hackMiiOption, in: controller)
+        select(hackMiiOption, in: controller)
 
         #expect(controller.status(for: hackMiiOption) == .readyToDownload)
     }
@@ -142,21 +119,14 @@ struct HomebrewDashboardControllerTests {
     @Test func nothingSelectedActionStateHasNoBottomBarAction() {
         let controller = HomebrewDashboardController()
 
-        #expect(controller.bottomBarConfiguration.contextualActions.isEmpty)
-        #expect(controller.bottomBarConfiguration.canGoForwardOverride == nil)
-        #expect(controller.bottomBarConfiguration.defaultAction == nil)
+        expectNoContextualActions(controller.bottomBarConfiguration)
     }
 
-    @Test func selectedSetupRequiredHomebrewNeedsNamedSetup() {
+    @Test func selectedSetupRequiredHomebrewNeedsNamedSetup() throws {
         let controller = HomebrewDashboardController()
-        let wilbrandOption = controller.visibleOptions.first { option in
-            option.source == .builtIn(.wilbrand)
-        }
+        let wilbrandOption = try requireBuiltInOption(.wilbrand, in: controller)
 
-        #expect(wilbrandOption != nil)
-        guard let wilbrandOption else { return }
-
-        controller.binding(for: wilbrandOption).wrappedValue = true
+        select(wilbrandOption, in: controller)
 
         #expect(controller.actionState == .needsSetup(optionName: "Wilbrand"))
     }
@@ -167,43 +137,28 @@ struct HomebrewDashboardControllerTests {
             controller: HomebrewDashboardController()
         )
 
-        #expect(configuration.contextualActions.map(\.titleKey) == [
-            action.titleKey
-        ])
-        #expect(configuration.contextualActions.map(\.titleArguments) == [
-            action.titleArguments
-        ])
-        #expect(configuration.contextualActions.map(\.systemImageName) == [
-            action.systemImageName
-        ])
-        #expect(configuration.canGoForwardOverride == false)
-        #expect(configuration.defaultAction == .contextualAction(index: 0))
+        expectSingleContextualAction(
+            configuration,
+            titleKey: action.titleKey,
+            titleArguments: action.titleArguments,
+            systemImageName: action.systemImageName
+        )
     }
 
-    @Test func selectedHackMiiIsReadyToDownload() {
+    @Test func selectedHackMiiIsReadyToDownload() throws {
         let controller = HomebrewDashboardController()
-        let hackMiiOption = controller.visibleOptions.first { option in
-            option.source == .builtIn(.hackMii)
-        }
+        let hackMiiOption = try requireBuiltInOption(.hackMii, in: controller)
 
-        #expect(hackMiiOption != nil)
-        guard let hackMiiOption else { return }
-
-        controller.binding(for: hackMiiOption).wrappedValue = true
+        select(hackMiiOption, in: controller)
 
         #expect(controller.actionState == .readyToDownload)
     }
 
-    @Test func hiddenSelectedOptionStillDeterminesActionState() {
+    @Test func hiddenSelectedOptionStillDeterminesActionState() throws {
         let controller = HomebrewDashboardController()
-        let hackMiiOption = controller.visibleOptions.first { option in
-            option.source == .builtIn(.hackMii)
-        }
+        let hackMiiOption = try requireBuiltInOption(.hackMii, in: controller)
 
-        #expect(hackMiiOption != nil)
-        guard let hackMiiOption else { return }
-
-        controller.binding(for: hackMiiOption).wrappedValue = true
+        select(hackMiiOption, in: controller)
         controller.selectedCategoryFilter = .category(.exploits)
 
         #expect(controller.visibleOptions.map(\.source) == [.builtIn(.wilbrand)])
@@ -215,14 +170,11 @@ struct HomebrewDashboardControllerTests {
             controller: HomebrewDashboardController()
         )
 
-        #expect(configuration.contextualActions.map(\.titleKey) == [
-            HomebrewPreparationAction.download.titleKey
-        ])
-        #expect(configuration.contextualActions.map(\.systemImageName) == [
-            HomebrewPreparationAction.download.systemImageName
-        ])
-        #expect(configuration.canGoForwardOverride == false)
-        #expect(configuration.defaultAction == .contextualAction(index: 0))
+        expectSingleContextualAction(
+            configuration,
+            titleKey: HomebrewPreparationAction.download.titleKey,
+            systemImageName: HomebrewPreparationAction.download.systemImageName
+        )
     }
 
     @Test func readyToSaveBottomBarUsesSaveAction() {
@@ -230,63 +182,31 @@ struct HomebrewDashboardControllerTests {
             controller: HomebrewDashboardController()
         )
 
-        #expect(configuration.contextualActions.map(\.titleKey) == [
-            HomebrewPreparationAction.save.titleKey
-        ])
-        #expect(configuration.contextualActions.map(\.systemImageName) == [
-            HomebrewPreparationAction.save.systemImageName
-        ])
-        #expect(configuration.canGoForwardOverride == false)
-        #expect(configuration.defaultAction == .contextualAction(index: 0))
+        expectSingleContextualAction(
+            configuration,
+            titleKey: HomebrewPreparationAction.save.titleKey,
+            systemImageName: HomebrewPreparationAction.save.systemImageName
+        )
     }
 
-    @Test func wilbrandSetupTakesPriorityOverDownload() {
+    @Test func wilbrandSetupTakesPriorityOverDownload() throws {
         let controller = HomebrewDashboardController()
-        let wilbrandOption = controller.visibleOptions.first { option in
-            option.source == .builtIn(.wilbrand)
-        }
-        let hackMiiOption = controller.visibleOptions.first { option in
-            option.source == .builtIn(.hackMii)
-        }
+        let wilbrandOption = try requireBuiltInOption(.wilbrand, in: controller)
+        let hackMiiOption = try requireBuiltInOption(.hackMii, in: controller)
 
-        #expect(wilbrandOption != nil)
-        #expect(hackMiiOption != nil)
-        guard let wilbrandOption, let hackMiiOption else { return }
-
-        controller.binding(for: wilbrandOption).wrappedValue = true
-        controller.binding(for: hackMiiOption).wrappedValue = true
+        select(wilbrandOption, in: controller)
+        select(hackMiiOption, in: controller)
 
         #expect(controller.actionState == .needsSetup(optionName: "Wilbrand"))
     }
 
     @Test func multipleSetupRequiredHomebrewNeedsGenericSetup() {
         let controller = HomebrewDashboardController(
-            builtInHomebrewCatalog: BuiltInHomebrewCatalog(definitions: [
-                HomebrewDefinition(
-                    id: HomebrewOptionID.publicRecipe("setup-one"),
-                    name: "Setup One",
-                    summaryKey: "chooseHomebrew.wilbrand.description",
-                    category: .exploits,
-                    systemImageName: "ladybug",
-                    sortOrder: 100,
-                    preparationKind: .setupRequired,
-                    source: .publicRecipe(id: "setup-one")
-                ),
-                HomebrewDefinition(
-                    id: HomebrewOptionID.publicRecipe("setup-two"),
-                    name: "Setup Two",
-                    summaryKey: "chooseHomebrew.hackMii.description",
-                    category: .utilities,
-                    systemImageName: "wrench",
-                    sortOrder: 101,
-                    preparationKind: .setupRequired,
-                    source: .publicRecipe(id: "setup-two")
-                )
-            ])
+            builtInHomebrewCatalog: catalogWithTwoSetupRequiredPublicRecipes()
         )
 
         for option in controller.visibleOptions {
-            controller.binding(for: option).wrappedValue = true
+            select(option, in: controller)
         }
 
         let configuration = controller.bottomBarConfiguration
@@ -298,48 +218,33 @@ struct HomebrewDashboardControllerTests {
         #expect(configuration.contextualActions.map(\.titleArguments) == [[]])
     }
 
-    @Test func performSetUpMovesSetupRequiredHomebrewToReadyToSave() {
+    @Test func performSetUpMovesSetupRequiredHomebrewToReadyToSave() throws {
         let controller = HomebrewDashboardController()
-        let wilbrandOption = controller.visibleOptions.first { option in
-            option.source == .builtIn(.wilbrand)
-        }
+        let wilbrandOption = try requireBuiltInOption(.wilbrand, in: controller)
 
-        #expect(wilbrandOption != nil)
-        guard let wilbrandOption else { return }
-
-        controller.binding(for: wilbrandOption).wrappedValue = true
+        select(wilbrandOption, in: controller)
         controller.perform(.setUp(optionName: "Wilbrand"))
 
         #expect(controller.status(for: wilbrandOption) == .readyToSave)
         #expect(controller.actionState == .readyToSave)
     }
 
-    @Test func performDownloadMovesReadyToDownloadOptionsToReadyToSave() {
+    @Test func performDownloadMovesReadyToDownloadOptionsToReadyToSave() throws {
         let controller = HomebrewDashboardController()
-        let hackMiiOption = controller.visibleOptions.first { option in
-            option.source == .builtIn(.hackMii)
-        }
+        let hackMiiOption = try requireBuiltInOption(.hackMii, in: controller)
 
-        #expect(hackMiiOption != nil)
-        guard let hackMiiOption else { return }
-
-        controller.binding(for: hackMiiOption).wrappedValue = true
+        select(hackMiiOption, in: controller)
         controller.perform(.download)
 
         #expect(controller.status(for: hackMiiOption) == .readyToSave)
         #expect(controller.actionState == .readyToSave)
     }
 
-    @Test func performDownloadUpdatesHiddenSelectedOptions() {
+    @Test func performDownloadUpdatesHiddenSelectedOptions() throws {
         let controller = HomebrewDashboardController()
-        let hackMiiOption = controller.visibleOptions.first { option in
-            option.source == .builtIn(.hackMii)
-        }
+        let hackMiiOption = try requireBuiltInOption(.hackMii, in: controller)
 
-        #expect(hackMiiOption != nil)
-        guard let hackMiiOption else { return }
-
-        controller.binding(for: hackMiiOption).wrappedValue = true
+        select(hackMiiOption, in: controller)
         controller.selectedCategoryFilter = .category(.exploits)
         controller.perform(.download)
 
@@ -348,16 +253,11 @@ struct HomebrewDashboardControllerTests {
         #expect(controller.actionState == .readyToSave)
     }
 
-    @Test func performSaveMovesReadyToSaveOptionsToSaved() {
+    @Test func performSaveMovesReadyToSaveOptionsToSaved() throws {
         let controller = HomebrewDashboardController()
-        let hackMiiOption = controller.visibleOptions.first { option in
-            option.source == .builtIn(.hackMii)
-        }
+        let hackMiiOption = try requireBuiltInOption(.hackMii, in: controller)
 
-        #expect(hackMiiOption != nil)
-        guard let hackMiiOption else { return }
-
-        controller.binding(for: hackMiiOption).wrappedValue = true
+        select(hackMiiOption, in: controller)
         controller.perform(.download)
         controller.perform(.save)
 
@@ -365,16 +265,11 @@ struct HomebrewDashboardControllerTests {
         #expect(controller.actionState == .complete)
     }
 
-    @Test func performSaveUpdatesHiddenSelectedOptions() {
+    @Test func performSaveUpdatesHiddenSelectedOptions() throws {
         let controller = HomebrewDashboardController()
-        let hackMiiOption = controller.visibleOptions.first { option in
-            option.source == .builtIn(.hackMii)
-        }
+        let hackMiiOption = try requireBuiltInOption(.hackMii, in: controller)
 
-        #expect(hackMiiOption != nil)
-        guard let hackMiiOption else { return }
-
-        controller.binding(for: hackMiiOption).wrappedValue = true
+        select(hackMiiOption, in: controller)
         controller.perform(.download)
         controller.selectedCategoryFilter = .category(.exploits)
         controller.perform(.save)
@@ -389,8 +284,88 @@ struct HomebrewDashboardControllerTests {
             controller: HomebrewDashboardController()
         )
 
+        expectNoContextualActions(configuration)
+    }
+
+    private func requireBuiltInOption(
+        _ kind: BuiltInHomebrewKind,
+        in controller: HomebrewDashboardController
+    ) throws -> HomebrewOption {
+        try #require(controller.visibleOptions.first { option in
+            option.source == .builtIn(kind)
+        })
+    }
+
+    private func select(
+        _ option: HomebrewOption,
+        in controller: HomebrewDashboardController
+    ) {
+        controller.binding(for: option).wrappedValue = true
+    }
+
+    private func deselect(
+        _ option: HomebrewOption,
+        in controller: HomebrewDashboardController
+    ) {
+        controller.binding(for: option).wrappedValue = false
+    }
+
+    private func preparationStateStore(
+        optionID: HomebrewOption.ID,
+        status: HomebrewPreparationStatus
+    ) -> HomebrewPreparationStateStore {
+        var preparationStateStore = HomebrewPreparationStateStore()
+        preparationStateStore[optionID] = status
+        return preparationStateStore
+    }
+
+    private func catalogWithTwoSetupRequiredPublicRecipes() -> BuiltInHomebrewCatalog {
+        BuiltInHomebrewCatalog(definitions: [
+            HomebrewDefinition(
+                id: HomebrewOptionID.publicRecipe("setup-one"),
+                name: "Setup One",
+                summaryKey: "chooseHomebrew.wilbrand.description",
+                category: .exploits,
+                systemImageName: "ladybug",
+                sortOrder: 100,
+                preparationKind: .setupRequired,
+                source: .publicRecipe(id: "setup-one")
+            ),
+            HomebrewDefinition(
+                id: HomebrewOptionID.publicRecipe("setup-two"),
+                name: "Setup Two",
+                summaryKey: "chooseHomebrew.hackMii.description",
+                category: .utilities,
+                systemImageName: "wrench",
+                sortOrder: 101,
+                preparationKind: .setupRequired,
+                source: .publicRecipe(id: "setup-two")
+            )
+        ])
+    }
+
+    private func expectNoContextualActions(_ configuration: WorkflowBottomBarConfiguration) {
         #expect(configuration.contextualActions.isEmpty)
         #expect(configuration.canGoForwardOverride == nil)
         #expect(configuration.defaultAction == nil)
+    }
+
+    private func expectSingleContextualAction(
+        _ configuration: WorkflowBottomBarConfiguration,
+        titleKey: String,
+        titleArguments: [String] = [],
+        systemImageName: String?
+    ) {
+        #expect(configuration.contextualActions.map(\.titleKey) == [
+            titleKey
+        ])
+        #expect(configuration.contextualActions.map(\.titleArguments) == [
+            titleArguments
+        ])
+        #expect(configuration.contextualActions.map(\.systemImageName) == [
+            systemImageName
+        ])
+        #expect(configuration.canGoForwardOverride == false)
+        #expect(configuration.defaultAction == .contextualAction(index: 0))
     }
 }

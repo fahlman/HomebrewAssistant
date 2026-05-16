@@ -13,8 +13,8 @@
 //
 
 import Foundation
-internal import SwiftUI
 import Testing
+internal import SwiftUI
 @testable import Homebrew_Assistant
 
 @MainActor
