@@ -13,7 +13,6 @@
 import Testing
 @testable import Homebrew_Assistant
 
-@MainActor
 struct HomebrewPreparationStateStoreTests {
     @Test func missingOptionReturnsNotSelectedStatus() {
         let store = HomebrewPreparationStateStore()

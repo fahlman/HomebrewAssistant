@@ -12,7 +12,6 @@
 import Testing
 @testable import Homebrew_Assistant
 
-@MainActor
 struct StepStateStoreTests {
     @Test func missingItemReturnsNotStartedState() {
         let store = StepStateStore()

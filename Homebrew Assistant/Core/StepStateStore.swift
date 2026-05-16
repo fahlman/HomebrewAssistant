@@ -13,7 +13,7 @@
 
 import Foundation
 
-struct StepStateStore {
+nonisolated struct StepStateStore {
     private var statesByItemID: [WorkflowItem.ID: StepState]
 
     init(statesByItemID: [WorkflowItem.ID: StepState] = [:]) {
@@ -44,7 +44,7 @@ struct StepStateStore {
     }
 }
 
-struct StepState: Equatable {
+nonisolated struct StepState: Equatable, Sendable {
     var status: StepStatus
     var progress: Double?
 
@@ -60,7 +60,7 @@ struct StepState: Equatable {
     static let notStarted = StepState(status: .notStarted)
 }
 
-enum StepStatus: String, CaseIterable, Hashable {
+nonisolated enum StepStatus: String, CaseIterable, Hashable, Sendable {
     case unavailable
     case notStarted
     case inProgress

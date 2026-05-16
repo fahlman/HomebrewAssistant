@@ -13,7 +13,7 @@
 
 import Foundation
 
-enum HomebrewPreparationStatus: Equatable {
+nonisolated enum HomebrewPreparationStatus: Equatable, Sendable {
     case notSelected
     case setupRequired
     case readyToDownload
