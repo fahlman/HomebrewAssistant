@@ -18,6 +18,10 @@ nonisolated enum HomebrewPreparationStatus: Equatable, Sendable {
     case setupRequired
     case readyToDownload
     case downloading(progress: Double)
+    case downloaded
+    case readyToExtract
+    case extracting
+    case generatedArchiveRequired
     case readyToSave
     case saving(progress: Double)
     case saved
@@ -33,6 +37,14 @@ nonisolated enum HomebrewPreparationStatus: Equatable, Sendable {
             String(localized: "chooseHomebrew.status.readyToDownload")
         case .downloading:
             String(localized: "chooseHomebrew.status.downloading")
+        case .downloaded:
+            String(localized: "chooseHomebrew.status.downloaded")
+        case .readyToExtract:
+            String(localized: "chooseHomebrew.status.readyToExtract")
+        case .extracting:
+            String(localized: "chooseHomebrew.status.extracting")
+        case .generatedArchiveRequired:
+            String(localized: "chooseHomebrew.status.generatedArchiveRequired")
         case .readyToSave:
             String(localized: "chooseHomebrew.status.readyToSave")
         case .saving:
@@ -49,7 +61,7 @@ nonisolated enum HomebrewPreparationStatus: Equatable, Sendable {
         switch self {
         case .downloading(let progress), .saving(let progress):
             progress
-        case .notSelected, .setupRequired, .readyToDownload, .readyToSave, .saved, .failed:
+        case .notSelected, .setupRequired, .readyToDownload, .downloaded, .readyToExtract, .extracting, .generatedArchiveRequired, .readyToSave, .saved, .failed:
             nil
         }
     }
@@ -58,7 +70,7 @@ nonisolated enum HomebrewPreparationStatus: Equatable, Sendable {
         switch self {
         case .failed(let message):
             message
-        case .notSelected, .setupRequired, .readyToDownload, .downloading, .readyToSave, .saving, .saved:
+        case .notSelected, .setupRequired, .readyToDownload, .downloading, .downloaded, .readyToExtract, .extracting, .generatedArchiveRequired, .readyToSave, .saving, .saved:
             nil
         }
     }

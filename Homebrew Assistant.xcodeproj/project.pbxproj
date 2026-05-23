@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 77;
+	objectVersion = 100;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -12,6 +12,8 @@
 		941D21EB2FAE4EE60013D2BC /* ROADMAP.md in Resources */ = {isa = PBXBuildFile; fileRef = 941D21AA2FAE4EE60013D2BC /* ROADMAP.md */; };
 		941D21EC2FAE4EE60013D2BC /* SECURITY.md in Resources */ = {isa = PBXBuildFile; fileRef = 941D21AB2FAE4EE60013D2BC /* SECURITY.md */; };
 		941D22182FAEAFE10013D2BC /* README.md in Resources */ = {isa = PBXBuildFile; fileRef = 941D22172FAEAFE10013D2BC /* README.md */; };
+		94448AFF2FC13A9E009BB007 /* Sparkle in Frameworks */ = {isa = PBXBuildFile; productRef = 94448AFE2FC13A9E009BB007 /* Sparkle */; };
+		946AF2982FBBFE2800729492 /* ZIPFoundation in Frameworks */ = {isa = PBXBuildFile; productRef = 946AF2972FBBFE2800729492 /* ZIPFoundation */; };
 		947CFAB32FB5D81600C0112D /* .gitignore in Resources */ = {isa = PBXBuildFile; fileRef = 947CFAAB2FB5D81600C0112D /* .gitignore */; };
 /* End PBXBuildFile section */
 
@@ -66,24 +68,20 @@
 /* Begin PBXFrameworksBuildPhase section */
 		94E96C942FA449B1004218AD /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
 			files = (
+				946AF2982FBBFE2800729492 /* ZIPFoundation in Frameworks */,
+				94448AFF2FC13A9E009BB007 /* Sparkle in Frameworks */,
 			);
-			runOnlyForDeploymentPostprocessing = 0;
 		};
 		94E96CA12FA449B2004218AD /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
 			files = (
 			);
-			runOnlyForDeploymentPostprocessing = 0;
 		};
 		94E96CAB2FA449B2004218AD /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
 			files = (
 			);
-			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
@@ -128,13 +126,13 @@
 			);
 			buildRules = (
 			);
-			dependencies = (
-			);
 			fileSystemSynchronizedGroups = (
 				94E96C992FA449B1004218AD /* Homebrew Assistant */,
 			);
 			name = "Homebrew Assistant";
 			packageProductDependencies = (
+				946AF2972FBBFE2800729492 /* ZIPFoundation */,
+				94448AFE2FC13A9E009BB007 /* Sparkle */,
 			);
 			productName = "Homebrew Assistant";
 			productReference = 94E96C972FA449B1004218AD /* Homebrew Assistant.app */;
@@ -157,8 +155,6 @@
 				948AF3662FA6DCFA0052B9AD /* Homebrew AssistantTests */,
 			);
 			name = "Homebrew AssistantTests";
-			packageProductDependencies = (
-			);
 			productName = "Homebrew AssistantTests";
 			productReference = 94E96CA42FA449B2004218AD /* Homebrew AssistantTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
@@ -180,8 +176,6 @@
 				948AF3672FA6DD310052B9AD /* Homebrew AssistantUITests */,
 			);
 			name = "Homebrew AssistantUITests";
-			packageProductDependencies = (
-			);
 			productName = "Homebrew AssistantUITests";
 			productReference = 94E96CAE2FA449B2004218AD /* Homebrew AssistantUITests.xctest */;
 			productType = "com.apple.product-type.bundle.ui-testing";
@@ -218,7 +212,11 @@
 			);
 			mainGroup = 94E96C8E2FA449B1004218AD;
 			minimizedProjectReferenceProxies = 1;
-			preferredProjectObjectVersion = 77;
+			packageReferences = (
+				946AF2962FBBFE2800729492 /* XCRemoteSwiftPackageReference "ZIPFoundation" */,
+				94448AFD2FC13A9E009BB007 /* XCRemoteSwiftPackageReference "Sparkle" */,
+			);
+			preferredProjectObjectVersion = 100;
 			productRefGroup = 94E96C982FA449B1004218AD /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -233,7 +231,6 @@
 /* Begin PBXResourcesBuildPhase section */
 		94E96C952FA449B1004218AD /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
 			files = (
 				941D21E82FAE4EE60013D2BC /* CONTRIBUTING.md in Resources */,
 				941D22182FAEAFE10013D2BC /* README.md in Resources */,
@@ -242,45 +239,34 @@
 				941D21EC2FAE4EE60013D2BC /* SECURITY.md in Resources */,
 				947CFAB32FB5D81600C0112D /* .gitignore in Resources */,
 			);
-			runOnlyForDeploymentPostprocessing = 0;
 		};
 		94E96CA22FA449B2004218AD /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
 			files = (
 			);
-			runOnlyForDeploymentPostprocessing = 0;
 		};
 		94E96CAC2FA449B2004218AD /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
 			files = (
 			);
-			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		94E96C932FA449B1004218AD /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
 			files = (
 			);
-			runOnlyForDeploymentPostprocessing = 0;
 		};
 		94E96CA02FA449B2004218AD /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
 			files = (
 			);
-			runOnlyForDeploymentPostprocessing = 0;
 		};
 		94E96CAA2FA449B2004218AD /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
 			files = (
 			);
-			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
 
@@ -298,7 +284,7 @@
 /* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
-		94E96CB62FA449B2004218AD /* Debug */ = {
+		94E96CB62FA449B2004218AD /* Debug configuration for PBXProject "Homebrew Assistant" */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -365,7 +351,7 @@
 			};
 			name = Debug;
 		};
-		94E96CB72FA449B2004218AD /* Release */ = {
+		94E96CB72FA449B2004218AD /* Release configuration for PBXProject "Homebrew Assistant" */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -424,7 +410,7 @@
 			};
 			name = Release;
 		};
-		94E96CB92FA449B2004218AD /* Debug */ = {
+		94E96CB92FA449B2004218AD /* Debug configuration for PBXNativeTarget "Homebrew Assistant" */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
@@ -436,7 +422,17 @@
 				DEVELOPMENT_TEAM = PUT2KYMV2W;
 				ENABLE_APP_SANDBOX = YES;
 				ENABLE_HARDENED_RUNTIME = YES;
+				ENABLE_INCOMING_NETWORK_CONNECTIONS = NO;
+				ENABLE_OUTGOING_NETWORK_CONNECTIONS = YES;
 				ENABLE_PREVIEWS = YES;
+				ENABLE_RESOURCE_ACCESS_AUDIO_INPUT = NO;
+				ENABLE_RESOURCE_ACCESS_BLUETOOTH = NO;
+				ENABLE_RESOURCE_ACCESS_CALENDARS = NO;
+				ENABLE_RESOURCE_ACCESS_CAMERA = NO;
+				ENABLE_RESOURCE_ACCESS_CONTACTS = NO;
+				ENABLE_RESOURCE_ACCESS_LOCATION = NO;
+				ENABLE_RESOURCE_ACCESS_PRINTING = NO;
+				ENABLE_RESOURCE_ACCESS_USB = NO;
 				ENABLE_USER_SELECTED_FILES = readonly;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
@@ -453,11 +449,11 @@
 				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
-				SWIFT_VERSION = 5.0;
+				SWIFT_VERSION = 6.0;
 			};
 			name = Debug;
 		};
-		94E96CBA2FA449B2004218AD /* Release */ = {
+		94E96CBA2FA449B2004218AD /* Release configuration for PBXNativeTarget "Homebrew Assistant" */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
@@ -469,7 +465,17 @@
 				DEVELOPMENT_TEAM = PUT2KYMV2W;
 				ENABLE_APP_SANDBOX = YES;
 				ENABLE_HARDENED_RUNTIME = YES;
+				ENABLE_INCOMING_NETWORK_CONNECTIONS = NO;
+				ENABLE_OUTGOING_NETWORK_CONNECTIONS = YES;
 				ENABLE_PREVIEWS = YES;
+				ENABLE_RESOURCE_ACCESS_AUDIO_INPUT = NO;
+				ENABLE_RESOURCE_ACCESS_BLUETOOTH = NO;
+				ENABLE_RESOURCE_ACCESS_CALENDARS = NO;
+				ENABLE_RESOURCE_ACCESS_CAMERA = NO;
+				ENABLE_RESOURCE_ACCESS_CONTACTS = NO;
+				ENABLE_RESOURCE_ACCESS_LOCATION = NO;
+				ENABLE_RESOURCE_ACCESS_PRINTING = NO;
+				ENABLE_RESOURCE_ACCESS_USB = NO;
 				ENABLE_USER_SELECTED_FILES = readonly;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
@@ -486,11 +492,11 @@
 				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
-				SWIFT_VERSION = 5.0;
+				SWIFT_VERSION = 6.0;
 			};
 			name = Release;
 		};
-		94E96CBC2FA449B2004218AD /* Debug */ = {
+		94E96CBC2FA449B2004218AD /* Debug configuration for PBXNativeTarget "Homebrew AssistantTests" */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
@@ -507,12 +513,12 @@
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
-				SWIFT_VERSION = 5.0;
+				SWIFT_VERSION = 6.0;
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Homebrew Assistant.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Homebrew Assistant";
 			};
 			name = Debug;
 		};
-		94E96CBD2FA449B2004218AD /* Release */ = {
+		94E96CBD2FA449B2004218AD /* Release configuration for PBXNativeTarget "Homebrew AssistantTests" */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
@@ -529,12 +535,12 @@
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
-				SWIFT_VERSION = 5.0;
+				SWIFT_VERSION = 6.0;
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Homebrew Assistant.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Homebrew Assistant";
 			};
 			name = Release;
 		};
-		94E96CBF2FA449B2004218AD /* Debug */ = {
+		94E96CBF2FA449B2004218AD /* Debug configuration for PBXNativeTarget "Homebrew AssistantUITests" */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
@@ -549,12 +555,12 @@
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
-				SWIFT_VERSION = 5.0;
+				SWIFT_VERSION = 6.0;
 				TEST_TARGET_NAME = "Homebrew Assistant";
 			};
 			name = Debug;
 		};
-		94E96CC02FA449B2004218AD /* Release */ = {
+		94E96CC02FA449B2004218AD /* Release configuration for PBXNativeTarget "Homebrew AssistantUITests" */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
@@ -569,7 +575,7 @@
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
-				SWIFT_VERSION = 5.0;
+				SWIFT_VERSION = 6.0;
 				TEST_TARGET_NAME = "Homebrew Assistant";
 			};
 			name = Release;
@@ -580,40 +586,68 @@
 		94E96C922FA449B1004218AD /* Build configuration list for PBXProject "Homebrew Assistant" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				94E96CB62FA449B2004218AD /* Debug */,
-				94E96CB72FA449B2004218AD /* Release */,
+				94E96CB62FA449B2004218AD /* Debug configuration for PBXProject "Homebrew Assistant" */,
+				94E96CB72FA449B2004218AD /* Release configuration for PBXProject "Homebrew Assistant" */,
 			);
-			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
 		94E96CB82FA449B2004218AD /* Build configuration list for PBXNativeTarget "Homebrew Assistant" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				94E96CB92FA449B2004218AD /* Debug */,
-				94E96CBA2FA449B2004218AD /* Release */,
+				94E96CB92FA449B2004218AD /* Debug configuration for PBXNativeTarget "Homebrew Assistant" */,
+				94E96CBA2FA449B2004218AD /* Release configuration for PBXNativeTarget "Homebrew Assistant" */,
 			);
-			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
 		94E96CBB2FA449B2004218AD /* Build configuration list for PBXNativeTarget "Homebrew AssistantTests" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				94E96CBC2FA449B2004218AD /* Debug */,
-				94E96CBD2FA449B2004218AD /* Release */,
+				94E96CBC2FA449B2004218AD /* Debug configuration for PBXNativeTarget "Homebrew AssistantTests" */,
+				94E96CBD2FA449B2004218AD /* Release configuration for PBXNativeTarget "Homebrew AssistantTests" */,
 			);
-			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
 		94E96CBE2FA449B2004218AD /* Build configuration list for PBXNativeTarget "Homebrew AssistantUITests" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				94E96CBF2FA449B2004218AD /* Debug */,
-				94E96CC02FA449B2004218AD /* Release */,
+				94E96CBF2FA449B2004218AD /* Debug configuration for PBXNativeTarget "Homebrew AssistantUITests" */,
+				94E96CC02FA449B2004218AD /* Release configuration for PBXNativeTarget "Homebrew AssistantUITests" */,
 			);
-			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		94448AFD2FC13A9E009BB007 /* XCRemoteSwiftPackageReference "Sparkle" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/sparkle-project/Sparkle";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.9.2;
+			};
+		};
+		946AF2962FBBFE2800729492 /* XCRemoteSwiftPackageReference "ZIPFoundation" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/weichsel/ZIPFoundation";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 0.9.20;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		94448AFE2FC13A9E009BB007 /* Sparkle */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 94448AFD2FC13A9E009BB007 /* XCRemoteSwiftPackageReference "Sparkle" */;
+			productName = Sparkle;
+		};
+		946AF2972FBBFE2800729492 /* ZIPFoundation */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 946AF2962FBBFE2800729492 /* XCRemoteSwiftPackageReference "ZIPFoundation" */;
+			productName = ZIPFoundation;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 94E96C8F2FA449B1004218AD /* Project object */;
 }

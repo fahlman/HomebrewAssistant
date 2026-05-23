@@ -21,6 +21,11 @@ enum HackMiiHomebrewDefinition {
         systemImageName: "hammer",
         sortOrder: 101,
         preparationKind: HomebrewPreparationKind.downloadable,
+        downloadRequest: HomebrewDownloadRequest(
+            approvedBaseURL: URL(string: "https://bootmii.org/")!,
+            payloadFileName: "hackmii_installer_v1.2.zip",
+            expectedSHA256: "32b7406956860ffb50d46f83e5fb6b8d67cd2612781cd97619d0c2371c84c945"
+        ),
         source: HomebrewDefinitionSource.builtIn(.hackMii)
     )
 }

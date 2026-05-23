@@ -118,6 +118,47 @@ struct SDSelectionControllerTests {
         #expect(configuration.defaultAction == .next)
     }
 
+    @Test func emptyVolumeSelectionShowsNoVolumeSelectedError() {
+        let controller = makeController(metadata: nil)
+
+        controller.handleVolumeSelection(.success([]))
+
+        #expect(controller.selectionErrorMessage == String(localized: "sdSelection.error.noVolumeSelected"))
+        #expect(controller.selectedDrive == nil)
+        #expect(controller.actionState == .needsSelection)
+    }
+
+    @Test func failedVolumeSelectionShowsSelectionFailedError() {
+        let controller = makeController(metadata: nil)
+
+        controller.handleVolumeSelection(.failure(TestSelectionError.failed))
+
+        #expect(controller.selectionErrorMessage == String(localized: "sdSelection.error.selectionFailed"))
+        #expect(controller.selectedDrive == nil)
+        #expect(controller.actionState == .needsSelection)
+    }
+
+    @Test func revalidateSelectedVolumeUpdatesStaleReadiness() {
+        let volumeURL = URL(fileURLWithPath: "/Volumes/TestSD")
+        let metadataProvider = MutableDiskMetadataProvider(
+            metadata: readySecureDigitalMetadata(for: volumeURL)
+        )
+        let controller = makeController(metadataProvider: metadataProvider)
+
+        controller.handleVolumeSelection(.success([volumeURL]))
+        #expect(controller.readiness?.isReady == true)
+
+        metadataProvider.metadata = unsupportedFilesystemSecureDigitalMetadata(for: volumeURL)
+        controller.revalidateSelectedVolume()
+
+        #expect(controller.readiness == .unavailable(
+            reason: .unsupportedFileSystem,
+            metadata: unsupportedFilesystemSecureDigitalMetadata(for: volumeURL)
+        ))
+        #expect(controller.selectedDrive?.volumeURL == volumeURL)
+        #expect(controller.actionState == .unsupportedFilesystem(hasOpenedDiskUtility: false))
+    }
+
     @Test func clearSelectionClearsReadinessDriveErrorAndDiskUtilityTracking() {
         let volumeURL = URL(fileURLWithPath: "/Volumes/TestSD")
         let controller = makeController(metadata: unsupportedFilesystemSecureDigitalMetadata(for: volumeURL))
@@ -149,13 +190,27 @@ struct SDSelectionControllerTests {
         metadata: DiskVolumeMetadata?,
         diskUtilityOpener: any DiskUtilityOpening = FakeDiskUtilityOpener()
     ) -> SDSelectionController {
+        makeController(
+            metadataProvider: MutableDiskMetadataProvider(metadata: metadata),
+            diskUtilityOpener: diskUtilityOpener
+        )
+    }
+
+    private func makeController(
+        metadataProvider: MutableDiskMetadataProvider,
+        diskUtilityOpener: any DiskUtilityOpening = FakeDiskUtilityOpener()
+    ) -> SDSelectionController {
         SDSelectionController(
             scopedAccessManager: ScopedAccessManager(accessSessionFactory: FakeSecurityScopedAccessSessionFactory()),
             sdCardValidationService: SDCardValidationService(
-                metadataProvider: MutableDiskMetadataProvider(metadata: metadata)
+                metadataProvider: metadataProvider
             ),
             diskUtilityOpener: diskUtilityOpener
         )
     }
 
+}
+
+private enum TestSelectionError: Error {
+    case failed
 }

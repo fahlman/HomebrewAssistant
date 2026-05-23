@@ -130,7 +130,10 @@ Human review determines which upstream source is official when a recipe is autho
 
 ## Payload Source Rules
 
+
 A payload URL is allowed only when it matches the trusted recipe’s approved source metadata and `SourcePolicy.swift` approves it.
+
+Recipe metadata must distinguish between an approved source and the concrete payload URL that will be downloaded. If the recipe declares an exact file URL, the app should treat it as the approved payload URL. If the recipe declares a base URL, repository, release page, or URL pattern, the schema must name that value accordingly and `SourcePolicy.swift` must derive and approve the final payload URL before download. The app must not rely on ambiguous fields such as `approvedSourceURL` when it is unclear whether the value is an exact payload URL, a base URL, or broader source policy metadata.
 
 The app must reject payloads from:
 

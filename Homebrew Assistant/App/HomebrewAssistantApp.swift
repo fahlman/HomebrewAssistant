@@ -15,7 +15,9 @@ internal import SwiftUI
 struct HomebrewAssistantApp: App {
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            ContentView(
+                sessionController: WorkflowSessionController.makeForLaunchEnvironment()
+            )
         }
         .windowStyle(.hiddenTitleBar)
     }

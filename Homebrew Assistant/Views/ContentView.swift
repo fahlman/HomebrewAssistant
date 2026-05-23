@@ -16,7 +16,15 @@
 internal import SwiftUI
 
 struct ContentView: View {
-    @StateObject private var sessionController = WorkflowSessionController()
+    @StateObject private var sessionController: WorkflowSessionController
+
+    init(
+        sessionController: WorkflowSessionController = WorkflowSessionController(
+            reconcilePreparedHomebrew: true
+        )
+    ) {
+        _sessionController = StateObject(wrappedValue: sessionController)
+    }
 
     var body: some View {
         NavigationSplitView {

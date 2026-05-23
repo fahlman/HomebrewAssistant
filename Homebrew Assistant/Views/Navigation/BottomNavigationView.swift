@@ -47,11 +47,13 @@ struct BottomNavigationView: View {
             Button(String(localized: "navigation.back")) {
                 goBack()
             }
+            .accessibilityIdentifier("bottom.back")
             .keyboardShortcut(.leftArrow, modifiers: [.command])
         } else {
             Button(String(localized: "navigation.quit")) {
                 NSApplication.shared.terminate(nil)
             }
+            .accessibilityIdentifier("bottom.quit")
         }
     }
 
@@ -72,12 +74,14 @@ struct BottomNavigationView: View {
             Button(String(localized: "navigation.next")) {
                 goForward()
             }
+            .accessibilityIdentifier("bottom.next")
             .disabled(!resolvedCanGoForward)
             .keyboardShortcut(.defaultAction)
         } else {
             Button(String(localized: "navigation.next")) {
                 goForward()
             }
+            .accessibilityIdentifier("bottom.next")
             .disabled(!resolvedCanGoForward)
         }
     }
@@ -91,12 +95,14 @@ struct BottomNavigationView: View {
             Button(title(for: action)) {
                 action.perform()
             }
+            .accessibilityIdentifier("bottom.contextual.\(action.titleKey)")
             .disabled(!action.isEnabled)
             .keyboardShortcut(.defaultAction)
         } else {
             Button(title(for: action)) {
                 action.perform()
             }
+            .accessibilityIdentifier("bottom.contextual.\(action.titleKey)")
             .disabled(!action.isEnabled)
         }
     }

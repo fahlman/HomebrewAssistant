@@ -9,7 +9,7 @@
 //  signed index verification, source policy, internal workflow behavior,
 //  recipe preparation state, downloads, saves, verification, or workflow navigation.
 //  Uses: HomebrewDashboardController for visible options, filter/sort state,
-//  selection bindings, and preparation status mapping.
+//  selection state updates, and preparation status mapping.
 //
 
 internal import SwiftUI
@@ -51,10 +51,19 @@ struct HomebrewDashboardView: View {
             ForEach(controller.visibleOptions) { option in
                 HomebrewOptionCard(
                     option: option,
-                    isSelected: controller.binding(for: option),
+                    isSelected: selectionBinding(for: option),
                     status: controller.status(for: option)
                 )
+                .accessibilityIdentifier("homebrew.option.\(option.id.rawValue)")
             }
+        }
+    }
+
+    private func selectionBinding(for option: HomebrewOption) -> Binding<Bool> {
+        Binding {
+            controller.isSelected(option)
+        } set: { isSelected in
+            controller.setOption(option, isSelected: isSelected)
         }
     }
 
@@ -88,11 +97,14 @@ private struct HomebrewOptionCard: View {
         HStack(alignment: .top, spacing: 12) {
             Toggle("", isOn: $isSelected)
                 .labelsHidden()
+                .accessibilityLabel(option.name)
+                .accessibilityIdentifier("homebrew.option.toggle.\(option.id.rawValue)")
                 .padding(.top, 2)
 
             VStack(alignment: .leading, spacing: 10) {
                 optionSummary
                 statusSummary
+                failureMessage
                 progressView
             }
             .frame(maxWidth: .infinity, alignment: .leading)
@@ -130,6 +142,16 @@ private struct HomebrewOptionCard: View {
                 .font(.caption)
                 .fontWeight(.semibold)
                 .foregroundStyle(status.style)
+        }
+    }
+
+    @ViewBuilder
+    private var failureMessage: some View {
+        if let failureMessage = status.failureMessage {
+            Text(failureMessage)
+                .font(.caption)
+                .foregroundStyle(AppStatusStyle.failureForeground)
+                .lineLimit(nil)
         }
     }
 

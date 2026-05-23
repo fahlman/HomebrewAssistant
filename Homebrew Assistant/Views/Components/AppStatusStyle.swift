@@ -21,7 +21,7 @@ enum AppStatusStyle {
 extension HomebrewPreparationStatus {
     var style: Color {
         switch self {
-        case .notSelected, .setupRequired, .readyToDownload, .downloading, .readyToSave, .saving:
+        case .notSelected, .setupRequired, .readyToDownload, .downloading, .downloaded, .readyToExtract, .extracting, .generatedArchiveRequired, .readyToSave, .saving:
             AppStatusStyle.neutralForeground
         case .saved:
             AppStatusStyle.successForeground

@@ -27,6 +27,7 @@ final class SDSelectionController: ObservableObject {
     @Published private(set) var selectedDrive: SelectedDrive?
     @Published private(set) var selectionErrorMessage: String?
     @Published private(set) var hasOpenedDiskUtilityForCurrentSelection = false
+    @Published private(set) var actionState: SDSelectionActionState
 
     let scopedAccessManager: ScopedAccessManager
 
@@ -37,6 +38,7 @@ final class SDSelectionController: ObservableObject {
         self.scopedAccessManager = ScopedAccessManager()
         self.sdCardValidationService = SDCardValidationService()
         self.diskUtilityOpener = AppKitDiskUtilityOpener()
+        self.actionState = .needsSelection
     }
 
     convenience init(
@@ -58,22 +60,19 @@ final class SDSelectionController: ObservableObject {
         self.scopedAccessManager = scopedAccessManager
         self.sdCardValidationService = sdCardValidationService
         self.diskUtilityOpener = diskUtilityOpener
+        self.actionState = .needsSelection
     }
 
     var selectedVolumeURL: URL? {
         scopedAccessManager.selectedVolumeURL
     }
 
-    var actionState: SDSelectionActionState {
-        actionState(for: readiness)
-    }
-
     var bottomBarConfiguration: WorkflowBottomBarConfiguration {
         actionState.bottomBarConfiguration(controller: self)
     }
 
-    func bottomBarConfiguration(for readiness: SDCardReadiness?) -> WorkflowBottomBarConfiguration {
-        actionState(for: readiness).bottomBarConfiguration(controller: self)
+    func bottomBarConfiguration(for actionState: SDSelectionActionState) -> WorkflowBottomBarConfiguration {
+        actionState.bottomBarConfiguration(controller: self)
     }
 
     private func actionState(for readiness: SDCardReadiness?) -> SDSelectionActionState {
@@ -90,6 +89,7 @@ final class SDSelectionController: ObservableObject {
 
     func openDiskUtility() {
         hasOpenedDiskUtilityForCurrentSelection = true
+        synchronizeActionState()
         diskUtilityOpener.openDiskUtility()
     }
 
@@ -113,12 +113,21 @@ final class SDSelectionController: ObservableObject {
         }
     }
 
+    func revalidateSelectedVolume() {
+        guard let selectedVolumeURL = selectedDrive?.volumeURL else {
+            return
+        }
+
+        validateSelectedVolume(selectedVolumeURL)
+    }
+
     func clearSelection() {
         scopedAccessManager.reset()
         readiness = nil
         selectedDrive = nil
         selectionErrorMessage = nil
         hasOpenedDiskUtilityForCurrentSelection = false
+        synchronizeActionState()
     }
 
     func reset() {
@@ -137,6 +146,7 @@ final class SDSelectionController: ObservableObject {
         let resolvedReadiness = sdCardValidationService.readiness(for: selectedURL)
         readiness = resolvedReadiness
         selectedDrive = SelectedDrive(volumeURL: selectedURL, readiness: resolvedReadiness)
+        synchronizeActionState()
 
         switch resolvedReadiness {
         case .ready:
@@ -146,5 +156,11 @@ final class SDSelectionController: ObservableObject {
             scopedAccessManager.stopAccessingSelectedVolume()
         }
     }
-}
 
+    private func synchronizeActionState() {
+        let actionState = actionState(for: readiness)
+        if self.actionState != actionState {
+            self.actionState = actionState
+        }
+    }
+}

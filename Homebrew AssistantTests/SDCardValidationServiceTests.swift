@@ -17,14 +17,14 @@ import Testing
 @testable import Homebrew_Assistant
 
 struct SDCardValidationServiceTests {
-    @Test func metadataUnavailableReturnsMetadataUnavailable() {
+    @MainActor @Test func metadataUnavailableReturnsMetadataUnavailable() {
         let volumeURL = URL(fileURLWithPath: "/Volumes/TestSD")
         let manager = SDCardValidationService(metadataProvider: MutableDiskMetadataProvider(metadata: nil))
 
         #expect(manager.readiness(for: volumeURL) == .unavailable(reason: .metadataUnavailable))
     }
 
-    @Test func nilProtocolReturnsNotSecureDigital() {
+    @MainActor @Test func nilProtocolReturnsNotSecureDigital() {
         let volumeURL = URL(fileURLWithPath: "/Volumes/TestSD")
         let manager = SDCardValidationService(metadataProvider: MutableDiskMetadataProvider(metadata: DiskVolumeMetadata(
             volumeURL: volumeURL,
@@ -45,7 +45,7 @@ struct SDCardValidationServiceTests {
         #expect(metadata?.displayName == "TestSD")
     }
 
-    @Test func nonSecureDigitalProtocolReturnsNotSecureDigital() {
+    @MainActor @Test func nonSecureDigitalProtocolReturnsNotSecureDigital() {
         let volumeURL = URL(fileURLWithPath: "/Volumes/USBDrive")
         let manager = SDCardValidationService(metadataProvider: MutableDiskMetadataProvider(metadata: DiskVolumeMetadata(
             volumeURL: volumeURL,
@@ -67,7 +67,7 @@ struct SDCardValidationServiceTests {
         #expect(metadata?.protocolName == "USB")
     }
 
-    @Test func secureDigitalButReadOnlyReturnsNotWritable() {
+    @MainActor @Test func secureDigitalButReadOnlyReturnsNotWritable() {
         let volumeURL = URL(fileURLWithPath: "/Volumes/TestSD")
         let manager = SDCardValidationService(metadataProvider: MutableDiskMetadataProvider(metadata: DiskVolumeMetadata(
             volumeURL: volumeURL,
@@ -91,7 +91,7 @@ struct SDCardValidationServiceTests {
         #expect(metadata?.isWritable == false)
     }
 
-    @Test func secureDigitalAndWritableReturnsReady() {
+    @MainActor @Test func secureDigitalAndWritableReturnsReady() {
         let volumeURL = URL(fileURLWithPath: "/Volumes/TestSD")
         let metadata = readySecureDigitalMetadata(for: volumeURL)
         let manager = SDCardValidationService(metadataProvider: MutableDiskMetadataProvider(metadata: metadata))
@@ -99,7 +99,7 @@ struct SDCardValidationServiceTests {
         #expect(manager.readiness(for: volumeURL) == .ready(metadata))
     }
 
-    @Test func internalSecureDigitalMediaCanBeReady() {
+    @MainActor @Test func internalSecureDigitalMediaCanBeReady() {
         let volumeURL = URL(fileURLWithPath: "/Volumes/InternalSD")
         let metadata = DiskVolumeMetadata(
             volumeURL: volumeURL,
@@ -115,7 +115,7 @@ struct SDCardValidationServiceTests {
         #expect(manager.readiness(for: volumeURL) == .ready(metadata))
     }
 
-    @Test func removableEjectableExternalTraitsWithoutSecureDigitalAreNotEnough() {
+    @MainActor @Test func removableEjectableExternalTraitsWithoutSecureDigitalAreNotEnough() {
         let volumeURL = URL(fileURLWithPath: "/Volumes/ExternalDrive")
         let manager = SDCardValidationService(metadataProvider: MutableDiskMetadataProvider(metadata: DiskVolumeMetadata(
             volumeURL: volumeURL,

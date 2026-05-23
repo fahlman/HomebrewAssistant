@@ -55,6 +55,13 @@ struct DiskAccessView: View {
             DriveSelectionCard(presentation: presentation)
 
             VStack(alignment: .leading, spacing: 6) {
+                if let selectionErrorMessage = controller.selectionErrorMessage {
+                    Text(selectionErrorMessage)
+                        .font(.headline)
+                        .fontWeight(.semibold)
+                        .foregroundStyle(AppStatusStyle.failureForeground)
+                }
+
                 Text(presentation.statusMessage)
                     .font(.headline)
                     .fontWeight(.semibold)

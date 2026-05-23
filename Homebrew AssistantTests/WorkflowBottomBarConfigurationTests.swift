@@ -13,7 +13,7 @@ import Testing
 @testable import Homebrew_Assistant
 
 struct WorkflowBottomBarConfigurationTests {
-    @Test func automaticConfigurationHasNoActionsOverridesOrDefaultAction() {
+    @Test @MainActor func automaticConfigurationHasNoActionsOverridesOrDefaultAction() {
         let configuration = WorkflowBottomBarConfiguration.automatic
 
         #expect(configuration.contextualActions.isEmpty)
@@ -21,7 +21,7 @@ struct WorkflowBottomBarConfigurationTests {
         #expect(configuration.defaultAction == nil)
     }
 
-    @Test func customConfigurationPreservesContextualActionsAndForwardOverride() {
+    @Test @MainActor func customConfigurationPreservesContextualActionsAndForwardOverride() {
         let action = WorkflowStepAction(
             titleKey: "test.action.title",
             systemImageName: "gearshape",
@@ -47,7 +47,7 @@ struct WorkflowBottomBarConfigurationTests {
         }
     }
 
-    @Test func customConfigurationPreservesContextualDefaultActionIndex() {
+    @Test @MainActor func customConfigurationPreservesContextualDefaultActionIndex() {
         let configuration = WorkflowBottomBarConfiguration(
             contextualActions: [
                 WorkflowStepAction(titleKey: "first", perform: {}),

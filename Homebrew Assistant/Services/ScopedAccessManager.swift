@@ -93,6 +93,8 @@ private final class ProductionSecurityScopedAccessSession: SecurityScopedAccessS
     }
 
     deinit {
-        stop()
+        if isActive {
+            volumeURL.stopAccessingSecurityScopedResource()
+        }
     }
 }

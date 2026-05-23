@@ -17,13 +17,18 @@ import Combine
 
 final class WorkflowCoordinator: ObservableObject {
     @Published private(set) var workflowItems: [WorkflowItem]
-    @Published var selectedItemID: WorkflowItem.ID?
+    @Published private(set) var selectedItemID: WorkflowItem.ID? {
+        didSet {
+            guard oldValue != selectedItemID else { return }
+            selectedItemDidChange?(selectedItem)
+        }
+    }
     @Published private(set) var stepStateStore: StepStateStore
-    @Published private(set) var completedWorkflowItemIDs: Set<WorkflowItem.ID>
+
+    var selectedItemDidChange: ((WorkflowItem?) -> Void)?
 
     init(stepStateStore: StepStateStore = StepStateStore()) {
         self.stepStateStore = stepStateStore
-        self.completedWorkflowItemIDs = []
         self.workflowItems = Self.fixedItems()
         self.selectedItemID = workflowItems.first?.id
     }
@@ -61,7 +66,7 @@ final class WorkflowCoordinator: ObservableObject {
     }
 
     func isCompleted(_ item: WorkflowItem) -> Bool {
-        completedWorkflowItemIDs.contains(item.id)
+        state(for: item).status == .completed
     }
 
     func select(_ item: WorkflowItem) {
@@ -103,12 +108,7 @@ final class WorkflowCoordinator: ObservableObject {
     func setWorkflowItem(_ item: WorkflowItem, isCompleted: Bool) {
         guard workflowItems.contains(item) else { return }
 
-        if isCompleted {
-            completedWorkflowItemIDs.insert(item.id)
-        } else {
-            completedWorkflowItemIDs.remove(item.id)
-        }
-        stepStateStore[item.id] = StepState(status: isCompleted ? .completed : .notStarted)
+        mark(item, as: StepState(status: isCompleted ? .completed : .notStarted))
 
         guard let selectedItem, canSelect(selectedItem) else {
             setSelectedItemID(firstSelectableItem?.id)
@@ -123,7 +123,6 @@ final class WorkflowCoordinator: ObservableObject {
         let dependentItemIDs = Set(dependentItems.map(\.id))
         let retainedItemIDs = Set(workflowItems.map(\.id)).subtracting(dependentItemIDs)
 
-        completedWorkflowItemIDs.subtract(dependentItemIDs)
         stepStateStore.removeStates(except: retainedItemIDs)
 
         guard let selectedItem, canSelect(selectedItem) else {
@@ -142,7 +141,6 @@ final class WorkflowCoordinator: ObservableObject {
     }
 
     func resetWorkflow() {
-        completedWorkflowItemIDs.removeAll()
         stepStateStore.reset()
         workflowItems = Self.fixedItems()
         setSelectedItemID(workflowItems.first?.id)

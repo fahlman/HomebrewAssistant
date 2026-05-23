@@ -28,11 +28,22 @@ struct LocalizationTests {
             "chooseHomebrew.setupNamed.button",
             "chooseHomebrew.setupSelected.button",
             "chooseHomebrew.download.button",
+            "chooseHomebrew.extract.button",
+            "chooseHomebrew.chooseGeneratedArchive.button",
+            "chooseHomebrew.chooseGeneratedArchive.panelMessage",
             "chooseHomebrew.save.button",
             "chooseHomebrew.status.notSelected",
             "chooseHomebrew.status.setupRequired",
             "chooseHomebrew.status.readyToDownload",
+            "chooseHomebrew.status.downloading",
+            "chooseHomebrew.status.downloaded",
+            "chooseHomebrew.status.readyToExtract",
+            "chooseHomebrew.status.extracting",
+            "chooseHomebrew.status.generatedArchiveRequired",
             "chooseHomebrew.status.readyToSave",
+            "chooseHomebrew.status.saving",
+            "chooseHomebrew.status.saved",
+            "chooseHomebrew.status.failed",
         ]
 
         for key in keys {

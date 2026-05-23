@@ -17,7 +17,13 @@ enum HomebrewDashboardActionState: Equatable {
     case nothingSelected
     case needsSetup(optionName: String?)
     case readyToDownload
+    case downloading
+    case readyToExtract
+    case extracting
+    case needsGeneratedArchiveFile
     case readyToSave
+    case saving
+    case failed
     case complete
 
     var preparationAction: HomebrewPreparationAction? {
@@ -26,14 +32,22 @@ enum HomebrewDashboardActionState: Equatable {
             .setUp(optionName: optionName)
         case .readyToDownload:
             .download
+        case .readyToExtract:
+            .extract
+        case .needsGeneratedArchiveFile:
+            .chooseGeneratedArchive
         case .readyToSave:
             .save
-        case .nothingSelected, .complete:
+        case .nothingSelected, .downloading, .extracting, .saving, .failed, .complete:
             nil
         }
     }
 
     func bottomBarConfiguration(controller: HomebrewDashboardController) -> WorkflowBottomBarConfiguration {
+        guard !isBusy else {
+            return WorkflowBottomBarConfiguration(canGoForwardOverride: false)
+        }
+
         let contextualActions = contextualActions(controller: controller)
 
         return WorkflowBottomBarConfiguration(
@@ -52,8 +66,19 @@ enum HomebrewDashboardActionState: Equatable {
                 titleArguments: preparationAction.titleArguments,
                 systemImageName: preparationAction.systemImageName
             ) { [weak controller] in
-                controller?.perform(preparationAction)
+                Task {
+                    await controller?.perform(preparationAction)
+                }
             }
         ]
+    }
+
+    private var isBusy: Bool {
+        switch self {
+        case .downloading, .extracting, .saving:
+            true
+        case .nothingSelected, .needsSetup, .readyToDownload, .readyToExtract, .needsGeneratedArchiveFile, .readyToSave, .failed, .complete:
+            false
+        }
     }
 }

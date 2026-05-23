@@ -154,17 +154,19 @@ Preparation is coordinated by `ItemPreparationService`. Views should present sta
 
 Wilbrand is an optional app-owned internal workflow item.
 
-Wilbrand does not provide a direct Download button because the user must visit the approved Wilbrand webpage and enter Wii-specific information to generate a custom exploit archive.
+Wilbrand does not provide a direct Download button in 1.0 because the user must visit the approved Wilbrand webpage and enter Wii-specific information to generate a custom exploit archive.
 
 When selected, the Wilbrand preparation step:
 
-- Provides a non-default Open Browser button.
-- Enables a non-default Choose File… button when appropriate.
+- Provides a non-default Open Browser button for the approved Wilbrand generation page.
+- Lets the user enter the Wii MAC address, target message date, and Wii System Menu version in the browser.
+- Enables a non-default Choose File… button after the browser handoff so the user can load the generated ZIP into Homebrew Assistant.
 - Uses a controlled macOS file picker for the generated archive.
 - Does not allow drag-and-drop file intake.
 - Validates the selected archive for expected Wilbrand output shape.
 - Rejects unsafe paths, symlinks, hard links, absolute paths, and traversal attempts during validation/extraction.
-- Stages the validated result in the session temporary directory only.
+- Stages the validated result in app-controlled staging.
+- Produces prepared item metadata for Review Setup.
 - Enables Next after successful validation and staging.
 
 No Wilbrand files are written to the SD card until Write and Verify Files.

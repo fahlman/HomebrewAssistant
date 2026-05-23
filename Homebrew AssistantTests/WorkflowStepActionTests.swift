@@ -12,6 +12,7 @@
 import Testing
 @testable import Homebrew_Assistant
 
+@MainActor
 struct WorkflowStepActionTests {
     @Test func actionStoresTitleIconEnabledStateAndClosure() {
         var didRun = false

@@ -21,6 +21,8 @@ enum WilbrandHomebrewDefinition {
         systemImageName: "ladybug",
         sortOrder: 100,
         preparationKind: .setupRequired,
+        setupURL: URL(string: "https://wilbrand.donut.eu.org")!,
+        downloadRequest: nil,
         source: .builtIn(.wilbrand)
     )
 }
